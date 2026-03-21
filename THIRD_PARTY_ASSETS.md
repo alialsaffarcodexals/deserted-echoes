@@ -19,6 +19,9 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Cowboy
   - Source: https://opengameart.org/content/cowboy
   - Files: `Assets/Art/Characters/Player/Desert/Cowboy4HiRes/`
+- 16x16 8-bit RPG Character Set
+  - Source: https://opengameart.org/content/16x16-8-bit-rpg-character-set
+  - Files: `Assets/Art/Characters/Player/TopDown/Retro16x16/`
 
 ## Environment And Items
 
