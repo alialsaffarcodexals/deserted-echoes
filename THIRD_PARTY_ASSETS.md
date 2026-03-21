@@ -219,3 +219,34 @@ This file records third-party assets imported into the project and the source/li
   - Source: https://assetstore.unity.com/packages/2d/environments/pixel-art-top-down-basic-187605
   - License: `Standard Unity Asset Store EULA`
   - Status: Not imported by CLI. The listing is free, but acquisition is account-gated through the Unity Asset Store / My Assets flow.
+
+### CraftPix
+
+- Free Top-Down Hunt Animals Pixel Sprite Pack
+  - Source: https://craftpix.net/freebies/free-top-down-hunt-animals-pixel-sprite-pack/
+  - License: `CraftPix free file license`
+  - Status: Not imported by CLI. The page is a freebie, but the download flow redirects to a sign-in page.
+- Free Desert Enemy Sprite Sheets Pixel Art
+  - Source: https://craftpix.net/freebies/free-desert-enemy-sprite-sheets-pixel-art/?num=1&count=61&sq=desert&pos=14
+  - License: `CraftPix free file license`
+  - Status: Not imported by CLI. The page is a freebie, but the download flow redirects to a sign-in page.
+- Free Rocks And Stones Top-Down Pixel Art
+  - Source: https://craftpix.net/freebies/free-rocks-and-stones-top-down-pixel-art/
+  - License: `CraftPix free file license`
+  - Status: Not imported by CLI. The page is a freebie, but the download flow redirects to a sign-in page.
+- Free Top-Down Bushes Pixel Art
+  - Source: https://craftpix.net/freebies/free-top-down-bushes-pixel-art/
+  - License: `CraftPix free file license`
+  - Status: Not imported by CLI. The page is a freebie, but the download flow redirects to a sign-in page.
+- Free Top-Down Trees Pixel Art
+  - Source: https://craftpix.net/freebies/free-top-down-trees-pixel-art/
+  - License: `CraftPix free file license`
+  - Status: Not imported by CLI. The page is a freebie, but the download flow redirects to a sign-in page.
+- Free Basic Pixel Art UI for RPG
+  - Source: https://craftpix.net/freebies/free-basic-pixel-art-ui-for-rpg/
+  - License: `CraftPix free file license`
+  - Status: Not imported by CLI. The page is a freebie, but the download flow redirects to a sign-in page.
+- Desert Tileset Top Down Pixel Art
+  - Source: https://craftpix.net/product/desert-tileset-top-down-pixel-art/
+  - License: `CraftPix premium product license`
+  - Status: Excluded. This listing is a premium product, not a free asset.
