@@ -148,9 +148,21 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Caught in the Desert Plains
   - Source: https://opengameart.org/content/caught-in-the-desert-plains
   - Files: `Assets/Audio/Music/Ambient/caught_in_the_desert_plains.ogg`
+- Desert Theme
+  - Source: https://opengameart.org/content/desert-theme
+  - Files: `Assets/Audio/Music/Ambient/desert_theme_caravan.ogg`
+- Telosroam1 BGM - Desert Music
+  - Source: https://opengameart.org/content/telosroam1-bgm-desert-music
+  - Files: `Assets/Audio/Music/Ambient/telosroam1_desert.ogg`
+- Desert calmness and fighting (orchestral) [1:41]
+  - Source: https://opengameart.org/content/desert-calmness-and-fighting-orchestral-141
+  - Files: `Assets/Audio/Music/Ambient/negev_desert_intro.wav`, `Assets/Audio/Music/Ambient/negev_desert_loop.wav`
 - wind1
   - Source: https://opengameart.org/content/wind1
-  - Files: `Assets/Audio/SFX/Ambient/wind1.wav`
+  - Files: `Assets/Audio/SFX/Ambient/wind1.wav`, `Assets/Audio/SFX/Ambient/wind2.wav`, `Assets/Audio/SFX/Ambient/wind3.wav`
+- Fireplace Sound Loop
+  - Source: https://opengameart.org/content/fireplace-sound-loop
+  - Files: `Assets/Audio/SFX/Ambient/fireplace_loop.wav`
 - Water Splash and sand footsteps
   - Source: https://opengameart.org/content/water-splash-and-sand-footsteps
   - Files: `Assets/Audio/SFX/Footsteps/sand_footsteps.mp3`
