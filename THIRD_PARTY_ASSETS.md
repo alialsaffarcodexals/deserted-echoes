@@ -118,6 +118,18 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Pixel Art Health and UI Set
   - Source: https://opengameart.org/content/pixel-art-health-and-ui-set
   - Files: `Assets/Art/UI/Bars/pixel_health_ui_set.png`
+- Inventory Filter Icons
+  - Source: https://opengameart.org/content/inventory-filter-icons
+  - Files: `Assets/Art/UI/Inventory/InventoryFilterIcons/`
+- UI Set 1
+  - Source: https://opengameart.org/content/ui-set-1
+  - Files: `Assets/Art/UI/HUD/UISet1/`
+- Pixel UI Pack - 750 Assets
+  - Source: https://opengameart.org/content/pixel-ui-pack-750-assets
+  - Files: `Assets/Art/UI/HUD/PixelUIPack/`
+- UI Icons 01
+  - Source: https://opengameart.org/content/ui-icons-01
+  - Files: `Assets/Art/UI/Icons/UIIcons01/`
 
 ## Weapons
 
