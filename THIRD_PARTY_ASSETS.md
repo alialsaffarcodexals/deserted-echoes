@@ -7,6 +7,9 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Tiny Characters Set
   - Source: https://opengameart.org/content/tiny-characters-set
   - Files: `Assets/Art/Characters/Player/TinyCharacters/`
+- Tiny RPG CC0 Characters and Portraits
+  - Source: https://opengameart.org/content/tiny-rpg-cc0-characters-and-portraits
+  - Files: `Assets/Art/Characters/Player/TinyRPGCC0Characters/`
 
 ## Environment And Items
 
