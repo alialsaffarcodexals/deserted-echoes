@@ -204,3 +204,18 @@ This file records third-party assets imported into the project and the source/li
   - Source: https://kenney.nl/assets/tiny-dungeon
   - License: `CC0`
   - Files: `Assets/Rawh_assets/Kenney/Environment/TinyDungeon/`
+
+### Unity Asset Store
+
+- Happy Harvest - 2D Sample Project
+  - Source: https://assetstore.unity.com/packages/essentials/tutorial-projects/happy-harvest-2d-sample-project-259218
+  - License: `Standard Unity Asset Store EULA`
+  - Status: Not imported by CLI. The listing is free, but acquisition is account-gated through the Unity Asset Store / My Assets flow.
+- Free 2D Mega Pack
+  - Source: https://assetstore.unity.com/packages/2d/free-2d-mega-pack-177430
+  - License: `Standard Unity Asset Store EULA`
+  - Status: Not imported by CLI. The listing is free, but acquisition is account-gated through the Unity Asset Store / My Assets flow.
+- Pixel Art Top Down - Basic
+  - Source: https://assetstore.unity.com/packages/2d/environments/pixel-art-top-down-basic-187605
+  - License: `Standard Unity Asset Store EULA`
+  - Status: Not imported by CLI. The listing is free, but acquisition is account-gated through the Unity Asset Store / My Assets flow.
