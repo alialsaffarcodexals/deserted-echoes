@@ -1,6 +1,6 @@
 # Third-Party Assets
 
-All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and selected only when the page license was marked `CC0`.
+This file records third-party assets imported into the project and the source/license notes verified at import time.
 
 ## Player
 
@@ -187,3 +187,20 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Button Click Sound Effect (CC0/Public Domain)
   - Source: https://opengameart.org/content/button-click-sound-effect-cc0public-domain
   - Files: `Assets/Audio/SFX/UI/ButtonClick/`
+
+## Rawh Asset Suggestions
+
+### Kenney
+
+- Desert Shooter Pack
+  - Source: https://kenney.nl/assets/desert-shooter-pack
+  - License: `CC0`
+  - Files: `Assets/Rawh_assets/Kenney/Environment/DesertShooterPack/`, `Assets/Rawh_assets/Kenney/Enemies/DesertShooterPack/`, `Assets/Rawh_assets/Kenney/Players/DesertShooterPack/`, `Assets/Rawh_assets/Kenney/Weapons/DesertShooterPack/`, `Assets/Rawh_assets/Kenney/UI/DesertShooterPack/`, `Assets/Rawh_assets/Kenney/Audio/SFX/DesertShooterPack/`
+- Sketch Desert
+  - Source: https://kenney.nl/assets/sketch-desert
+  - License: `CC0`
+  - Files: `Assets/Rawh_assets/Kenney/Environment/SketchDesert/`
+- Tiny Dungeon
+  - Source: https://kenney.nl/assets/tiny-dungeon
+  - License: `CC0`
+  - Files: `Assets/Rawh_assets/Kenney/Environment/TinyDungeon/`
