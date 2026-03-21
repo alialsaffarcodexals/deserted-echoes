@@ -58,6 +58,15 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Tiny Creatures
   - Source: https://opengameart.org/content/tiny-creatures
   - Files: `Assets/Art/Characters/Enemies/TinyCreatures/`
+- Bandit Sprite [16x16]
+  - Source: https://opengameart.org/content/bandit-sprite-16x16
+  - Files: `Assets/Art/Characters/Enemies/Bandits/BanditSprite16x16/`
+- Bandits
+  - Source: https://opengameart.org/content/bandits
+  - Files: `Assets/Art/Characters/Enemies/Bandits/UndertakerBandits/`
+- Pixelart humans characters
+  - Source: https://opengameart.org/content/pixelart-humans-characters
+  - Files: `Assets/Art/Characters/Enemies/Bandits/PixelHumansCharacters/`
 
 ## UI
 
