@@ -71,6 +71,18 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
   - Source: https://opengameart.org/content/pixel-art-health-and-ui-set
   - Files: `Assets/Art/UI/Bars/pixel_health_ui_set.png`
 
+## Weapons
+
+- 2D Gun Pack
+  - Source: https://opengameart.org/content/2d-gun-pack
+  - Files: `Assets/Art/Weapons/Guns/GunPack2D/`
+- Bows and Guns CC0
+  - Source: https://opengameart.org/content/bows-and-guns-cc0
+  - Files: `Assets/Art/Weapons/Guns/BowsAndGunsCC0/`
+- CC0 Firearm Icons
+  - Source: https://opengameart.org/content/cc0-firearm-icons
+  - Files: `Assets/Art/Weapons/Guns/FirearmIcons/`
+
 ## Audio
 
 - Caught in the Desert Plains
