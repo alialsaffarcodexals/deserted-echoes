@@ -52,6 +52,15 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Bottle of Water
   - Source: https://opengameart.org/content/bottle-of-water
   - Files: `Assets/Art/Sprites/Items/Survival/water_bottle.png`
+- 16x16 Assorted RPG Icons
+  - Source: https://opengameart.org/content/16x16-assorted-rpg-icons
+  - Files: `Assets/Art/Sprites/Items/Inventory/AssortedRPGIcons/`
+- 16x16 Food
+  - Source: https://opengameart.org/content/16x16-food
+  - Files: `Assets/Art/Sprites/Items/Food/SixteenBySixteenFood/`
+- Simple RPG Inventory Icons
+  - Source: https://opengameart.org/content/simple-rpg-inventory-icons
+  - Files: `Assets/Art/Sprites/Items/Inventory/SimpleRPGInventoryIcons/`
 
 ## Enemies
 
