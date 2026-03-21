@@ -31,6 +31,21 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Cave Tileset
   - Source: https://opengameart.org/content/cave-tileset-4
   - Files: `Assets/Art/Environment/Ruins/CaveTileset4/`
+- Lamps Lights n Torches
+  - Source: https://opengameart.org/content/lamps-lights-n-torches
+  - Files: `Assets/Art/Environment/Lighting/LampsLightsTorches/`
+- Pixel Torch
+  - Source: https://opengameart.org/content/pixel-torch
+  - Files: `Assets/Art/Environment/Lighting/PixelTorch/`
+- Chest - Opening Animation 16x16
+  - Source: https://opengameart.org/content/chest-opening-animation-16x16
+  - Files: `Assets/Art/Environment/Props/Treasure/chest_opening_animation_sheet.png`
+- Pixel Chest and Money (REDO)
+  - Source: https://opengameart.org/content/pixel-chest-and-money-redo
+  - Files: `Assets/Art/Environment/Props/Treasure/`
+- Skull Post
+  - Source: https://opengameart.org/content/skull-post
+  - Files: `Assets/Art/Environment/Props/BonesAndMarkers/skull_post.png`
 - Gold Coin/Token
   - Source: https://opengameart.org/content/gold-cointoken
   - Files: `Assets/Art/Sprites/Items/Survival/coin_gold.png`
