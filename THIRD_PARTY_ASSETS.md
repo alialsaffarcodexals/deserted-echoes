@@ -10,6 +10,9 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Tiny RPG CC0 Characters and Portraits
   - Source: https://opengameart.org/content/tiny-rpg-cc0-characters-and-portraits
   - Files: `Assets/Art/Characters/Player/TinyRPGCC0Characters/`
+- 80x64 Male and Female Sprites Character Template
+  - Source: https://opengameart.org/content/80x64-male-and-female-sprites-character-template
+  - Files: `Assets/Art/Characters/Player/Templates/MaleFemale80x64/`
 
 ## Environment And Items
 
