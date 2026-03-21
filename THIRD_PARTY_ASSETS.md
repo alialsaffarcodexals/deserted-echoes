@@ -16,6 +16,9 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Adventurer Girl - Free Sprite
   - Source: https://opengameart.org/content/adventurer-girl-free-sprite
   - Files: `Assets/Art/Characters/Player/SideScroller/AdventurerGirl/`
+- Cowboy
+  - Source: https://opengameart.org/content/cowboy
+  - Files: `Assets/Art/Characters/Player/Desert/Cowboy4HiRes/`
 
 ## Environment And Items
 
