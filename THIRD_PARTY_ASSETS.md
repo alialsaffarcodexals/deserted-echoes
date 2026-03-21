@@ -31,12 +31,27 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Cave Tileset
   - Source: https://opengameart.org/content/cave-tileset-4
   - Files: `Assets/Art/Environment/Ruins/CaveTileset4/`
+- Desert Isometric Tiles
+  - Source: https://opengameart.org/content/desert-isometric-tiles
+  - Files: `Assets/Art/Environment/Tilesets/DesertIsometricTiles/`
+- Classical Ruin Tiles
+  - Source: https://opengameart.org/content/classical-ruin-tiles
+  - Files: `Assets/Art/Environment/Ruins/ClassicalRuinTiles/`
+- Desert Background
+  - Source: https://opengameart.org/content/desert-background-0
+  - Files: `Assets/Art/Environment/Landmarks/DesertBackground/`
+- Pyramid Background
+  - Source: https://opengameart.org/content/pyramid-background-0
+  - Files: `Assets/Art/Environment/Landmarks/PyramidBackground/`
 - Lamps Lights n Torches
   - Source: https://opengameart.org/content/lamps-lights-n-torches
   - Files: `Assets/Art/Environment/Lighting/LampsLightsTorches/`
 - Pixel Torch
   - Source: https://opengameart.org/content/pixel-torch
   - Files: `Assets/Art/Environment/Lighting/PixelTorch/`
+- first campfire
+  - Source: https://opengameart.org/content/first-campfire
+  - Files: `Assets/Art/Environment/Props/Campfires/FirstCampfire/`
 - Chest - Opening Animation 16x16
   - Source: https://opengameart.org/content/chest-opening-animation-16x16
   - Files: `Assets/Art/Environment/Props/Treasure/chest_opening_animation_sheet.png`
