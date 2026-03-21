@@ -3,10 +3,7 @@ param(
 )
 
 $targetRoots = @(
-    "Assets/Art/Characters",
-    "Assets/Art/Environment",
-    "Assets/Art/Sprites",
-    "Assets/Art/UI"
+    "Assets/Art"
 )
 
 $skipPatterns = @(
@@ -143,7 +140,7 @@ foreach ($root in $targetRoots) {
             return
         }
 
-        $content = Get-Content $metaPath -Raw
+        $content = [System.IO.File]::ReadAllText($metaPath)
         $original = $content
         $content = Repair-CorruptedScalarLines $content
 
