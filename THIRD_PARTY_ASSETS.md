@@ -13,6 +13,9 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - 80x64 Male and Female Sprites Character Template
   - Source: https://opengameart.org/content/80x64-male-and-female-sprites-character-template
   - Files: `Assets/Art/Characters/Player/Templates/MaleFemale80x64/`
+- Adventurer Girl - Free Sprite
+  - Source: https://opengameart.org/content/adventurer-girl-free-sprite
+  - Files: `Assets/Art/Characters/Player/SideScroller/AdventurerGirl/`
 
 ## Environment And Items
 
