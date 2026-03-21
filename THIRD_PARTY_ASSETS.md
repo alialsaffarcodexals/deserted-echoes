@@ -67,6 +67,12 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Pixelart humans characters
   - Source: https://opengameart.org/content/pixelart-humans-characters
   - Files: `Assets/Art/Characters/Enemies/Bandits/PixelHumansCharacters/`
+- Animated Monsters
+  - Source: https://opengameart.org/content/animated-monsters
+  - Files: `Assets/Art/Characters/Enemies/Creatures/AnimatedMonsters/`
+- 50+ Monsters Pack 2D
+  - Source: https://opengameart.org/content/50-monsters-pack-2d
+  - Files: `Assets/Art/Characters/Enemies/Creatures/FiftyMonstersPack2D/`
 
 ## Bosses
 
