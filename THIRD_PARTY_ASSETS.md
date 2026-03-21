@@ -250,3 +250,10 @@ This file records third-party assets imported into the project and the source/li
   - Source: https://craftpix.net/product/desert-tileset-top-down-pixel-art/
   - License: `CraftPix premium product license`
   - Status: Excluded. This listing is a premium product, not a free asset.
+
+### itch.io
+
+- Desert - Top Down Pixel Art Tileset
+  - Source: https://sanctumpixel.itch.io/desert-top-down-pixel-art-tileset
+  - License: `Vendor-specific commercial-use license`
+  - Status: Excluded. This listing is paid and requires purchase before download.
