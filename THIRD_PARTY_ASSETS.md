@@ -16,6 +16,21 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
 - Desert - Assets
   - Source: https://opengameart.org/content/desert-assets
   - Files: `Assets/Art/Environment/DesertAssets/`
+- Desert Tilesets
+  - Source: https://opengameart.org/content/desert-tilesets
+  - Files: `Assets/Art/Environment/Tilesets/DesertVariety/`
+- 2D Cave Platformer Tileset [16x16]
+  - Source: https://opengameart.org/content/2d-cave-platformer-tileset-16x16
+  - Files: `Assets/Art/Environment/Tilesets/CavePlatformer16x16/`
+- Cavern Tile Set
+  - Source: https://opengameart.org/content/cavern-tile-set
+  - Files: `Assets/Art/Environment/Tilesets/CavernTileSet/`
+- Mythical Ruins Tileset
+  - Source: https://opengameart.org/content/mythical-ruins-tileset
+  - Files: `Assets/Art/Environment/Ruins/MythicalRuins/`
+- Cave Tileset
+  - Source: https://opengameart.org/content/cave-tileset-4
+  - Files: `Assets/Art/Environment/Ruins/CaveTileset4/`
 - Gold Coin/Token
   - Source: https://opengameart.org/content/gold-cointoken
   - Files: `Assets/Art/Sprites/Items/Survival/coin_gold.png`
