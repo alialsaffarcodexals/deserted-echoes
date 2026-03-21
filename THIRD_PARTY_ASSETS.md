@@ -68,6 +68,15 @@ All assets listed here were downloaded on 2026-03-22 from OpenGameArt.org and se
   - Source: https://opengameart.org/content/pixelart-humans-characters
   - Files: `Assets/Art/Characters/Enemies/Bandits/PixelHumansCharacters/`
 
+## Bosses
+
+- Pixel Bosses. Yes!
+  - Source: https://opengameart.org/content/pixel-bosses-yes
+  - Files: `Assets/Art/Characters/Bosses/PixelBosses/`
+- Eyeball Boss
+  - Source: https://opengameart.org/content/eyeball-boss
+  - Files: `Assets/Art/Characters/Bosses/EyeballBoss/`
+
 ## UI
 
 - Simple Pixel GUI (Programmer Art)
