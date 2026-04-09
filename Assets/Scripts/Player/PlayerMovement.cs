@@ -14,10 +14,12 @@ public class PlayerMovement : MonoBehaviour
     System.Collections.Generic.Dictionary<string,string> stateCache = new System.Collections.Generic.Dictionary<string,string>();
 
     PlayerInputActions input;
+    Vector2 currentMoveInput = Vector2.zero;
 
     void Awake()
     {
         rb2d = GetComponent<Rigidbody2D>();
+        if (rb2d != null) rb2d.freezeRotation = true;
         animator = GetComponentInChildren<Animator>();
         input = new PlayerInputActions();
         if (animator != null && animator.runtimeAnimatorController != null)
@@ -64,10 +66,21 @@ public class PlayerMovement : MonoBehaviour
                 lastAnimState = desiredState;
             }
         }
+        // store for FixedUpdate movement
+        currentMoveInput = moveInput;
+    }
 
-        Vector2 displacement = moveInput * walkSpeed * Time.deltaTime;
-        if (rb2d != null) rb2d.MovePosition(rb2d.position + displacement);
-        else transform.position += new Vector3(displacement.x, displacement.y, 0f);
+    void FixedUpdate()
+    {
+        Vector2 displacement = currentMoveInput * walkSpeed * Time.fixedDeltaTime;
+        if (rb2d != null)
+        {
+            rb2d.MovePosition(rb2d.position + displacement);
+        }
+        else
+        {
+            transform.position += new Vector3(displacement.x, displacement.y, 0f);
+        }
     }
 
     string FacingName(int f)
