@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────
 // GameManager.cs
 // Deserted Echoes | IT8101 Games Development | Group 3
-// Author: Ali Husain Ali Alsaffar (201900576)
+// Author: Ali Husain Ali Alsaffar (202301152)
 // Sprint: 1 | Created: April 9, 2026
 // Description: Persistent singleton that manages global game
 //              state across all scenes. Attach to a GameObject
