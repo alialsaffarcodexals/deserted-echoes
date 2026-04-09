@@ -61,10 +61,16 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.11f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Player\PlayerCollisionHandler.cs" />
+    <Compile Include="Assets\Scripts\Collectible.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
+    <Compile Include="Assets\Scripts\ICollectible.cs" />
+    <Compile Include="Assets\Scripts\Player\InputSystem_Actions.cs" />
     <Compile Include="Assets\Scripts\UI\HUDController.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenuUI.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\SceneLoader.cs" />
+    <Compile Include="Assets\Scripts\Camera\CameraFollow2D.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Characters\Mobs\EnemySlime\License.txt" />
@@ -1039,6 +1045,10 @@
       <Project>{448A203B-591F-025D-B277-16CA0C4BCDD9}</Project>
       <Name>Unity.UnifiedRayTracing.Runtime.Player</Name>
     </ProjectReference>
+    <ProjectReference Include="Unity.Cinemachine.Player.csproj">
+      <Project>{84D0E3C6-7FB4-7EBE-11EB-6BD26AB17ABF}</Project>
+      <Name>Unity.Cinemachine.Player</Name>
+    </ProjectReference>
     <ProjectReference Include="Unity.RenderPipelines.Core.Runtime.Player.csproj">
       <Project>{7DF4C40E-D274-D36C-EE5A-1A4D178C8A26}</Project>
       <Name>Unity.RenderPipelines.Core.Runtime.Player</Name>
@@ -1118,6 +1128,10 @@
     <ProjectReference Include="Unity.InputSystem.Player.csproj">
       <Project>{764F489A-B6C1-25F0-70C1-596AF1B60E1A}</Project>
       <Name>Unity.InputSystem.Player</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.Splines.Player.csproj">
+      <Project>{4E3459E1-05E0-3984-82D8-02EA6F8A3CDB}</Project>
+      <Name>Unity.Splines.Player</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
