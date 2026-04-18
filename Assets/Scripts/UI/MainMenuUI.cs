@@ -29,7 +29,7 @@ public class MainMenuUI : MonoBehaviour
     /// <summary>Start Game button → loads first level.</summary>
     public void OnStartGame()
     {
-        SceneLoader.LoadScene("test-level");
+        SceneLoader.LoadScene("open-wrold");
     }
 
     /// <summary>Instructions button → shows instructions panel.</summary>
