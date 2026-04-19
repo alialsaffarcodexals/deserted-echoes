@@ -11,9 +11,5 @@ public class PlayerCollisionHandler : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         Debug.Log("Trigger with: " + other.name);
-        if (other.CompareTag("Pickup"))
-        {
-            Destroy(other.gameObject);
-        }
     }
 }
