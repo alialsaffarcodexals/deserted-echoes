@@ -24,7 +24,7 @@ public class PauseMenuUI : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (GameManager.Instance != null && GameManager.Instance.isGamePaused)
+            if (pausePanel != null && pausePanel.activeSelf)
                 OnResume();
             else
                 OnPause();
@@ -39,6 +39,8 @@ public class PauseMenuUI : MonoBehaviour
         if (pausePanel != null)
             pausePanel.SetActive(true);
 
+        Time.timeScale = 0f;
+
         if (GameManager.Instance != null)
             GameManager.Instance.PauseGame();
     }
@@ -47,6 +49,8 @@ public class PauseMenuUI : MonoBehaviour
     public void OnResume()
     {
         CloseAllPanels();
+
+        Time.timeScale = 1f;
 
         if (GameManager.Instance != null)
             GameManager.Instance.ResumeGame();
@@ -69,6 +73,8 @@ public class PauseMenuUI : MonoBehaviour
     /// <summary>Main Menu button → resumes time then loads main menu.</summary>
     public void OnMainMenu()
     {
+        Time.timeScale = 1f;
+
         if (GameManager.Instance != null)
             GameManager.Instance.ResumeGame();
 
