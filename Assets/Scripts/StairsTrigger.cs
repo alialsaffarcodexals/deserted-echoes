@@ -11,7 +11,7 @@ public class StairsTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             // Find the Cinemachine camera and disable damping
-            CinemachinePositionComposer composer = FindObjectOfType<CinemachinePositionComposer>();
+            CinemachinePositionComposer composer = FindFirstObjectByType<CinemachinePositionComposer>();
 
             Vector3 originalDamping = Vector3.zero;
             if (composer != null)
