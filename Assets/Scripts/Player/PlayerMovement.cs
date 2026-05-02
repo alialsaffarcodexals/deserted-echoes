@@ -4,7 +4,9 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     public float walkSpeed = 4f;
+    public float sprintSpeed = 7f;
     public float inputDeadzone = 0.15f;
+    public SurvivalSystem survival;
 
     Rigidbody2D rb2d;
     Animator animator;
@@ -66,13 +68,28 @@ public class PlayerMovement : MonoBehaviour
                 lastAnimState = desiredState;
             }
         }
-        // store for FixedUpdate movement
-        currentMoveInput = moveInput;
-    }
 
+        float currentSpeed = walkSpeed;
+
+        bool isSprintPressed = Keyboard.current.leftShiftKey.isPressed;
+
+        if (isSprintPressed && survival.CanSprint && currentMoveInput.magnitude > 0f)
+        {
+            currentSpeed = sprintSpeed;
+            survival?.UseStamina(7f * Time.deltaTime);
+            survival?.SetSprinting(true);
+        }
+        else
+        {
+            survival?.SetSprinting(false);
+        }
+        // store for FixedUpdate movement
+        currentMoveInput = moveInput * currentSpeed;
+    }
+    
     void FixedUpdate()
     {
-        Vector2 displacement = currentMoveInput * walkSpeed * Time.fixedDeltaTime;
+        Vector2 displacement = currentMoveInput * Time.fixedDeltaTime;
         if (rb2d != null)
         {
             rb2d.MovePosition(rb2d.position + displacement);

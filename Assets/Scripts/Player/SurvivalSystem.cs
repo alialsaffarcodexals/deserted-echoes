@@ -21,10 +21,36 @@ public class SurvivalSystem : MonoBehaviour
     public float thirstDepletionRate = 0.8f;
     public float staminaDepletionRate = 5f;
 
-    private float currentHealth, currentStamina, currentHunger, currentThirst;
+    [Header("Health Settings")]
+    public float starvationDamage = 1f;
+    public bool canRegenerateHealth = true;
+    public float healthRegenRate = 0.5f;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private float currentHealth, currentStamina, currentHunger, currentThirst;
+    private bool isSprinting;
+
+    public bool IsDead => currentHealth <= 0;
+    public bool CanSprint => currentStamina > 0 && !IsDead;
+
     void Start()
+    {
+        InitializeStats();
+    }
+
+    void Update()
+    {
+        if (IsDead) return; // Stop further updates if the player is dead
+
+        HandleDepletion();
+        HandleRegenration();
+        HandleEnviromentalDamage();
+
+        ClampAllStats();
+
+        UpdateUI();
+    }
+
+    private void InitializeStats()
     {
         //Initialize stats
         currentHealth = maxHealth;
@@ -39,28 +65,38 @@ public class SurvivalSystem : MonoBehaviour
         thirstSlider.maxValue = maxThirst;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void HandleDepletion()
     {
-        //Here we will handle the depletion of hunger and thirst over time
         currentHunger -= hungerDepletionRate * Time.deltaTime;
         currentThirst -= thirstDepletionRate * Time.deltaTime;
-
-        //Here we will handle the stamina regeneration when the player is not performing actions that consume stamina
-        if (currentStamina < maxStamina)
+        if (isSprinting && currentStamina > 0)
         {
-            currentStamina += staminaDepletionRate * Time.deltaTime; // Regenerate stamina
+            currentStamina -= staminaDepletionRate * Time.deltaTime;
+        }
+    }
+
+    private void HandleRegenration()
+    {
+        if (!isSprinting && currentStamina < maxStamina)
+        {
+            currentStamina += (staminaDepletionRate * 0.5f) * Time.deltaTime; // Regenerate stamina
         }
 
+        if (canRegenerateHealth && currentHunger > 20f && currentThirst > 20f && currentHealth < maxHealth)
+        {
+            currentHealth += healthRegenRate * Time.deltaTime; // Regenerate health
+        }
+    }
+
+    private void HandleEnviromentalDamage()
+    {
         if (currentHunger <= 0 || currentThirst <= 0)
         {
-            TakeDamage(1f * Time.deltaTime); // Take damage if hunger or thirst reaches zero
+            currentHealth -= starvationDamage * Time.deltaTime; // Take damage from starvation or dehydration
         }
-
-        ClampAllStats();
-
-        UpdateUI();
     }
+
+    public void SetSprinting(bool state) => isSprinting = state;
 
     void UpdateUI()
     {
@@ -78,9 +114,26 @@ public class SurvivalSystem : MonoBehaviour
         currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
     }
 
-    public void TakeDamage(float amount) => currentHealth -= amount;
+    private void OnDeath()
+    {
+        // Handle death logic here (e.g., play animation, disable controls, etc.)
+        Debug.Log("Player has died.");
+    }
+
+    public void TakeDamage(float amount)
+    {
+        if (IsDead) return; // Prevent taking damage if already dead
+        currentHealth -= amount;
+        if (currentHealth <= 0)
+        {
+            currentHealth = 0;
+            OnDeath();
+        }
+    }
 
     public void UseStamina(float amount) => currentStamina -= amount;
+
+    public void Heal (float amount) => currentHealth += amount;
 
     public void Eat(float amount) => currentHunger += amount;
 

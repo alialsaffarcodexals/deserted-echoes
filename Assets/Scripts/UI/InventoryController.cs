@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class InventoryController : MonoBehaviour
 {
@@ -7,10 +8,10 @@ public class InventoryController : MonoBehaviour
     public int slotCount;
     public GameObject[] itemPrefabs;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        for(int i = 0; i < slotCount; i++)
+        inventoryPanel.SetActive(false); // Hide the inventory panel at the start
+        for (int i = 0; i < slotCount; i++)
         {
             Slot slot = Instantiate(slotPrefab, inventoryPanel.transform).GetComponent<Slot>();
             if (i < itemPrefabs.Length)
@@ -19,6 +20,14 @@ public class InventoryController : MonoBehaviour
                 item.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
                 slot.currentItem = item;
             }
+        }
+    }
+
+    void Update()
+    {
+        if (Keyboard.current != null && Keyboard.current.iKey.wasPressedThisFrame)
+        {
+            inventoryPanel.SetActive(!inventoryPanel.activeSelf);
         }
     }
 }
