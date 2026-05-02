@@ -10,6 +10,7 @@ public class SlimeController : MonoBehaviour
     [SerializeField] private float detectionRange = 6f;
     [SerializeField] private float runRange = 3f;
     [SerializeField] private float attackRange = 0.8f;
+    [SerializeField] private Vector2 playerTargetOffset = new Vector2(0f, -0.3f);
 
     [Header("Combat")]
     [SerializeField] private int attackDamage = 10;
@@ -94,7 +95,8 @@ public class SlimeController : MonoBehaviour
             return;
         }
 
-        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+        Vector2 playerTargetPosition = GetPlayerTargetPosition();
+        float distanceToPlayer = Vector2.Distance(transform.position, playerTargetPosition);
 
         if (distanceToPlayer <= detectionRange && distanceToPlayer > attackRange)
         {
@@ -116,7 +118,8 @@ public class SlimeController : MonoBehaviour
             return;
         }
 
-        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+        Vector2 playerTargetPosition = GetPlayerTargetPosition();
+        float distanceToPlayer = Vector2.Distance(transform.position, playerTargetPosition);
 
         if (distanceToPlayer > detectionRange)
         {
@@ -124,7 +127,7 @@ public class SlimeController : MonoBehaviour
             return;
         }
 
-        Vector2 directionToPlayer = (player.position - transform.position).normalized;
+        Vector2 directionToPlayer = (playerTargetPosition - (Vector2)transform.position).normalized;
         movement = directionToPlayer;
 
         if (movement != Vector2.zero)
@@ -149,6 +152,11 @@ public class SlimeController : MonoBehaviour
             return runSpeed;
 
         return walkSpeed;
+    }
+
+    private Vector2 GetPlayerTargetPosition()
+    {
+        return (Vector2)player.position + playerTargetOffset;
     }
 
     private void AttackPlayer()
@@ -197,7 +205,7 @@ public class SlimeController : MonoBehaviour
 
         if (movement != Vector2.zero && player != null)
         {
-            float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+            float distanceToPlayer = Vector2.Distance(transform.position, GetPlayerTargetPosition());
             speedValue = GetCurrentMoveSpeed(distanceToPlayer);
 
             animator.SetFloat("MoveX", movement.x);
