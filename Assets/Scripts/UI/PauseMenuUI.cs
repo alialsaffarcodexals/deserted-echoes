@@ -56,10 +56,9 @@ public class PauseMenuUI : MonoBehaviour
             GameManager.Instance.ResumeGame();
     }
 
-    /// <summary>Settings button → hides pause panel and shows settings sub-panel.</summary>
+    /// <summary>Settings button → shows settings sub-panel on top of pause panel.</summary>
     public void OnSettings()
     {
-        if (pausePanel != null)    pausePanel.SetActive(false);
         if (settingsPanel != null) settingsPanel.SetActive(true);
     }
 
@@ -67,7 +66,6 @@ public class PauseMenuUI : MonoBehaviour
     public void OnCloseSettings()
     {
         if (settingsPanel != null) settingsPanel.SetActive(false);
-        if (pausePanel != null)    pausePanel.SetActive(true);
     }
 
     /// <summary>Main Menu button → resumes time then loads main menu.</summary>
