@@ -301,6 +301,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: PauseMenuCanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 1116455709841978876, guid: 5d8e1ef0e3d67d442bade31fddee2bd8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1180643388855486760, guid: 5d8e1ef0e3d67d442bade31fddee2bd8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2449878514411072376, guid: 5d8e1ef0e3d67d442bade31fddee2bd8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3332468967788351806, guid: 5d8e1ef0e3d67d442bade31fddee2bd8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4936583888436683530, guid: 5d8e1ef0e3d67d442bade31fddee2bd8, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -379,6 +395,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4936583888436683530, guid: 5d8e1ef0e3d67d442bade31fddee2bd8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7397858272475625935, guid: 5d8e1ef0e3d67d442bade31fddee2bd8, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9177248196613338024, guid: 5d8e1ef0e3d67d442bade31fddee2bd8, type: 3}
+      propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -32912,7 +32936,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   walkSpeed: 20
+  runSpeed: 7
   inputDeadzone: 0.15
+  animationSpeed: 0.8
+  speedParam: Speed
+  facingParam: Facing
+  runParam: Run
+  attackParam: Attack
+  hurtParam: Hurt
+  deathParam: Death
+  attackLockSeconds: 0.2
+  useFallbackAttackInput: 1
+  fallbackKeyboardAttackKey: 1
+  allowMouseLeftAsAttack: 1
+  allowGamepadSouthAsAttack: 1
+  attackBindingHint: 
 --- !u!212 &1108225274
 SpriteRenderer:
   serializedVersion: 2
