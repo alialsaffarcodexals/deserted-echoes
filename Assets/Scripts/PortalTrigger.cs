@@ -17,11 +17,26 @@ public class PortalTrigger : MonoBehaviour
     [Tooltip("Exact name of the scene to load (must match Build Settings)")]
     [SerializeField] private string targetSceneName;
 
+    private bool playerInRange = false;
+
+    private void Update()
+    {
+        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+            EnterPortal();
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
 
-        EnterPortal();
+        playerInRange = true;
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        playerInRange = false;
     }
 
     private void EnterPortal()
