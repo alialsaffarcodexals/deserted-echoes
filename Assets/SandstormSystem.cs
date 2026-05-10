@@ -3,88 +3,75 @@ using UnityEngine.UI;
 
 public class SandstormSystem : MonoBehaviour
 {
-    [Header("Drag these in from the Hierarchy")]
+    // drag these in from the hierarchy
     public ParticleSystem sandstorm;
     public Image sandstormOverlay;
 
-    [Header("Sandstorm Settings")]
-    public float minTimeBetweenStorms = 30f;
-    public float maxTimeBetweenStorms = 90f;
+    // how long the storm lasts in seconds
     public float stormDuration = 15f;
-    public float fadeSpeed = 1f;
-    public float maxOverlayAlpha = 0.5f;
 
-    // Keep track of what the sandstorm is doing
+    // how fast the overlay fades in and out
+    public float fadeSpeed = 1f;
+
+    // how dark the overlay gets at its strongest (0 = invisible, 1 = fully opaque)
+    public float maxOverlayAlpha = 0.1f;
+
+    // daytime starts at 0.3 and 1 in game minute is 0.1 (since a day is 10 mins)
+    // so the storm triggers at 0.3 + 0.1 = 0.4
+    float stormTriggerTime = 0.4f;
+
+    // keeping track of whats happening
     bool stormIsActive = false;
     bool fadingIn = false;
     bool fadingOut = false;
     float stormTimer = 0f;
-    float timUntilNextStorm = 0f;
+    bool stormHappenedToday = false;
 
     void Start()
     {
-        // Stop particles at the start
+        // make sure particles arent playing at the start
         sandstorm.Stop();
-
-        // Pick a random time for the first storm
-        timUntilNextStorm = Random.Range(minTimeBetweenStorms, maxTimeBetweenStorms);
     }
 
     void Update()
     {
-        // Only trigger storms during daytime
-        bool isDay = DayNightCycle.Instance != null && DayNightCycle.Instance.IsDay;
+        if (DayNightCycle.Instance == null) return;
 
-        if (!stormIsActive && isDay)
+        float timeOfDay = DayNightCycle.Instance.timeOfDay;
+        int currentDay = DayNightCycle.Instance.currentDay;
+
+        // reset so the storm can happen again next day if needed
+        if (DayNightCycle.Instance.JustStartedNewDay())
+            stormHappenedToday = false;
+
+        // trigger the storm 1 in game minute into day 1
+        if (currentDay == 1 && !stormHappenedToday && timeOfDay >= stormTriggerTime)
         {
-            // Count down to the next storm
-            timUntilNextStorm -= Time.deltaTime;
-
-            if (timUntilNextStorm <= 0f)
-                StartStorm();
+            stormHappenedToday = true;
+            StartStorm();
         }
 
-        // Handle fading the overlay in
+        // slowly fade the overlay in
         if (fadingIn)
         {
-            float currentAlpha = sandstormOverlay.color.a;
-            currentAlpha += Time.deltaTime * fadeSpeed;
-
-            if (currentAlpha >= maxOverlayAlpha)
-            {
-                currentAlpha = maxOverlayAlpha;
-                fadingIn = false;
-            }
-
-            SetOverlayAlpha(currentAlpha);
+            float a = sandstormOverlay.color.a + Time.deltaTime * fadeSpeed;
+            if (a >= maxOverlayAlpha) { a = maxOverlayAlpha; fadingIn = false; }
+            SetOverlayAlpha(a);
         }
 
-        // Handle fading the overlay out
+        // slowly fade the overlay out
         if (fadingOut)
         {
-            float currentAlpha = sandstormOverlay.color.a;
-            currentAlpha -= Time.deltaTime * fadeSpeed;
-
-            if (currentAlpha <= 0f)
-            {
-                currentAlpha = 0f;
-                fadingOut = false;
-                stormIsActive = false;
-
-                // Pick time for next storm
-                timUntilNextStorm = Random.Range(minTimeBetweenStorms, maxTimeBetweenStorms);
-            }
-
-            SetOverlayAlpha(currentAlpha);
+            float a = sandstormOverlay.color.a - Time.deltaTime * fadeSpeed;
+            if (a <= 0f) { a = 0f; fadingOut = false; stormIsActive = false; }
+            SetOverlayAlpha(a);
         }
 
-        // Count down the storm duration
+        // count down how long the storm has left
         if (stormIsActive && !fadingIn && !fadingOut)
         {
             stormTimer -= Time.deltaTime;
-
-            if (stormTimer <= 0f)
-                StopStorm();
+            if (stormTimer <= 0f) StopStorm();
         }
     }
 
@@ -104,7 +91,7 @@ public class SandstormSystem : MonoBehaviour
         sandstorm.Stop();
     }
 
-    // Helper to set the overlay transparency
+    // helper to change the overlay transparency
     void SetOverlayAlpha(float alpha)
     {
         Color c = sandstormOverlay.color;
@@ -112,12 +99,10 @@ public class SandstormSystem : MonoBehaviour
         sandstormOverlay.color = c;
     }
 
-    // Call this from a UI button to test the storm
+    // hooked up to the test button in the inspector
     public void TestStorm()
     {
-        if (!stormIsActive)
-            StartStorm();
-        else
-            StopStorm();
+        if (!stormIsActive) StartStorm();
+        else StopStorm();
     }
 }
