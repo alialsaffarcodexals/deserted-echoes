@@ -3,13 +3,13 @@ using UnityEngine.Rendering.Universal;
 
 public class DayNightCycle : MonoBehaviour
 {
-    // i need this so other scripts can access this one
+    // for later scripts to easily find this one and get info about the time of day
     public static DayNightCycle Instance { get; private set; }
 
-    // drag the global light into this in the inspector
+    // global light holder
     public Light2D globalLight;
 
-    // these control the colour and brightness over time - set them in the inspector
+    // these control the colour and brightness over time (used in the inspector)
     public Gradient lightColour;
     public AnimationCurve lightIntensity;
 

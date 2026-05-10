@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class SandstormSystem : MonoBehaviour
 {
-    // drag these in from the hierarchy
+    
     public ParticleSystem sandstorm;
     public Image sandstormOverlay;
 
@@ -13,7 +13,7 @@ public class SandstormSystem : MonoBehaviour
     // how fast the overlay fades in and out
     public float fadeSpeed = 1f;
 
-    // how dark the overlay gets at its strongest (0 = invisible, 1 = fully opaque)
+    // how dark the overlay gets at its strongest (0 = invisible, 1 = fully opaque) still testing values around 0.1 since the particles themselves are already pretty strong visually
     public float maxOverlayAlpha = 0.1f;
 
     // daytime starts at 0.3 and 1 in game minute is 0.1 (since a day is 10 mins)
