@@ -9,8 +9,9 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Movement")]
     public float walkSpeed = 4f;
-    public float runSpeed = 7f;
+    public float sprintSpeed = 7f;
     public float inputDeadzone = 0.15f;
+    public SurvivalSystem survival;
 
     [Header("Animation")]
     [SerializeField] float animationSpeed = 0.8f;
@@ -123,6 +124,23 @@ public class PlayerMovement : MonoBehaviour
 
         if (attackPressed && Time.time >= attackLockUntil)
             TriggerAttack();
+
+        float currentSpeed = walkSpeed;
+
+        bool isSprintPressed = Keyboard.current.leftShiftKey.isPressed;
+
+        if (isSprintPressed && survival.CanSprint && currentMoveInput.magnitude > 0f)
+        {
+            currentSpeed = sprintSpeed;
+            survival?.UseStamina(7f * Time.deltaTime);
+            survival?.SetSprinting(true);
+        }
+        else
+        {
+            survival?.SetSprinting(false);
+        }
+        // store for FixedUpdate movement
+        currentMoveInput = moveInput * currentSpeed;
     }
 
     void FixedUpdate()
@@ -130,9 +148,7 @@ public class PlayerMovement : MonoBehaviour
         if (isDead)
             return;
 
-        float speed = isRunning ? runSpeed : walkSpeed;
-        Vector2 displacement = currentMoveInput * speed * Time.fixedDeltaTime;
-
+        Vector2 displacement = currentMoveInput * Time.fixedDeltaTime;
         if (rb2d != null)
             rb2d.MovePosition(rb2d.position + displacement);
         else
