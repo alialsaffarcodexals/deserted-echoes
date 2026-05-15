@@ -13,6 +13,7 @@ public class EnemyFollowAndDisappear : MonoBehaviour
     [SerializeField] string attackHitboxTag = "AttackHitbox";
 
     Transform player;
+    PlayerController playerController;
 
     void Awake()
     {
@@ -28,7 +29,10 @@ public class EnemyFollowAndDisappear : MonoBehaviour
     {
         var playerObj = GameObject.FindGameObjectWithTag(playerTag);
         if (playerObj != null)
+        {
             player = playerObj.transform;
+            playerController = playerObj.GetComponent<PlayerController>();
+        }
     }
 
     void FixedUpdate()
@@ -36,7 +40,11 @@ public class EnemyFollowAndDisappear : MonoBehaviour
         if (player == null)
             return;
 
-        Vector2 toPlayer = player.position - transform.position;
+        Vector2 targetPosition = player.position;
+        if (playerController != null)
+            playerController.TryGetEnemyAttackTargetPosition(out targetPosition);
+
+        Vector2 toPlayer = targetPosition - (Vector2)transform.position;
         float distance = toPlayer.magnitude;
         if (distance <= stopDistance)
             return;

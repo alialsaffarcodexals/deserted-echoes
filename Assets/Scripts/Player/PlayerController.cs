@@ -4,15 +4,15 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float walkSpeed = 3f;
-    [SerializeField] private float runSpeed = 5.5f;
+    [SerializeField] private float walkSpeed = 5f;
+    [SerializeField] private float runSpeed = 10f;
 
     [Header("Combat")]
     [SerializeField] private Transform attackPoint;
-    [SerializeField] private float attackPointDistance = 0.7f;
-    [SerializeField] private float attackRange = 0.6f;
+    [SerializeField] private float attackPointDistance = 1f;
+    [SerializeField] private float attackRange = 1f;
     [SerializeField] private int attackDamage = 25;
-    [SerializeField] private float attackCooldown = 0.4f;
+    [SerializeField] private float attackCooldown = 0.5f;
     [SerializeField] private LayerMask enemyLayer;
 
     [Header("Health")]
@@ -192,7 +192,12 @@ public class PlayerController : MonoBehaviour
         if (attackPoint == null)
             return;
 
-        attackPoint.localPosition = lastMoveDirection * attackPointDistance;
+        attackPoint.position = GetAttackCenterWorld();
+    }
+
+    private Vector2 GetAttackCenterWorld()
+    {
+        return (Vector2)transform.position + lastMoveDirection * attackPointDistance;
     }
 
     private Vector2 GetMainDirection(Vector2 direction)
@@ -227,11 +232,22 @@ public class PlayerController : MonoBehaviour
             animator.SetTrigger("Attack");
         }
 
+        Vector2 attackCenter = GetAttackCenterWorld();
+
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
-            attackPoint.position,
+            attackCenter,
             attackRange,
             enemyLayer
         );
+
+        if (hitEnemies.Length == 0)
+        {
+            // Fallback for cases where the Enemy layer mask is not set correctly.
+            hitEnemies = Physics2D.OverlapCircleAll(
+            attackCenter,
+            attackRange
+        );
+        }
 
         foreach (Collider2D enemy in hitEnemies)
         {
@@ -280,11 +296,14 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
     }
 
+    public bool TryGetEnemyAttackTargetPosition(out Vector2 targetPosition)
+    {
+        targetPosition = GetAttackCenterWorld();
+        return true;
+    }
+
     private void OnDrawGizmosSelected()
     {
-        if (attackPoint == null)
-            return;
-
-        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+        Gizmos.DrawWireSphere(GetAttackCenterWorld(), attackRange);
     }
 }
