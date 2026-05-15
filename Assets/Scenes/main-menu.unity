@@ -624,6 +624,7 @@ GameObject:
   - component: {fileID: 380660468}
   - component: {fileID: 380660467}
   - component: {fileID: 380660466}
+  - component: {fileID: 380660471}
   m_Layer: 5
   m_Name: MainMenuCanvas
   m_TagString: Untagged
@@ -647,6 +648,58 @@ MonoBehaviour:
   creditsPanel: {fileID: 1035966176}
   settingsPanel: {fileID: 1733239881}
   buttonList: {fileID: 375972832}
+  uiAudio: {fileID: 380660471}
+  buttonClickClip: {fileID: 8300000, guid: d80206faaa7b20d479720b54e2a77eb7, type: 3}
+  panelOpenClip: {fileID: 8300000, guid: f8b674c485354d543a1ee3d3f6a53fba, type: 3}
+  panelCloseClip: {fileID: 8300000, guid: e39713c21b524cc46be36dceeaa8024f, type: 3}
+--- !u!82 &380660471
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 380660465}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve: []
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve: []
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve: []
 --- !u!114 &380660467
 MonoBehaviour:
   m_ObjectHideFlags: 0

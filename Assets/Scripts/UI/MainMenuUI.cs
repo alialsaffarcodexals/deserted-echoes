@@ -21,6 +21,12 @@ public class MainMenuUI : MonoBehaviour
     [Header("Navigation")]
     [SerializeField] private GameObject buttonList;
 
+    [Header("UI Sound Effects")]
+    [SerializeField] private AudioSource uiAudio;
+    [SerializeField] private AudioClip buttonClickClip;
+    [SerializeField] private AudioClip panelOpenClip;
+    [SerializeField] private AudioClip panelCloseClip;
+
     private void Start()
     {
         CloseAllPanels();
@@ -32,12 +38,14 @@ public class MainMenuUI : MonoBehaviour
     /// <summary>Start Game button → loads first level.</summary>
     public void OnStartGame()
     {
+        PlaySound(buttonClickClip);
         SceneLoader.LoadScene("open-world");
     }
 
     /// <summary>Instructions button → shows instructions panel.</summary>
     public void OnInstructions()
     {
+        PlaySound(panelOpenClip);
         CloseAllPanels();
         HideButtonList();
         if (instructionsPanel != null)
@@ -47,6 +55,7 @@ public class MainMenuUI : MonoBehaviour
     /// <summary>Credits button → shows credits panel.</summary>
     public void OnCredits()
     {
+        PlaySound(panelOpenClip);
         CloseAllPanels();
         HideButtonList();
         if (creditsPanel != null)
@@ -56,6 +65,7 @@ public class MainMenuUI : MonoBehaviour
     /// <summary>Settings button → shows settings panel.</summary>
     public void OnSettings()
     {
+        PlaySound(panelOpenClip);
         CloseAllPanels();
         HideButtonList();
         if (settingsPanel != null)
@@ -65,6 +75,7 @@ public class MainMenuUI : MonoBehaviour
     /// <summary>Quit button → exits the application.</summary>
     public void OnQuit()
     {
+        PlaySound(buttonClickClip);
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -75,11 +86,18 @@ public class MainMenuUI : MonoBehaviour
     /// <summary>Close / back button on any overlay panel.</summary>
     public void OnClosePanel()
     {
+        PlaySound(panelCloseClip);
         CloseAllPanels();
         ShowButtonList();
     }
 
     // ── Private Helpers ──────────────────────────────────────
+
+    private void PlaySound(AudioClip clip)
+    {
+        if (uiAudio != null && clip != null)
+            uiAudio.PlayOneShot(clip);
+    }
 
     private void CloseAllPanels()
     {
