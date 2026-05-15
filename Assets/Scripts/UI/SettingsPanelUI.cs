@@ -30,6 +30,9 @@ public class SettingsPanelUI : MonoBehaviour
     [Header("Fullscreen Toggle")]
     [SerializeField] private Toggle fullscreenToggle;
 
+    [Header("UI Sound Effects")]
+    [SerializeField] private AudioClip panelOpenClip;
+
     // ── PlayerPrefs Keys ─────────────────────────────────────
     private const string KEY_MASTER  = "MasterVolume";
     private const string KEY_MUSIC   = "MusicVolume";
@@ -46,6 +49,14 @@ public class SettingsPanelUI : MonoBehaviour
     private void OnEnable()
     {
         LoadSettings();
+        PlayOpenSound();
+    }
+
+    private void PlayOpenSound()
+    {
+        AudioSource src = GetComponentInParent<AudioSource>();
+        if (src != null && panelOpenClip != null)
+            src.PlayOneShot(panelOpenClip);
     }
 
     // ── Load & Apply saved settings ──────────────────────────

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6685295406814392161}
   - component: {fileID: 7596322511654860584}
   - component: {fileID: 2438169609212739307}
+  - component: {fileID: 6800239648091958070}
   m_Layer: 5
   m_Name: PauseMenuCanvas
   m_TagString: Untagged
@@ -117,6 +118,58 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PauseMenuUI
   pausePanel: {fileID: 5107421210615095172}
   settingsPanel: {fileID: 5925570592113341358}
+  uiAudio: {fileID: 6800239648091958070}
+  buttonClickClip: {fileID: 8300000, guid: d80206faaa7b20d479720b54e2a77eb7, type: 3}
+  menuOpenClip: {fileID: 8300000, guid: f8b674c485354d543a1ee3d3f6a53fba, type: 3}
+  menuCloseClip: {fileID: 8300000, guid: 3f06e8180d2b36842906ca3d8307edb6, type: 3}
+--- !u!82 &6800239648091958070
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 680023964809195807}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve: []
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve: []
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve: []
 --- !u!1 &799704105706897727
 GameObject:
   m_ObjectHideFlags: 0
@@ -2437,6 +2490,7 @@ MonoBehaviour:
   musicVolumeSlider: {fileID: 1393093742009021708}
   sfxVolumeSlider: {fileID: 5606314011167853413}
   fullscreenToggle: {fileID: 3918366357009020100}
+  panelOpenClip: {fileID: 8300000, guid: f8b674c485354d543a1ee3d3f6a53fba, type: 3}
 --- !u!1 &6111604129624326490
 GameObject:
   m_ObjectHideFlags: 0
