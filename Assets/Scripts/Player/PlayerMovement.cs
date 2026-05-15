@@ -6,14 +6,14 @@ public class PlayerMovement : MonoBehaviour
     public float walkSpeed = 4f;
     public float sprintSpeed = 7f;
     public float inputDeadzone = 0.15f;
-    public SurvivalSystem survival;
+    public SurvivalSystem survival; // Link this in Inspector or via Awake
 
     Rigidbody2D rb2d;
     Animator animator;
     int currentFacing = 0;
     string lastAnimState = "";
     string[] availableStates;
-    System.Collections.Generic.Dictionary<string,string> stateCache = new System.Collections.Generic.Dictionary<string,string>();
+    System.Collections.Generic.Dictionary<string, string> stateCache = new System.Collections.Generic.Dictionary<string, string>();
 
     PlayerInputActions input;
     Vector2 currentMoveInput = Vector2.zero;
@@ -22,7 +22,12 @@ public class PlayerMovement : MonoBehaviour
     {
         rb2d = GetComponent<Rigidbody2D>();
         if (rb2d != null) rb2d.freezeRotation = true;
+
         animator = GetComponentInChildren<Animator>();
+
+        // AUTO-LINK: Tries to find SurvivalSystem on this object if not set in Inspector
+        if (survival == null) survival = GetComponent<SurvivalSystem>();
+
         input = new PlayerInputActions();
         if (animator != null && animator.runtimeAnimatorController != null)
         {
@@ -43,6 +48,7 @@ public class PlayerMovement : MonoBehaviour
         if (mag < inputDeadzone) moveInput = Vector2.zero;
         else moveInput = moveInput.normalized * Mathf.Clamp01(mag);
 
+        // Animation Logic
         if (moveInput.sqrMagnitude > 0f)
         {
             int facing = Mathf.Abs(moveInput.x) > Mathf.Abs(moveInput.y)
@@ -62,31 +68,32 @@ public class PlayerMovement : MonoBehaviour
             if (!string.IsNullOrEmpty(desiredState) && desiredState != lastAnimState)
             {
                 int hash = Animator.StringToHash(desiredState);
-                int layer = 0;
-                animator.CrossFade(hash, 0f, layer, 0f);
+                animator.CrossFade(hash, 0f, 0, 0f);
                 animator.Update(0f);
                 lastAnimState = desiredState;
             }
         }
 
+        // Sprinting Logic
         float currentSpeed = walkSpeed;
-
         bool isSprintPressed = Keyboard.current.leftShiftKey.isPressed;
 
-        if (isSprintPressed && survival.CanSprint && currentMoveInput.magnitude > 0f)
+        // Check survival system existence and stamina availability
+        if (isSprintPressed && survival != null && survival.CanSprint && moveInput.magnitude > 0.1f)
         {
             currentSpeed = sprintSpeed;
-            survival?.UseStamina(7f * Time.deltaTime);
-            survival?.SetSprinting(true);
+            survival.UseStamina(7f * Time.deltaTime);
+            survival.SetSprinting(true);
         }
         else
         {
+            currentSpeed = walkSpeed;
             survival?.SetSprinting(false);
         }
-        // store for FixedUpdate movement
+
         currentMoveInput = moveInput * currentSpeed;
     }
-    
+
     void FixedUpdate()
     {
         Vector2 displacement = currentMoveInput * Time.fixedDeltaTime;
@@ -104,7 +111,6 @@ public class PlayerMovement : MonoBehaviour
     {
         switch (f)
         {
-            case 0: return "down";
             case 1: return "left";
             case 2: return "right";
             case 3: return "up";
@@ -116,29 +122,16 @@ public class PlayerMovement : MonoBehaviour
     {
         if (string.IsNullOrEmpty(logical)) return null;
         if (stateCache.TryGetValue(logical, out var cached)) return cached;
-        if (availableStates == null || availableStates.Length == 0)
-        {
-            stateCache[logical] = null;
-            return null;
-        }
-        // exact match
+        if (availableStates == null || availableStates.Length == 0) return null;
+
         foreach (var s in availableStates)
             if (s == logical) { stateCache[logical] = s; return s; }
+
         var low = logical.ToLowerInvariant();
-        // try contains match
         foreach (var s in availableStates)
             if (s.ToLowerInvariant().Contains(low)) { stateCache[logical] = s; return s; }
-        // try partial matches by split
-        var parts = low.Split(new[]{'_', ' '}, System.StringSplitOptions.RemoveEmptyEntries);
-        foreach (var s in availableStates)
-        {
-            var sl = s.ToLowerInvariant();
-            bool all = true;
-            foreach (var p in parts) if (!sl.Contains(p)) { all = false; break; }
-            if (all) { stateCache[logical] = s; return s; }
-        }
+
         stateCache[logical] = null;
-        Debug.LogWarning($"Animator state not found (tried resolving): {logical}");
         return null;
     }
 }

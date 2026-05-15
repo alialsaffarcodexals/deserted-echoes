@@ -57,7 +57,7 @@ public class InventoryController : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.iKey.wasPressedThisFrame)
+        if (Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
         {
             inventoryPanel.SetActive(!inventoryPanel.activeSelf);
         }

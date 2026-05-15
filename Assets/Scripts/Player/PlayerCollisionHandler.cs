@@ -14,7 +14,7 @@ public class PlayerCollisionHandler : MonoBehaviour
     {
         Debug.Log("Collided with: " + collision.collider.name);
 
-        if (stats != null)
+        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Trap"))
         {
             stats.LoseLife();
         }
