@@ -18,10 +18,13 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] private GameObject creditsPanel;
     [SerializeField] private GameObject settingsPanel;
 
+    [Header("Navigation")]
+    [SerializeField] private GameObject buttonList;
+
     private void Start()
     {
-        // Ensure all overlay panels are hidden at start
         CloseAllPanels();
+        ShowButtonList();
     }
 
     // ── Button Callbacks (wire these in Inspector OnClick) ───
@@ -36,6 +39,7 @@ public class MainMenuUI : MonoBehaviour
     public void OnInstructions()
     {
         CloseAllPanels();
+        HideButtonList();
         if (instructionsPanel != null)
             instructionsPanel.SetActive(true);
     }
@@ -44,6 +48,7 @@ public class MainMenuUI : MonoBehaviour
     public void OnCredits()
     {
         CloseAllPanels();
+        HideButtonList();
         if (creditsPanel != null)
             creditsPanel.SetActive(true);
     }
@@ -52,6 +57,7 @@ public class MainMenuUI : MonoBehaviour
     public void OnSettings()
     {
         CloseAllPanels();
+        HideButtonList();
         if (settingsPanel != null)
             settingsPanel.SetActive(true);
     }
@@ -70,6 +76,7 @@ public class MainMenuUI : MonoBehaviour
     public void OnClosePanel()
     {
         CloseAllPanels();
+        ShowButtonList();
     }
 
     // ── Private Helpers ──────────────────────────────────────
@@ -79,5 +86,15 @@ public class MainMenuUI : MonoBehaviour
         if (instructionsPanel != null) instructionsPanel.SetActive(false);
         if (creditsPanel != null)      creditsPanel.SetActive(false);
         if (settingsPanel != null)     settingsPanel.SetActive(false);
+    }
+
+    private void ShowButtonList()
+    {
+        if (buttonList != null) buttonList.SetActive(true);
+    }
+
+    private void HideButtonList()
+    {
+        if (buttonList != null) buttonList.SetActive(false);
     }
 }
