@@ -19,6 +19,9 @@ public class SettingsPanelUI : MonoBehaviour
     [Header("Audio Mixer")]
     [SerializeField] private AudioMixer audioMixer;
 
+    [Header("Direct Audio Sources (used when no mixer is assigned)")]
+    [SerializeField] private AudioSource musicSource;
+
     [Header("Volume Sliders")]
     [SerializeField] private Slider masterVolumeSlider;
     [SerializeField] private Slider musicVolumeSlider;
@@ -64,6 +67,9 @@ public class SettingsPanelUI : MonoBehaviour
         ApplyVolume(PARAM_MASTER, master);
         ApplyVolume(PARAM_MUSIC,  music);
         ApplyVolume(PARAM_SFX,    sfx);
+
+        // Apply directly to audio sources if no mixer
+        if (musicSource != null) musicSource.volume = music;
         Screen.fullScreen = fullscr == 1;
     }
 
@@ -80,6 +86,7 @@ public class SettingsPanelUI : MonoBehaviour
     public void OnMusicVolumeChanged(float value)
     {
         ApplyVolume(PARAM_MUSIC, value);
+        if (musicSource != null) musicSource.volume = value;
         PlayerPrefs.SetFloat(KEY_MUSIC, value);
     }
 

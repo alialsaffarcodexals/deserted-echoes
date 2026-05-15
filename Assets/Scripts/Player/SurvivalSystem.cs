@@ -15,7 +15,6 @@ public class SurvivalSystem : MonoBehaviour
     public float maxHunger = 100f;
     public float maxThirst = 100f;
 
-    //Those values are not completed now they maybe changed later
     [Header("Depletion Rates (Per Second)")]
     public float hungerDepletionRate = 0.5f;
     public float thirstDepletionRate = 0.8f;
@@ -39,60 +38,57 @@ public class SurvivalSystem : MonoBehaviour
 
     void Update()
     {
-        if (IsDead) return; // Stop further updates if the player is dead
+        if (IsDead) return;
 
         HandleDepletion();
-        HandleRegenration();
-        HandleEnviromentalDamage();
-
+        HandleRegeneration();
+        HandleEnvironmentalDamage();
         ClampAllStats();
-
         UpdateUI();
     }
 
     private void InitializeStats()
     {
-        //Initialize stats
         currentHealth = maxHealth;
         currentStamina = maxStamina;
         currentHunger = maxHunger;
         currentThirst = maxThirst;
 
-        //Now the values must be synced with the UI sliders
-        healthSlider.maxValue = maxHealth;
-        staminaSlider.maxValue = maxStamina;
-        hungerSlider.maxValue = maxHunger;
-        thirstSlider.maxValue = maxThirst;
+        if (healthSlider) healthSlider.maxValue = maxHealth;
+        if (staminaSlider) staminaSlider.maxValue = maxStamina;
+        if (hungerSlider) hungerSlider.maxValue = maxHunger;
+        if (thirstSlider) thirstSlider.maxValue = maxThirst;
     }
 
     private void HandleDepletion()
     {
         currentHunger -= hungerDepletionRate * Time.deltaTime;
         currentThirst -= thirstDepletionRate * Time.deltaTime;
+
         if (isSprinting && currentStamina > 0)
         {
             currentStamina -= staminaDepletionRate * Time.deltaTime;
         }
     }
 
-    private void HandleRegenration()
+    private void HandleRegeneration()
     {
         if (!isSprinting && currentStamina < maxStamina)
         {
-            currentStamina += (staminaDepletionRate * 0.5f) * Time.deltaTime; // Regenerate stamina
+            currentStamina += (staminaDepletionRate * 0.5f) * Time.deltaTime;
         }
 
         if (canRegenerateHealth && currentHunger > 20f && currentThirst > 20f && currentHealth < maxHealth)
         {
-            currentHealth += healthRegenRate * Time.deltaTime; // Regenerate health
+            currentHealth += healthRegenRate * Time.deltaTime;
         }
     }
 
-    private void HandleEnviromentalDamage()
+    private void HandleEnvironmentalDamage()
     {
         if (currentHunger <= 0 || currentThirst <= 0)
         {
-            currentHealth -= starvationDamage * Time.deltaTime; // Take damage from starvation or dehydration
+            TakeDamage(starvationDamage * Time.deltaTime);
         }
     }
 
@@ -100,10 +96,10 @@ public class SurvivalSystem : MonoBehaviour
 
     void UpdateUI()
     {
-        healthSlider.value = currentHealth;
-        staminaSlider.value = currentStamina;
-        hungerSlider.value = currentHunger;
-        thirstSlider.value = currentThirst;
+        if (healthSlider) healthSlider.value = currentHealth;
+        if (staminaSlider) staminaSlider.value = currentStamina;
+        if (hungerSlider) hungerSlider.value = currentHunger;
+        if (thirstSlider) thirstSlider.value = currentThirst;
     }
 
     void ClampAllStats()
@@ -116,13 +112,12 @@ public class SurvivalSystem : MonoBehaviour
 
     private void OnDeath()
     {
-        // Handle death logic here (e.g., play animation, disable controls, etc.)
         Debug.Log("Player has died.");
     }
 
     public void TakeDamage(float amount)
     {
-        if (IsDead) return; // Prevent taking damage if already dead
+        if (IsDead) return;
         currentHealth -= amount;
         if (currentHealth <= 0)
         {
@@ -132,10 +127,7 @@ public class SurvivalSystem : MonoBehaviour
     }
 
     public void UseStamina(float amount) => currentStamina -= amount;
-
-    public void Heal (float amount) => currentHealth += amount;
-
+    public void Heal(float amount) => currentHealth += amount;
     public void Eat(float amount) => currentHunger += amount;
-
     public void Drink(float amount) => currentThirst += amount;
 }
