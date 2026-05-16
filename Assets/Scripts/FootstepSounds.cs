@@ -101,4 +101,10 @@ public class FootstepSounds : MonoBehaviour
     {
         SetSurface(onCarpet ? SurfaceType.Carpet : SurfaceType.Wood);
     }
+
+    /// <summary>Called by SettingsPanelUI to control SFX volume at runtime.</summary>
+    public void SetVolume(float volume)
+    {
+        if (audioSource != null) audioSource.volume = volume;
+    }
 }
