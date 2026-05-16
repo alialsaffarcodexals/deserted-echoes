@@ -500,6 +500,7 @@ GameObject:
   - component: {fileID: 1003623893644020518}
   - component: {fileID: 5568565327450645279}
   - component: {fileID: 790533004807259606}
+  - component: {fileID: 1100000000000001}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -603,6 +604,7 @@ GameObject:
   - component: {fileID: 7730288229544399427}
   - component: {fileID: 8143436565499277462}
   - component: {fileID: 5626040018989012125}
+  - component: {fileID: 1100000000000002}
   m_Layer: 5
   m_Name: Player Stats
   m_TagString: Untagged
@@ -699,6 +701,22 @@ MonoBehaviour:
   starvationDamage: 1
   canRegenerateHealth: 1
   healthRegenRate: 0.5
+--- !u!114 &1100000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2833293493649536709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f33a0be468aa6844ba9bc34995d3fecd, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
+  lives: 3
+  livesText: {fileID: 745924592885314672}
+  score: 0
+  scoreText: {fileID: 7804913127576643401}
 --- !u!1 &3031126328862296394
 GameObject:
   m_ObjectHideFlags: 0
@@ -2002,3 +2020,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1100000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2795679153158946673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbdff0df5dee3474dacf79d551b7b6d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryController
+  inventoryPanel: {fileID: 366738962935042040}
+  slotPrefab: {fileID: 0}
+  slotCount: 0
+  itemPrefabs: []
