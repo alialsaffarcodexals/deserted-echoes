@@ -27,12 +27,17 @@ public class SurvivalSystem : MonoBehaviour
     public bool canRegenerateHealth = true;
     public float healthRegenRate = 0.5f;
 
+    [Header("Stamina Exhaustion")]
+    public float exhaustionCooldown = 5f;
+
     private float currentHealth, currentStamina, currentHunger, currentThirst;
     private bool isSprinting;
+    private bool isExhausted;
+    private float exhaustionTimer;
     private PlayerController playerController;
 
     public bool IsDead => currentHealth <= 0;
-    public bool CanSprint => currentStamina > 0 && !IsDead;
+    public bool CanSprint => currentStamina > 0 && !isExhausted && !IsDead;
 
     void Start()
     {
@@ -72,12 +77,25 @@ public class SurvivalSystem : MonoBehaviour
         if (isSprinting && currentStamina > 0)
         {
             currentStamina -= staminaRunDepletionRate * Time.deltaTime;
+
+            if (currentStamina <= 0)
+            {
+                currentStamina = 0;
+                isExhausted    = true;
+                exhaustionTimer = exhaustionCooldown;
+            }
         }
     }
 
     private void HandleRegeneration()
     {
-        if (!isSprinting && currentStamina < maxStamina)
+        if (isExhausted)
+        {
+            exhaustionTimer -= Time.deltaTime;
+            if (exhaustionTimer <= 0f)
+                isExhausted = false;
+        }
+        else if (!isSprinting && currentStamina < maxStamina)
         {
             currentStamina += staminaRegenRate * Time.deltaTime;
         }
