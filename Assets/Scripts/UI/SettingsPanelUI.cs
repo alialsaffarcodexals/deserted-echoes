@@ -56,7 +56,6 @@ public class SettingsPanelUI : MonoBehaviour
 
     private void ResolveMusicSource()
     {
-        if (musicSource != null) return;
         GameObject go = GameObject.Find("negev_desert_music");
         if (go != null) musicSource = go.GetComponent<AudioSource>();
     }
@@ -112,19 +111,7 @@ public class SettingsPanelUI : MonoBehaviour
     {
         ResolveMusicSource();
         ApplyVolume(PARAM_MUSIC, value);
-        if (musicSource != null)
-        {
-            musicSource.volume = value;
-            Debug.Log($"[SettingsPanelUI] Music volume set to {value} on '{musicSource.gameObject.name}'");
-        }
-        else
-        {
-            Debug.LogWarning("[SettingsPanelUI] OnMusicVolumeChanged called but musicSource is NULL");
-        }
-
-        if (audioMixer == null)
-            Debug.LogWarning("[SettingsPanelUI] audioMixer is NULL — mixer route skipped");
-
+        if (musicSource != null) musicSource.volume = value;
         PlayerPrefs.SetFloat(KEY_MUSIC, value);
     }
 
