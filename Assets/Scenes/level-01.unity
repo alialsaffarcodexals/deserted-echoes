@@ -51190,6 +51190,66 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 08e10547af7634476a633da8536f97ce, type: 3}
+--- !u!1660057539 &100000001
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2795679153158946673, guid: fdbcafafa7915714e80500321b28d80d, type: 3}
+      propertyPath: m_Name
+      value: Canvas
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fdbcafafa7915714e80500321b28d80d, type: 3}
+--- !u!224 &100000002 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 4991548054203897729, guid: fdbcafafa7915714e80500321b28d80d, type: 3}
+  m_PrefabInstance: {fileID: 100000001}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1660057539 &100000003
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 634885492775248940, guid: 678306d566eb747839ac0ad263d21fde, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 634885492775248940, guid: 678306d566eb747839ac0ad263d21fde, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -45.23
+      objectReference: {fileID: 0}
+    - target: {fileID: 634885492775248940, guid: 678306d566eb747839ac0ad263d21fde, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8709083618618344848, guid: 678306d566eb747839ac0ad263d21fde, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8709083618618344848, guid: 678306d566eb747839ac0ad263d21fde, type: 3}
+      propertyPath: m_Name
+      value: Goblin1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 678306d566eb747839ac0ad263d21fde, type: 3}
+--- !u!4 &100000004 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 634885492775248940, guid: 678306d566eb747839ac0ad263d21fde, type: 3}
+  m_PrefabInstance: {fileID: 100000003}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -51205,6 +51265,8 @@ SceneRoots:
   - {fileID: 630943178}
   - {fileID: 457529136}
   - {fileID: 991000001}
+  - {fileID: 100000001}
+  - {fileID: 100000003}
 
 --- !u!1 &991000001
 GameObject:

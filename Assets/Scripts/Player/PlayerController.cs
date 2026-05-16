@@ -29,6 +29,7 @@ public class PlayerController : MonoBehaviour
     private bool isDead;
     private bool isAttacking;
     private float nextAttackTime;
+    private SurvivalSystem survivalSystem;
 
     private void Awake()
     {
@@ -57,6 +58,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
+        survivalSystem = FindObjectOfType<SurvivalSystem>();
 
         if (animator == null)
             return;
@@ -271,6 +273,9 @@ public class PlayerController : MonoBehaviour
             return;
 
         currentHealth -= damage;
+
+        if (survivalSystem != null)
+            survivalSystem.TakeDamage((float)damage);
 
         if (currentHealth <= 0)
         {
