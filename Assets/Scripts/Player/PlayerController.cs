@@ -272,15 +272,21 @@ public class PlayerController : MonoBehaviour
         if (isDead)
             return;
 
-        currentHealth -= damage;
-
         if (survivalSystem != null)
-            survivalSystem.TakeDamage((float)damage);
-
-        if (currentHealth <= 0)
         {
-            Die();
-            return;
+            // SurvivalSystem is the single health authority — it drives the bar
+            // and calls Die() via OnDeath() when it reaches 0
+            survivalSystem.TakeDamage((float)damage);
+        }
+        else
+        {
+            // Fallback: no SurvivalSystem in scene, track internally
+            currentHealth -= damage;
+            if (currentHealth <= 0)
+            {
+                Die();
+                return;
+            }
         }
 
         if (animator != null)
@@ -301,10 +307,6 @@ public class PlayerController : MonoBehaviour
         }
 
         rb.linearVelocity = Vector2.zero;
-
-        // Drain health bar to 0 so it matches the death state
-        if (survivalSystem != null)
-            survivalSystem.TakeDamage(survivalSystem.maxHealth);
     }
 
     public bool TryGetEnemyAttackTargetPosition(out Vector2 targetPosition)
