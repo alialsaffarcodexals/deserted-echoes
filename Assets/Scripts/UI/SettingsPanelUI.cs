@@ -110,8 +110,21 @@ public class SettingsPanelUI : MonoBehaviour
     /// <summary>Called by MusicVolumeSlider OnValueChanged.</summary>
     public void OnMusicVolumeChanged(float value)
     {
+        ResolveMusicSource();
         ApplyVolume(PARAM_MUSIC, value);
-        if (musicSource != null) musicSource.volume = value;
+        if (musicSource != null)
+        {
+            musicSource.volume = value;
+            Debug.Log($"[SettingsPanelUI] Music volume set to {value} on '{musicSource.gameObject.name}'");
+        }
+        else
+        {
+            Debug.LogWarning("[SettingsPanelUI] OnMusicVolumeChanged called but musicSource is NULL");
+        }
+
+        if (audioMixer == null)
+            Debug.LogWarning("[SettingsPanelUI] audioMixer is NULL — mixer route skipped");
+
         PlayerPrefs.SetFloat(KEY_MUSIC, value);
     }
 
