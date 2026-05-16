@@ -31,6 +31,8 @@ public class PlayerController : MonoBehaviour
     private float nextAttackTime;
     private SurvivalSystem survivalSystem;
 
+    public bool IsSprinting { get; private set; }
+
     private void Awake()
     {
         if (rb == null)
@@ -103,10 +105,12 @@ public class PlayerController : MonoBehaviour
         bool wantsToRun = IsRunPressed();
         bool canRun = survivalSystem != null ? survivalSystem.CanSprint : true;
 
-        if (survivalSystem != null)
-            survivalSystem.SetSprinting(wantsToRun && canRun);
+        IsSprinting = wantsToRun && canRun;
 
-        float currentSpeed = (wantsToRun && canRun) ? runSpeed : walkSpeed;
+        if (survivalSystem != null)
+            survivalSystem.SetSprinting(IsSprinting);
+
+        float currentSpeed = IsSprinting ? runSpeed : walkSpeed;
 
         rb.MovePosition(rb.position + movement * currentSpeed * Time.fixedDeltaTime);
     }

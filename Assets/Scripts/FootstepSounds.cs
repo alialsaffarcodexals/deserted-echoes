@@ -26,18 +26,21 @@ public class FootstepSounds : MonoBehaviour
     public float sandVolume   = 1f;
 
     [Header("Timing")]
-    public float footstepInterval = 0.4f;
+    public float footstepInterval    = 0.4f;
+    public float runFootstepInterval = 0.2f;
 
     private AudioSource audioSource;
     private float footstepTimer = 0f;
     private SurfaceType currentSurface = SurfaceType.Wood;
     private Vector3 lastPosition;
+    private PlayerController playerController;
 
     void Start()
     {
-        audioSource  = GetComponent<AudioSource>();
-        lastPosition = transform.position;
-        footstepTimer = footstepInterval;
+        audioSource      = GetComponent<AudioSource>();
+        playerController = GetComponent<PlayerController>();
+        lastPosition     = transform.position;
+        footstepTimer    = footstepInterval;
     }
 
     void Update()
@@ -47,9 +50,13 @@ public class FootstepSounds : MonoBehaviour
 
         if (isMoving)
         {
+            float activeInterval = (playerController != null && playerController.IsSprinting)
+                ? runFootstepInterval
+                : footstepInterval;
+
             footstepTimer += Time.deltaTime;
 
-            if (footstepTimer >= footstepInterval)
+            if (footstepTimer >= activeInterval)
             {
                 PlayCurrentSurface();
                 footstepTimer = 0f;
