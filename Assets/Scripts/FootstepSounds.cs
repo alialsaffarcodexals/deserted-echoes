@@ -71,7 +71,6 @@ public class FootstepSounds : MonoBehaviour
 
     private void PlayCurrentSurface()
     {
-        audioSource.Stop();
         switch (currentSurface)
         {
             case SurfaceType.Sand:
