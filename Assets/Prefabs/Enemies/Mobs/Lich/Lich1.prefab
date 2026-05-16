@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6844878922481205566
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2432343798899017302}
+  m_Layer: 6
+  m_Name: ThrowPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2432343798899017302
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6844878922481205566}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6691680676771635965}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7767414607107087173
 GameObject:
   m_ObjectHideFlags: 0
@@ -33,7 +64,8 @@ Transform:
   m_LocalPosition: {x: 0, y: -3, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
-  m_Children: []
+  m_Children:
+  - {fileID: 2432343798899017302}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &2997514640911642538
@@ -211,17 +243,20 @@ MonoBehaviour:
     attackCooldownMultiplier: 0
   walkSpeed: 1.5
   runSpeed: 3
-  detectionRange: 6
-  runRange: 3
-  attackRange: 1.5
-  chaseStopDistance: 1
+  detectionRange: 10
+  runRange: 6
+  attackRange: 5
+  chaseStopDistance: 5
   fallbackTargetOffset: {x: 0, y: -0.3}
   attackDamage: 10
   attackCooldown: 2
   attackAnimationDuration: 0.5
   maxHealth: 50
   deathDestroyDelay: 1.2
-  damageDistanceToPlayer: 1
+  damageDistanceToPlayer: 5
   attackAnimationMode: 0
   rb: {fileID: 431972276023111799}
   animator: {fileID: 2849701718438416147}
+  lichFireProjectilePrefab: {fileID: 1309040597552750176, guid: a880d846fde9a4e71b3aa313cb4db98a, type: 3}
+  throwPoint: {fileID: 2432343798899017302}
+  projectileSpeed: 8

@@ -33,7 +33,8 @@ Transform:
   m_LocalPosition: {x: 0, y: -3, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
-  m_Children: []
+  m_Children:
+  - {fileID: 183269926380106717}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &2693833678381639303
@@ -211,17 +212,51 @@ MonoBehaviour:
     attackCooldownMultiplier: 0
   walkSpeed: 1.5
   runSpeed: 3
-  detectionRange: 6
-  runRange: 3
-  attackRange: 1.2
-  chaseStopDistance: 1
+  detectionRange: 10
+  runRange: 6
+  attackRange: 5
+  chaseStopDistance: 5
   fallbackTargetOffset: {x: 0, y: -0.3}
   attackDamage: 10
   attackCooldown: 2
   attackAnimationDuration: 0.5
   maxHealth: 50
   deathDestroyDelay: 1.2
-  damageDistanceToPlayer: 1
+  damageDistanceToPlayer: 5
   attackAnimationMode: 0
   rb: {fileID: 2194749864979165290}
   animator: {fileID: 6815290909893039457}
+  impFireProjectilePrefab: {fileID: 1104005832880348426, guid: e2f78e29557f24e32b731f63dd34022b, type: 3}
+  throwPoint: {fileID: 183269926380106717}
+  projectileSpeed: 6
+--- !u!1 &7464150486598200457
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 183269926380106717}
+  m_Layer: 6
+  m_Name: ThrowPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &183269926380106717
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7464150486598200457}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3666769223745208945}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
