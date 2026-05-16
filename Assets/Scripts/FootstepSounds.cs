@@ -59,6 +59,7 @@ public class FootstepSounds : MonoBehaviour
             // immediate overlap while the previous footstep sound still plays
             if (!Mathf.Approximately(activeInterval, lastActiveInterval))
             {
+                audioSource.Stop();   // flush stacked PlayOneShot sounds from the previous cadence
                 footstepTimer      = 0f;
                 lastActiveInterval = activeInterval;
             }
