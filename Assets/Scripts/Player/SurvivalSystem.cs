@@ -27,12 +27,14 @@ public class SurvivalSystem : MonoBehaviour
 
     private float currentHealth, currentStamina, currentHunger, currentThirst;
     private bool isSprinting;
+    private PlayerController playerController;
 
     public bool IsDead => currentHealth <= 0;
     public bool CanSprint => currentStamina > 0 && !IsDead;
 
     void Start()
     {
+        playerController = FindObjectOfType<PlayerController>();
         InitializeStats();
     }
 
@@ -113,6 +115,8 @@ public class SurvivalSystem : MonoBehaviour
     private void OnDeath()
     {
         Debug.Log("Player has died.");
+        if (playerController != null)
+            playerController.Die();
     }
 
     public void TakeDamage(float amount)

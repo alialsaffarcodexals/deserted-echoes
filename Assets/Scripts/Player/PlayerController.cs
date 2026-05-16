@@ -287,8 +287,10 @@ public class PlayerController : MonoBehaviour
             animator.SetTrigger("Hurt");
     }
 
-    private void Die()
+    public void Die()
     {
+        if (isDead) return;
+
         isDead = true;
         movement = Vector2.zero;
 
@@ -299,6 +301,10 @@ public class PlayerController : MonoBehaviour
         }
 
         rb.linearVelocity = Vector2.zero;
+
+        // Drain health bar to 0 so it matches the death state
+        if (survivalSystem != null)
+            survivalSystem.TakeDamage(survivalSystem.maxHealth);
     }
 
     public bool TryGetEnemyAttackTargetPosition(out Vector2 targetPosition)
