@@ -79,6 +79,13 @@ public class PlayerController : MonoBehaviour
 
         ReadMovementInput();
 
+        // Resolve sprinting here (Update) so FootstepSounds reads a current value
+        bool wantsToRun = IsRunPressed();
+        bool canRun = survivalSystem != null ? survivalSystem.CanSprint : true;
+        IsSprinting = wantsToRun && canRun;
+        if (survivalSystem != null)
+            survivalSystem.SetSprinting(IsSprinting);
+
         UpdateAttackPoint();
         UpdateAnimator();
 
@@ -102,16 +109,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        bool wantsToRun = IsRunPressed();
-        bool canRun = survivalSystem != null ? survivalSystem.CanSprint : true;
-
-        IsSprinting = wantsToRun && canRun;
-
-        if (survivalSystem != null)
-            survivalSystem.SetSprinting(IsSprinting);
-
         float currentSpeed = IsSprinting ? runSpeed : walkSpeed;
-
         rb.MovePosition(rb.position + movement * currentSpeed * Time.fixedDeltaTime);
     }
 

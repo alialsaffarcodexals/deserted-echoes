@@ -30,7 +30,8 @@ public class FootstepSounds : MonoBehaviour
     public float runFootstepInterval = 0.2f;
 
     private AudioSource audioSource;
-    private float footstepTimer = 0f;
+    private float footstepTimer      = 0f;
+    private float lastActiveInterval = -1f;
     private SurfaceType currentSurface = SurfaceType.Wood;
     private Vector3 lastPosition;
     private PlayerController playerController;
@@ -40,7 +41,7 @@ public class FootstepSounds : MonoBehaviour
         audioSource      = GetComponent<AudioSource>();
         playerController = GetComponent<PlayerController>();
         lastPosition     = transform.position;
-        footstepTimer    = footstepInterval;
+        footstepTimer    = 0f;
     }
 
     void Update()
@@ -54,6 +55,14 @@ public class FootstepSounds : MonoBehaviour
                 ? runFootstepInterval
                 : footstepInterval;
 
+            // Reset timer on walk<->run switch to prevent carry-over causing
+            // immediate overlap while the previous footstep sound still plays
+            if (!Mathf.Approximately(activeInterval, lastActiveInterval))
+            {
+                footstepTimer      = 0f;
+                lastActiveInterval = activeInterval;
+            }
+
             footstepTimer += Time.deltaTime;
 
             if (footstepTimer >= activeInterval)
@@ -65,7 +74,8 @@ public class FootstepSounds : MonoBehaviour
         else
         {
             audioSource.Stop();
-            footstepTimer = footstepInterval;
+            footstepTimer      = 0f;
+            lastActiveInterval = -1f;
         }
     }
 
@@ -91,9 +101,10 @@ public class FootstepSounds : MonoBehaviour
     /// <summary>Called by SandZone / CarpetZone to switch the active surface.</summary>
     public void SetSurface(SurfaceType surface)
     {
-        currentSurface = surface;
+        currentSurface     = surface;
+        footstepTimer      = 0f;
+        lastActiveInterval = -1f;
         audioSource.Stop();
-        footstepTimer = footstepInterval;
     }
 
     /// <summary>Backward-compatible shim — still works with existing CarpetZone.</summary>
