@@ -399,7 +399,7 @@ public abstract class EnemyControllerBase : MonoBehaviour
         isDead = true;
         movement = Vector2.zero;
 
-        PlayerStats stats = Object.FindAnyObjectByType<PlayerStats>();
+        PlayerStats stats = UnityEngine.Object.FindAnyObjectByType<PlayerStats>();
         if (stats != null) stats.AddScore(scoreValue);
 
         if (animator != null)
