@@ -1,59 +1,62 @@
 // ─────────────────────────────────────────────────────────────
-// Level01Setup.cs  (Editor-only — lives in Assets/Editor/)
+// Level02Setup.cs  (Editor-only — lives in Assets/Editor/)
 // Deserted Echoes | IT8101 Games Development | Group 3
-// Run once: Tools ▶ Deserted Echoes ▶ Setup Level-01
+// Run once: Tools ▶ Deserted Echoes ▶ Setup Level-02
 // ─────────────────────────────────────────────────────────────
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public static class Level01Setup
+public static class Level02Setup
 {
-    [MenuItem("Tools/Deserted Echoes/Setup Level-01 (Enemies + HUD)")]
+    [MenuItem("Tools/Deserted Echoes/Setup Level-02 (Enemies + HUD)")]
     public static void Run()
     {
         Scene scene = SceneManager.GetActiveScene();
-        if (!scene.name.Equals("level-01", System.StringComparison.OrdinalIgnoreCase))
+        if (!scene.name.Equals("level-02", System.StringComparison.OrdinalIgnoreCase))
         {
-            Debug.LogError("[Level01Setup] Open level-01 first, then run this tool.");
+            Debug.LogError("[Level02Setup] Open level-02 first, then run this tool.");
             return;
         }
 
         int enemyLayer = LayerMask.NameToLayer("Enemy");
         if (enemyLayer < 0) enemyLayer = 6;
 
+        // Player spawn in level-02 is approx (102.23, 19.38)
+
         // ── HUD Canvas ────────────────────────────────────────
         Place("Assets/Prefabs/UI Items/Canvas.prefab",
-              "Canvas", Vector3.zero, -1, false);
+              "Canvas", Vector3.zero, -1);
 
         // ── Mobs ──────────────────────────────────────────────
-        Place("Assets/Prefabs/Enemies/Mobs/Goblin/Goblin1.prefab",
-              "Goblin1",    new Vector3(14f, -45.23f, 0f), enemyLayer);
+        Place("Assets/Prefabs/Enemies/Mobs/Zombie/Zombie1.prefab",
+              "Zombie1",  new Vector3(107f, 19.38f, 0f), enemyLayer);
 
-        Place("Assets/Prefabs/Enemies/Mobs/Skeleton/Skeleton1.prefab",
-              "Skeleton1",  new Vector3(7f,  -45.23f, 0f), enemyLayer);
+        Place("Assets/Prefabs/Enemies/Mobs/Orc/Orc1.prefab",
+              "Orc1",     new Vector3(102f, 14f,    0f), enemyLayer);
 
-        Place("Assets/Prefabs/Enemies/Mobs/GiantRat/GiantRat1.prefab",
-              "GiantRat1",  new Vector3(11f, -50f,    0f), enemyLayer);
+        // ── Boss ──────────────────────────────────────────────
+        Place("Assets/Prefabs/Enemies/Bosses/Gnoll/Gnoll1.prefab",
+              "Gnoll1",   new Vector3(115f, 19.38f, 0f), enemyLayer);
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
-        Debug.Log("[Level01Setup] Done — scene saved.");
+        Debug.Log("[Level02Setup] Done — scene saved.");
     }
 
-    static void Place(string prefabPath, string goName, Vector3 pos, int layer, bool checkDuplicate = true)
+    static void Place(string prefabPath, string goName, Vector3 pos, int layer)
     {
-        if (checkDuplicate && GameObject.Find(goName) != null)
+        if (GameObject.Find(goName) != null)
         {
-            Debug.Log($"[Level01Setup] {goName} already exists — skipped.");
+            Debug.Log($"[Level02Setup] {goName} already exists — skipped.");
             return;
         }
 
         GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
         if (prefab == null)
         {
-            Debug.LogError($"[Level01Setup] Prefab not found: {prefabPath}");
+            Debug.LogError($"[Level02Setup] Prefab not found: {prefabPath}");
             return;
         }
 
@@ -61,6 +64,6 @@ public static class Level01Setup
         go.transform.position = pos;
         if (layer >= 0) go.layer = layer;
         Undo.RegisterCreatedObjectUndo(go, $"Add {goName}");
-        Debug.Log($"[Level01Setup] Placed {goName} at {pos}");
+        Debug.Log($"[Level02Setup] Placed {goName} at {pos}");
     }
 }
