@@ -100,7 +100,13 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        float currentSpeed = IsRunPressed() ? runSpeed : walkSpeed;
+        bool wantsToRun = IsRunPressed();
+        bool canRun = survivalSystem != null ? survivalSystem.CanSprint : true;
+
+        if (survivalSystem != null)
+            survivalSystem.SetSprinting(wantsToRun && canRun);
+
+        float currentSpeed = (wantsToRun && canRun) ? runSpeed : walkSpeed;
 
         rb.MovePosition(rb.position + movement * currentSpeed * Time.fixedDeltaTime);
     }
