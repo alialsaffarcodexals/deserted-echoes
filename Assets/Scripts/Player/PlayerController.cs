@@ -242,15 +242,26 @@ public class PlayerController : MonoBehaviour
 
         if (hitEnemies.Length == 0)
         {
-            // Fallback for cases where the Enemy layer mask is not set correctly.
+            // Fallback: search all layers except the player layer
+            int allLayersExceptPlayer = ~LayerMask.GetMask("Default");
+            if (gameObject.layer != LayerMask.NameToLayer("Default"))
+            {
+                allLayersExceptPlayer = ~LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer));
+            }
+            
             hitEnemies = Physics2D.OverlapCircleAll(
-            attackCenter,
-            attackRange
-        );
+                attackCenter,
+                attackRange,
+                allLayersExceptPlayer
+            );
         }
 
+        // Filter out the player itself to avoid self-damage
         foreach (Collider2D enemy in hitEnemies)
         {
+            if (enemy.gameObject == gameObject)
+                continue;
+
             enemy.SendMessage("TakeDamage", attackDamage, SendMessageOptions.DontRequireReceiver);
         }
 
