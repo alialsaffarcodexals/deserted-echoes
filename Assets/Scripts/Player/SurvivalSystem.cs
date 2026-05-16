@@ -19,6 +19,8 @@ public class SurvivalSystem : MonoBehaviour
     public float hungerDepletionRate = 0.5f;
     public float thirstDepletionRate = 0.8f;
     public float staminaDepletionRate = 5f;
+    public float staminaRunDepletionRate = 15f;
+    public float staminaRegenRate = 2.5f;
 
     [Header("Health Settings")]
     public float starvationDamage = 1f;
@@ -69,7 +71,7 @@ public class SurvivalSystem : MonoBehaviour
 
         if (isSprinting && currentStamina > 0)
         {
-            currentStamina -= staminaDepletionRate * Time.deltaTime;
+            currentStamina -= staminaRunDepletionRate * Time.deltaTime;
         }
     }
 
@@ -77,7 +79,7 @@ public class SurvivalSystem : MonoBehaviour
     {
         if (!isSprinting && currentStamina < maxStamina)
         {
-            currentStamina += (staminaDepletionRate * 0.5f) * Time.deltaTime;
+            currentStamina += staminaRegenRate * Time.deltaTime;
         }
 
         if (canRegenerateHealth && currentHunger > 20f && currentThirst > 20f && currentHealth < maxHealth)
