@@ -115,10 +115,10 @@ public class SettingsPanelUI : MonoBehaviour
         ApplyVolume(PARAM_MUSIC,  music);
         ApplyVolume(PARAM_SFX,    sfx);
 
-        // Apply directly to audio sources (handles missing mixer output routes)
-        if (musicSource    != null) musicSource.volume    = music;
-        if (footstepSounds != null) footstepSounds.SetVolume(sfx);
-        if (uiAudioSource  != null) uiAudioSource.volume  = sfx;
+        // Apply directly to audio sources — master acts as top-level multiplier
+        if (musicSource    != null) musicSource.volume           = music * master;
+        if (footstepSounds != null) footstepSounds.SetVolume(sfx * master);
+        if (uiAudioSource  != null) uiAudioSource.volume         = sfx   * master;
         Screen.fullScreen = fullscr == 1;
     }
 
@@ -130,6 +130,16 @@ public class SettingsPanelUI : MonoBehaviour
         ResolveMixer();
         ApplyVolume(PARAM_MASTER, value);
         PlayerPrefs.SetFloat(KEY_MASTER, value);
+
+        // Also scale direct sources by master × their individual saved level
+        // (covers scenes where mixer output route is not wired)
+        ResolveRuntimeRefs();
+        ResolveMusicSource();
+        float music = PlayerPrefs.GetFloat(KEY_MUSIC, 0.75f);
+        float sfx   = PlayerPrefs.GetFloat(KEY_SFX,   0.75f);
+        if (musicSource    != null) musicSource.volume           = music * value;
+        if (footstepSounds != null) footstepSounds.SetVolume(sfx * value);
+        if (uiAudioSource  != null) uiAudioSource.volume         = sfx   * value;
     }
 
     /// <summary>Called by MusicVolumeSlider OnValueChanged.</summary>
