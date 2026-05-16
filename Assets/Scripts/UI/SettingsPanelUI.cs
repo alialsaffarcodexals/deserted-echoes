@@ -47,6 +47,16 @@ public class SettingsPanelUI : MonoBehaviour
 
     // ─────────────────────────────────────────────────────────
 
+    private void Awake()
+    {
+        if (musicSource == null)
+        {
+            GameObject musicGO = GameObject.Find("negev_desert_music");
+            if (musicGO != null)
+                musicSource = musicGO.GetComponent<AudioSource>();
+        }
+    }
+
     private void OnEnable()
     {
         LoadSettings();
