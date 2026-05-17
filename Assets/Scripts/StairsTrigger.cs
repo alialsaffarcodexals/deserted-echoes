@@ -20,7 +20,6 @@ public class StairsTrigger : MonoBehaviour
                 composer.Damping = Vector3.zero;
             }
 
-            // Stop velocity and teleport
             Rigidbody2D rb = other.GetComponent<Rigidbody2D>();
             if (rb != null) rb.linearVelocity = Vector2.zero;
             other.transform.position = destination.position;
