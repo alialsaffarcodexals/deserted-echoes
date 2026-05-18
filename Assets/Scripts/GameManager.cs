@@ -16,6 +16,9 @@ public class GameManager : MonoBehaviour
     // ── Singleton ────────────────────────────────────────────
     public static GameManager Instance { get; private set; }
 
+    [Header("Difficulty")]
+    [SerializeField] private EnemyDifficultyApplier difficultyApplier;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -25,6 +28,14 @@ public class GameManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        GameDifficultySettings.Load();
+
+        if (difficultyApplier == null)
+            difficultyApplier = GetComponent<EnemyDifficultyApplier>();
+
+        if (difficultyApplier == null)
+            difficultyApplier = gameObject.AddComponent<EnemyDifficultyApplier>();
     }
 
     // ── Game State ───────────────────────────────────────────
