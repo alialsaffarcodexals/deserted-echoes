@@ -26,18 +26,22 @@ public class FootstepSounds : MonoBehaviour
     public float sandVolume   = 1f;
 
     [Header("Timing")]
-    public float footstepInterval = 0.4f;
+    public float footstepInterval    = 0.4f;
+    public float runFootstepInterval = 0.2f;
 
     private AudioSource audioSource;
-    private float footstepTimer = 0f;
+    private float footstepTimer      = 0f;
+    private float lastActiveInterval = -1f;
     private SurfaceType currentSurface = SurfaceType.Wood;
     private Vector3 lastPosition;
+    private PlayerController playerController;
 
     void Start()
     {
-        audioSource  = GetComponent<AudioSource>();
-        lastPosition = transform.position;
-        footstepTimer = footstepInterval;
+        audioSource      = GetComponent<AudioSource>();
+        playerController = GetComponent<PlayerController>();
+        lastPosition     = transform.position;
+        footstepTimer    = 0f;
     }
 
     void Update()
@@ -47,9 +51,22 @@ public class FootstepSounds : MonoBehaviour
 
         if (isMoving)
         {
+            float activeInterval = (playerController != null && playerController.IsSprinting)
+                ? runFootstepInterval
+                : footstepInterval;
+
+            // Reset timer on walk<->run switch to prevent carry-over causing
+            // immediate overlap while the previous footstep sound still plays
+            if (!Mathf.Approximately(activeInterval, lastActiveInterval))
+            {
+                audioSource.Stop();   // flush stacked PlayOneShot sounds from the previous cadence
+                footstepTimer      = 0f;
+                lastActiveInterval = activeInterval;
+            }
+
             footstepTimer += Time.deltaTime;
 
-            if (footstepTimer >= footstepInterval)
+            if (footstepTimer >= activeInterval)
             {
                 PlayCurrentSurface();
                 footstepTimer = 0f;
@@ -58,13 +75,13 @@ public class FootstepSounds : MonoBehaviour
         else
         {
             audioSource.Stop();
-            footstepTimer = footstepInterval;
+            footstepTimer      = 0f;
+            lastActiveInterval = -1f;
         }
     }
 
     private void PlayCurrentSurface()
     {
-        audioSource.Stop();
         switch (currentSurface)
         {
             case SurfaceType.Sand:
@@ -85,14 +102,21 @@ public class FootstepSounds : MonoBehaviour
     /// <summary>Called by SandZone / CarpetZone to switch the active surface.</summary>
     public void SetSurface(SurfaceType surface)
     {
-        currentSurface = surface;
+        currentSurface     = surface;
+        footstepTimer      = 0f;
+        lastActiveInterval = -1f;
         audioSource.Stop();
-        footstepTimer = footstepInterval;
     }
 
     /// <summary>Backward-compatible shim — still works with existing CarpetZone.</summary>
     public void SetOnCarpet(bool onCarpet)
     {
         SetSurface(onCarpet ? SurfaceType.Carpet : SurfaceType.Wood);
+    }
+
+    /// <summary>Called by SettingsPanelUI to control SFX volume at runtime.</summary>
+    public void SetVolume(float volume)
+    {
+        if (audioSource != null) audioSource.volume = volume;
     }
 }

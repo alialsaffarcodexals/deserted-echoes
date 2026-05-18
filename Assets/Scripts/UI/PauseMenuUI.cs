@@ -20,6 +20,12 @@ public class PauseMenuUI : MonoBehaviour
     [Header("Sub Panels")]
     [SerializeField] private GameObject settingsPanel;
 
+    [Header("UI Sound Effects")]
+    [SerializeField] private AudioSource uiAudio;
+    [SerializeField] private AudioClip buttonClickClip;
+    [SerializeField] private AudioClip menuOpenClip;
+    [SerializeField] private AudioClip menuCloseClip;
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -39,6 +45,7 @@ public class PauseMenuUI : MonoBehaviour
         if (pausePanel != null)
             pausePanel.SetActive(true);
 
+        PlaySound(menuOpenClip);
         Time.timeScale = 0f;
 
         if (GameManager.Instance != null)
@@ -48,6 +55,7 @@ public class PauseMenuUI : MonoBehaviour
     /// <summary>Resume button → hides pause panel and resumes game.</summary>
     public void OnResume()
     {
+        PlaySound(menuCloseClip);
         CloseAllPanels();
 
         Time.timeScale = 1f;
@@ -59,18 +67,21 @@ public class PauseMenuUI : MonoBehaviour
     /// <summary>Settings button → shows settings sub-panel on top of pause panel.</summary>
     public void OnSettings()
     {
+        PlaySound(buttonClickClip);
         if (settingsPanel != null) settingsPanel.SetActive(true);
     }
 
     /// <summary>Close settings sub-panel and return to pause panel.</summary>
     public void OnCloseSettings()
     {
+        PlaySound(buttonClickClip);
         if (settingsPanel != null) settingsPanel.SetActive(false);
     }
 
     /// <summary>Main Menu button → resumes time then loads main menu.</summary>
     public void OnMainMenu()
     {
+        PlaySound(buttonClickClip);
         Time.timeScale = 1f;
 
         if (GameManager.Instance != null)
@@ -82,6 +93,7 @@ public class PauseMenuUI : MonoBehaviour
     /// <summary>Quit button → exits the application.</summary>
     public void OnQuit()
     {
+        PlaySound(buttonClickClip);
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -90,6 +102,12 @@ public class PauseMenuUI : MonoBehaviour
     }
 
     // ── Private Helpers ──────────────────────────────────────
+
+    private void PlaySound(AudioClip clip)
+    {
+        if (uiAudio != null && clip != null)
+            uiAudio.PlayOneShot(clip);
+    }
 
     private void CloseAllPanels()
     {

@@ -22,6 +22,10 @@ public class SettingsPanelUI : MonoBehaviour
     [Header("Direct Audio Sources (used when no mixer is assigned)")]
     [SerializeField] private AudioSource musicSource;
 
+    // ── Runtime-resolved references ──────────────────────────
+    private FootstepSounds footstepSounds;
+    private AudioSource    uiAudioSource;
+
     [Header("Volume Sliders")]
     [SerializeField] private Slider masterVolumeSlider;
     [SerializeField] private Slider musicVolumeSlider;
@@ -29,6 +33,10 @@ public class SettingsPanelUI : MonoBehaviour
 
     [Header("Fullscreen Toggle")]
     [SerializeField] private Toggle fullscreenToggle;
+
+    [Header("UI Sound Effects")]
+    [SerializeField] private AudioClip panelOpenClip;
+    [SerializeField] private AudioClip toggleClip;
 
     // ── PlayerPrefs Keys ─────────────────────────────────────
     private const string KEY_MASTER  = "MasterVolume";
@@ -45,7 +53,46 @@ public class SettingsPanelUI : MonoBehaviour
 
     private void OnEnable()
     {
+        ResolveMixer();
+        ResolveMusicSource();
+        ResolveRuntimeRefs();
         LoadSettings();
+        PlayOpenSound();
+    }
+
+    private void ResolveMixer()
+    {
+        if (audioMixer != null) return;
+        foreach (var m in Resources.FindObjectsOfTypeAll<AudioMixer>())
+        {
+            if (m.name == "MainAudioMixer") { audioMixer = m; break; }
+        }
+    }
+
+    private void ResolveMusicSource()
+    {
+        GameObject go = GameObject.Find("negev_desert_music");
+        if (go != null) musicSource = go.GetComponent<AudioSource>();
+    }
+
+    private void ResolveRuntimeRefs()
+    {
+        if (footstepSounds == null)
+            footstepSounds = FindObjectOfType<FootstepSounds>();
+        if (uiAudioSource == null)
+            uiAudioSource = GetComponentInParent<AudioSource>();
+    }
+
+    private void PlayOpenSound()
+    {
+        PlaySound(panelOpenClip);
+    }
+
+    private void PlaySound(AudioClip clip)
+    {
+        AudioSource src = GetComponentInParent<AudioSource>();
+        if (src != null && clip != null)
+            src.PlayOneShot(clip);
     }
 
     // ── Load & Apply saved settings ──────────────────────────
@@ -68,8 +115,10 @@ public class SettingsPanelUI : MonoBehaviour
         ApplyVolume(PARAM_MUSIC,  music);
         ApplyVolume(PARAM_SFX,    sfx);
 
-        // Apply directly to audio sources if no mixer
-        if (musicSource != null) musicSource.volume = music;
+        // Apply directly to audio sources — master acts as top-level multiplier
+        if (musicSource    != null) musicSource.volume           = music * master;
+        if (footstepSounds != null) footstepSounds.SetVolume(sfx * master);
+        if (uiAudioSource  != null) uiAudioSource.volume         = sfx   * master;
         Screen.fullScreen = fullscr == 1;
     }
 
@@ -78,13 +127,26 @@ public class SettingsPanelUI : MonoBehaviour
     /// <summary>Called by MasterVolumeSlider OnValueChanged.</summary>
     public void OnMasterVolumeChanged(float value)
     {
+        ResolveMixer();
         ApplyVolume(PARAM_MASTER, value);
         PlayerPrefs.SetFloat(KEY_MASTER, value);
+
+        // Also scale direct sources by master × their individual saved level
+        // (covers scenes where mixer output route is not wired)
+        ResolveRuntimeRefs();
+        ResolveMusicSource();
+        float music = PlayerPrefs.GetFloat(KEY_MUSIC, 0.75f);
+        float sfx   = PlayerPrefs.GetFloat(KEY_SFX,   0.75f);
+        if (musicSource    != null) musicSource.volume           = music * value;
+        if (footstepSounds != null) footstepSounds.SetVolume(sfx * value);
+        if (uiAudioSource  != null) uiAudioSource.volume         = sfx   * value;
     }
 
     /// <summary>Called by MusicVolumeSlider OnValueChanged.</summary>
     public void OnMusicVolumeChanged(float value)
     {
+        ResolveMixer();
+        ResolveMusicSource();
         ApplyVolume(PARAM_MUSIC, value);
         if (musicSource != null) musicSource.volume = value;
         PlayerPrefs.SetFloat(KEY_MUSIC, value);
@@ -93,7 +155,12 @@ public class SettingsPanelUI : MonoBehaviour
     /// <summary>Called by SFXVolumeSlider OnValueChanged.</summary>
     public void OnSFXVolumeChanged(float value)
     {
+        ResolveMixer();
+        ResolveRuntimeRefs();
         ApplyVolume(PARAM_SFX, value);
+        // Direct volume control for sources not routed through the mixer
+        if (footstepSounds != null) footstepSounds.SetVolume(value);
+        if (uiAudioSource  != null) uiAudioSource.volume = value;
         PlayerPrefs.SetFloat(KEY_SFX, value);
     }
 
@@ -102,6 +169,7 @@ public class SettingsPanelUI : MonoBehaviour
     /// <summary>Called by FullscreenToggle OnValueChanged.</summary>
     public void OnFullscreenToggleChanged(bool isOn)
     {
+        PlaySound(toggleClip);
         Screen.fullScreen = isOn;
         PlayerPrefs.SetInt(KEY_FULLSCR, isOn ? 1 : 0);
     }

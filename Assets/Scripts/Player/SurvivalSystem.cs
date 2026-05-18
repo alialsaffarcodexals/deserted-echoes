@@ -19,20 +19,29 @@ public class SurvivalSystem : MonoBehaviour
     public float hungerDepletionRate = 0.5f;
     public float thirstDepletionRate = 0.8f;
     public float staminaDepletionRate = 5f;
+    public float staminaRunDepletionRate = 15f;
+    public float staminaRegenRate = 2.5f;
 
     [Header("Health Settings")]
     public float starvationDamage = 1f;
     public bool canRegenerateHealth = true;
     public float healthRegenRate = 0.5f;
 
+    [Header("Stamina Exhaustion")]
+    public float exhaustionCooldown = 5f;
+
     private float currentHealth, currentStamina, currentHunger, currentThirst;
     private bool isSprinting;
+    private bool isExhausted;
+    private float exhaustionTimer;
+    private PlayerController playerController;
 
     public bool IsDead => currentHealth <= 0;
-    public bool CanSprint => currentStamina > 0 && !IsDead;
+    public bool CanSprint => currentStamina > 0 && !isExhausted && !IsDead;
 
     void Start()
     {
+        playerController = FindObjectOfType<PlayerController>();
         InitializeStats();
     }
 
@@ -67,15 +76,28 @@ public class SurvivalSystem : MonoBehaviour
 
         if (isSprinting && currentStamina > 0)
         {
-            currentStamina -= staminaDepletionRate * Time.deltaTime;
+            currentStamina -= staminaRunDepletionRate * Time.deltaTime;
+
+            if (currentStamina <= 0)
+            {
+                currentStamina = 0;
+                isExhausted    = true;
+                exhaustionTimer = exhaustionCooldown;
+            }
         }
     }
 
     private void HandleRegeneration()
     {
-        if (!isSprinting && currentStamina < maxStamina)
+        if (isExhausted)
         {
-            currentStamina += (staminaDepletionRate * 0.5f) * Time.deltaTime;
+            exhaustionTimer -= Time.deltaTime;
+            if (exhaustionTimer <= 0f)
+                isExhausted = false;
+        }
+        else if (!isSprinting && currentStamina < maxStamina)
+        {
+            currentStamina += staminaRegenRate * Time.deltaTime;
         }
 
         if (canRegenerateHealth && currentHunger > 20f && currentThirst > 20f && currentHealth < maxHealth)
@@ -113,6 +135,8 @@ public class SurvivalSystem : MonoBehaviour
     private void OnDeath()
     {
         Debug.Log("Player has died.");
+        if (playerController != null)
+            playerController.Die();
     }
 
     public void TakeDamage(float amount)

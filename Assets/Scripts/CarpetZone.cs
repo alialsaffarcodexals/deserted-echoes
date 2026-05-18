@@ -3,14 +3,14 @@ using UnityEngine;
 public class CarpetZone : MonoBehaviour
 {
     // grab the footstep script from the player
-    private FootstepSounds footstepSounds;
+    private HouseFootsteps footstepSounds;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
             // tell the footstep script we're on carpet
-            footstepSounds = other.GetComponent<FootstepSounds>();
+            footstepSounds = other.GetComponent<HouseFootsteps>();
             if (footstepSounds != null)
                 footstepSounds.SetOnCarpet(true);
         }

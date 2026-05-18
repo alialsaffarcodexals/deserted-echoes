@@ -53,6 +53,9 @@ public abstract class EnemyControllerBase : MonoBehaviour
     [SerializeField] private float deathDestroyDelay = 1.2f;
     [SerializeField] private float damageDistanceToPlayer = 1f;
 
+    [Header("Score")]
+    [SerializeField] private int scoreValue = 100;
+
     [Header("Animation")]
     [SerializeField] private AttackAnimationMode attackAnimationMode = AttackAnimationMode.Single;
 
@@ -151,6 +154,8 @@ public abstract class EnemyControllerBase : MonoBehaviour
             currentTargetDistance = 0f;
             currentPlayerBodyDistance = float.MaxValue;
         }
+
+        IgnoreEnemyToEnemyCollisions();
 
         if (animator != null)
         {
@@ -396,6 +401,9 @@ public abstract class EnemyControllerBase : MonoBehaviour
         isDead = true;
         movement = Vector2.zero;
 
+        PlayerStats stats = UnityEngine.Object.FindAnyObjectByType<PlayerStats>();
+        if (stats != null) stats.AddScore(scoreValue);
+
         if (animator != null)
         {
             animator.SetBool("IsAttacking", false);
@@ -497,6 +505,33 @@ public abstract class EnemyControllerBase : MonoBehaviour
                     continue;
 
                 Physics2D.IgnoreCollision(enemyCollider, playerCollider, true);
+            }
+        }
+    }
+
+    private void IgnoreEnemyToEnemyCollisions()
+    {
+        EnemyControllerBase[] allEnemies = FindObjectsByType<EnemyControllerBase>(FindObjectsSortMode.None);
+
+        foreach (EnemyControllerBase otherEnemy in allEnemies)
+        {
+            if (otherEnemy == null || otherEnemy == this)
+                continue;
+
+            Collider2D[] otherEnemyColliders = otherEnemy.GetComponentsInChildren<Collider2D>();
+
+            foreach (Collider2D myCollider in enemyColliders)
+            {
+                if (myCollider == null || myCollider.isTrigger)
+                    continue;
+
+                foreach (Collider2D otherCollider in otherEnemyColliders)
+                {
+                    if (otherCollider == null || otherCollider.isTrigger)
+                        continue;
+
+                    Physics2D.IgnoreCollision(myCollider, otherCollider, true);
+                }
             }
         }
     }
