@@ -30,6 +30,9 @@ public class SurvivalSystem : MonoBehaviour
     [Header("Stamina Exhaustion")]
     public float exhaustionCooldown = 5f;
 
+    [Header("Game Over")]
+    [SerializeField] private float gameOverShowDelay = 1.5f;
+
     private float currentHealth, currentStamina, currentHunger, currentThirst;
     private bool isSprinting;
     private bool isExhausted;
@@ -137,6 +140,11 @@ public class SurvivalSystem : MonoBehaviour
         Debug.Log("Player has died.");
         if (playerController != null)
             playerController.Die();
+
+        if (GameOverUI.Instance != null)
+            GameOverUI.Instance.ShowAfterDelay(gameOverShowDelay);
+        else if (GameManager.Instance != null)
+            GameManager.Instance.GameOver();
     }
 
     public void TakeDamage(float amount)
