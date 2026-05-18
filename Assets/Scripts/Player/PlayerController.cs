@@ -326,6 +326,10 @@ public class PlayerController : MonoBehaviour
         }
 
         rb.linearVelocity = Vector2.zero;
+
+        // SurvivalSystem shows game over after Die(); this covers scenes without it.
+        if (survivalSystem == null && GameOverUI.Instance != null)
+            GameOverUI.Instance.ShowAfterDelay(1.5f);
     }
 
     public bool TryGetEnemyAttackTargetPosition(out Vector2 targetPosition)
