@@ -9,7 +9,6 @@
 // ─────────────────────────────────────────────────────────────
 
 using UnityEngine;
-using UnityEngine.UI;
 
 public class MainMenuUI : MonoBehaviour
 {
@@ -17,9 +16,13 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] private GameObject instructionsPanel;
     [SerializeField] private GameObject creditsPanel;
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private GameObject difficultyPanel;
 
     [Header("Navigation")]
     [SerializeField] private GameObject buttonList;
+
+    [Header("Scene")]
+    [SerializeField] private string firstLevelScene = "Open-World";
 
     [Header("UI Sound Effects")]
     [SerializeField] private AudioSource uiAudio;
@@ -29,17 +32,35 @@ public class MainMenuUI : MonoBehaviour
 
     private void Start()
     {
+        GameDifficultySettings.Load();
         CloseAllPanels();
         ShowButtonList();
     }
 
     // ── Button Callbacks (wire these in Inspector OnClick) ───
 
-    /// <summary>Start Game button → loads first level.</summary>
+    /// <summary>Start Game button → shows difficulty selection.</summary>
     public void OnStartGame()
     {
+        PlaySound(panelOpenClip);
+        CloseAllPanels();
+        HideButtonList();
+        if (difficultyPanel != null)
+            difficultyPanel.SetActive(true);
+    }
+
+    public void OnSelectEasy() => OnSelectDifficulty(GameDifficulty.Easy);
+
+    public void OnSelectNormal() => OnSelectDifficulty(GameDifficulty.Normal);
+
+    public void OnSelectHard() => OnSelectDifficulty(GameDifficulty.Hard);
+
+    /// <summary>Called by Easy / Normal / Hard buttons.</summary>
+    public void OnSelectDifficulty(GameDifficulty difficulty)
+    {
         PlaySound(buttonClickClip);
-        SceneLoader.LoadScene("open-world");
+        GameDifficultySettings.Set(difficulty);
+        SceneLoader.LoadScene(firstLevelScene);
     }
 
     /// <summary>Instructions button → shows instructions panel.</summary>
@@ -104,6 +125,7 @@ public class MainMenuUI : MonoBehaviour
         if (instructionsPanel != null) instructionsPanel.SetActive(false);
         if (creditsPanel != null)      creditsPanel.SetActive(false);
         if (settingsPanel != null)     settingsPanel.SetActive(false);
+        if (difficultyPanel != null)   difficultyPanel.SetActive(false);
     }
 
     private void ShowButtonList()
