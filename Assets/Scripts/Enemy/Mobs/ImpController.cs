@@ -22,24 +22,28 @@ public class ImpController : EnemyControllerBase
 
     public void ThrowFireball()
     {
+        Debug.Log("ImpController.ThrowFireball() called!");
+        
         if (impFireProjectilePrefab == null)
         {
-            Debug.LogWarning("ImpController: impFireProjectilePrefab not assigned!");
+            Debug.LogError("ImpController: impFireProjectilePrefab is NOT ASSIGNED in Inspector!");
             return;
         }
 
-        // Get throw direction
-        Vector2 throwDirection = GetLastMoveDirection();
-        if (throwDirection == Vector2.zero)
-            throwDirection = Vector2.right;
+        Debug.Log("Spawning Imp fireball at position: " + throwPoint.position);
 
         // Spawn projectile
         GameObject projectileObj = Instantiate(impFireProjectilePrefab, throwPoint.position, Quaternion.identity);
+        Debug.Log("Projectile instantiated: " + projectileObj.name);
+        
         ProjectileBase projectile = projectileObj.GetComponent<ProjectileBase>();
         Animator projAnimator = projectileObj.GetComponent<Animator>();
 
         if (projectile != null)
         {
+            Debug.Log("ProjectileBase component found!");
+            // Default to right direction
+            Vector2 throwDirection = Vector2.right;
             projectile.SetDirection(throwDirection);
 
             // Set animator direction parameters
@@ -54,15 +58,17 @@ public class ImpController : EnemyControllerBase
             Rigidbody2D projRb = projectileObj.GetComponent<Rigidbody2D>();
             if (projRb != null)
             {
+                Debug.Log("Projectile Rigidbody found, setting velocity to: " + (throwDirection * projectileSpeed));
                 projRb.linearVelocity = throwDirection * projectileSpeed;
             }
+            else
+            {
+                Debug.LogError("Projectile has NO Rigidbody2D!");
+            }
         }
-    }
-
-    private Vector2 GetLastMoveDirection()
-    {
-        // This is a simplified approach - in a real scenario, 
-        // you might want to expose lastMoveDirection from base class
-        return Vector2.right;
+        else
+        {
+            Debug.LogError("Projectile has NO ProjectileBase component!");
+        }
     }
 }
