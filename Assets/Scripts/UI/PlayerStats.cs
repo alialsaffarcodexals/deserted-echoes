@@ -40,7 +40,7 @@ public class PlayerStats : MonoBehaviour
 
     void UpdateLivesUI()
     {
-        if (livesText != null) livesText.text = "Lives: " + lives.ToString();
+        if (livesText != null) livesText.text = $"<b>x{lives}</b>";
     }
 
     public void AddScore(int points)
@@ -51,6 +51,6 @@ public class PlayerStats : MonoBehaviour
 
     void UpdateScoreUI()
     {
-        if (scoreText != null) scoreText.text = "Score: " + score.ToString("D6");
+        if (scoreText != null) scoreText.text = $"<b>{score:D6}</b>";
     }
 }
