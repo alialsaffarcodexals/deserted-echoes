@@ -17,6 +17,11 @@ public class PlayerController : MonoBehaviour
 
     [Header("Health")]
     [SerializeField] private int maxHealth = 100;
+    
+    [Header("Level & Experience")]
+    [SerializeField] private int level = 1;
+    [SerializeField] private int experience = 0;
+    [SerializeField] private int experiencePerLevel = 100;
 
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
@@ -282,6 +287,7 @@ public class PlayerController : MonoBehaviour
             return;
 
         currentHealth -= damage;
+        SavePlayerData();
 
         if (currentHealth <= 0)
         {
@@ -311,6 +317,102 @@ public class PlayerController : MonoBehaviour
     {
         targetPosition = GetAttackCenterWorld();
         return true;
+    }
+
+    /// <summary>
+    /// Loads player data from save file.
+    /// </summary>
+    public void LoadFromSave(SaveData saveData)
+    {
+        if (saveData == null)
+            return;
+
+        currentHealth = saveData.currentHealth;
+        maxHealth = saveData.maxHealth;
+        level = saveData.level;
+        experience = saveData.experience;
+        attackDamage = saveData.attackDamage;
+        
+        // Restore position if different scene
+        if (saveData.lastSceneName == UnityEngine.SceneManagement.SceneManager.GetActiveScene().name)
+        {
+            transform.position = new Vector2(saveData.playerPositionX, saveData.playerPositionY);
+        }
+
+        Debug.Log($"Player loaded: HP={currentHealth}/{maxHealth}, Level={level}, Exp={experience}");
+    }
+
+    /// <summary>
+    /// Saves player data to SaveManager.
+    /// </summary>
+    public void SavePlayerData()
+    {
+        if (SaveManager.Instance == null)
+            return;
+
+        SaveManager.Instance.UpdatePlayerStats(
+            currentHealth,
+            maxHealth,
+            level,
+            experience,
+            transform.position
+        );
+    }
+
+    /// <summary>
+    /// Adds experience to the player.
+    /// </summary>
+    public void AddExperience(int exp)
+    {
+        experience += exp;
+        
+        // Check for level up
+        while (experience >= experiencePerLevel)
+        {
+            experience -= experiencePerLevel;
+            LevelUp();
+        }
+
+        SavePlayerData();
+        Debug.Log($"Experience: {experience}/{experiencePerLevel}");
+    }
+
+    /// <summary>
+    /// Levels up the player.
+    /// </summary>
+    private void LevelUp()
+    {
+        level++;
+        maxHealth += 10;
+        currentHealth = maxHealth;
+        attackDamage += 5;
+
+        Debug.Log($"LEVEL UP! Now Level {level}");
+        SavePlayerData();
+    }
+
+    /// <summary>
+    /// Gets player level.
+    /// </summary>
+    public int GetLevel()
+    {
+        return level;
+    }
+
+    /// <summary>
+    /// Gets player current health.
+    /// </summary>
+    public int GetCurrentHealth()
+    {
+        return currentHealth;
+    }
+
+    /// <summary>
+    /// Gets player max health.
+    /// </summary>
+    public int GetMaxHealth()
+    {
+        return maxHealth;
     }
 
     private void OnDrawGizmosSelected()
