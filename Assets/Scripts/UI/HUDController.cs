@@ -52,13 +52,13 @@ public class HUDController : MonoBehaviour
     public void UpdateScore(int score)
     {
         if (scoreText != null)
-            scoreText.text = score.ToString();
+            scoreText.text = $"<b>{score:D6}</b>";
     }
 
     /// <summary>Update lives display.</summary>
     public void UpdateLives(int lives)
     {
         if (livesText != null)
-            livesText.text = $"x{lives}";
+            livesText.text = $"<b>x{lives}</b>";
     }
 }
