@@ -18,10 +18,11 @@ public class PortalTrigger : MonoBehaviour
     [SerializeField] private string targetSceneName;
 
     private bool playerInRange = false;
+    private bool hasTriggered   = false;
 
     private void Update()
     {
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        if (playerInRange && !hasTriggered && Input.GetKeyDown(KeyCode.E))
             EnterPortal();
     }
 
@@ -47,6 +48,7 @@ public class PortalTrigger : MonoBehaviour
             return;
         }
 
+        hasTriggered   = true;
         Time.timeScale = 1f;
         SceneLoader.LoadScene(targetSceneName);
     }
