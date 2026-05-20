@@ -569,7 +569,7 @@ public abstract class EnemyControllerBase : MonoBehaviour
 
     private void ResolveDifficultyStats()
     {
-        easyProfile = SanitizeProfile(easyProfile, 0.85f, 0.75f, 0.75f, 1.2f);
+        easyProfile = SanitizeProfile(easyProfile, 0.85f, 0.75f, 1f, 1.2f);
         normalProfile = SanitizeProfile(normalProfile, 1f, 1f, 1f, 1f);
         hardProfile = SanitizeProfile(hardProfile, 1.2f, 1.25f, 1.35f, 0.8f);
 
