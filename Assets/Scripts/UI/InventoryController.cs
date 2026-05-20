@@ -18,7 +18,7 @@ public class InventoryController : MonoBehaviour
 
         if (slotPrefab == null)
         {
-            // No slot prefab assigned — TAB toggle still works, slots just won't spawn
+            Debug.LogError("InventoryController: Slot Prefab is not assigned in the Inspector!");
             return;
         }
 
