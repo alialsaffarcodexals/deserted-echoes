@@ -7,7 +7,6 @@
 //              Handles Master / Music / SFX volume sliders and
 //              Fullscreen toggle. Settings are saved via PlayerPrefs
 //              and restored automatically on startup.
-//              Wire up all fields in the Inspector.
 // ─────────────────────────────────────────────────────────────
 
 using UnityEngine;
@@ -38,49 +37,12 @@ public class SettingsPanelUI : MonoBehaviour
     [SerializeField] private AudioClip panelOpenClip;
     [SerializeField] private AudioClip toggleClip;
 
-    // ── PlayerPrefs Keys ─────────────────────────────────────
-    private const string KEY_MASTER  = "MasterVolume";
-    private const string KEY_MUSIC   = "MusicVolume";
-    private const string KEY_SFX     = "SFXVolume";
-    private const string KEY_FULLSCR = "Fullscreen";
-
-    // ── Audio Mixer Exposed Parameter Names ──────────────────
-    private const string PARAM_MASTER = "MasterVolume";
-    private const string PARAM_MUSIC  = "MusicVolume";
-    private const string PARAM_SFX    = "SFXVolume";
-
     // ─────────────────────────────────────────────────────────
 
     private void OnEnable()
     {
-        ResolveMixer();
-        ResolveMusicSource();
-        ResolveRuntimeRefs();
-        LoadSettings();
+        LoadSettingsIntoUI();
         PlayOpenSound();
-    }
-
-    private void ResolveMixer()
-    {
-        if (audioMixer != null) return;
-        foreach (var m in Resources.FindObjectsOfTypeAll<AudioMixer>())
-        {
-            if (m.name == "MainAudioMixer") { audioMixer = m; break; }
-        }
-    }
-
-    private void ResolveMusicSource()
-    {
-        GameObject go = GameObject.Find("negev_desert_music");
-        if (go != null) musicSource = go.GetComponent<AudioSource>();
-    }
-
-    private void ResolveRuntimeRefs()
-    {
-        if (footstepSounds == null)
-            footstepSounds = FindObjectOfType<FootstepSounds>();
-        if (uiAudioSource == null)
-            uiAudioSource = GetComponentInParent<AudioSource>();
     }
 
     private void PlayOpenSound()
@@ -95,31 +57,27 @@ public class SettingsPanelUI : MonoBehaviour
             src.PlayOneShot(clip);
     }
 
-    // ── Load & Apply saved settings ──────────────────────────
+    // ── Load saved settings into UI elements ─────────────────
 
-    private void LoadSettings()
+    private void LoadSettingsIntoUI()
     {
-        float master  = PlayerPrefs.GetFloat(KEY_MASTER,  0.75f);
-        float music   = PlayerPrefs.GetFloat(KEY_MUSIC,   0.75f);
-        float sfx     = PlayerPrefs.GetFloat(KEY_SFX,     0.75f);
-        int   fullscr = PlayerPrefs.GetInt(KEY_FULLSCR,   Screen.fullScreen ? 1 : 0);
+        // Apply settings through SettingsManager to ensure everything is synchronized
+        if (SettingsManager.Instance != null)
+        {
+            SettingsManager.Instance.ApplyAllSettings();
+        }
 
-        // Update sliders without triggering callbacks (set value silently)
+        // Fetch current values from PlayerPrefs using standard keys
+        float master  = PlayerPrefs.GetFloat(SettingsManager.KEY_MASTER,  0.75f);
+        float music   = PlayerPrefs.GetFloat(SettingsManager.KEY_MUSIC,   0.75f);
+        float sfx     = PlayerPrefs.GetFloat(SettingsManager.KEY_SFX,     0.75f);
+        int   fullscr = PlayerPrefs.GetInt(SettingsManager.KEY_FULLSCR,   Screen.fullScreen ? 1 : 0);
+
+        // Update UI components silently without triggering their onValueChanged callbacks
         if (masterVolumeSlider != null)  masterVolumeSlider.SetValueWithoutNotify(master);
         if (musicVolumeSlider  != null)  musicVolumeSlider.SetValueWithoutNotify(music);
         if (sfxVolumeSlider    != null)  sfxVolumeSlider.SetValueWithoutNotify(sfx);
         if (fullscreenToggle   != null)  fullscreenToggle.SetIsOnWithoutNotify(fullscr == 1);
-
-        // Apply to Audio Mixer
-        ApplyVolume(PARAM_MASTER, master);
-        ApplyVolume(PARAM_MUSIC,  music);
-        ApplyVolume(PARAM_SFX,    sfx);
-
-        // Apply directly to audio sources — master acts as top-level multiplier
-        if (musicSource    != null) musicSource.volume           = music * master;
-        if (footstepSounds != null) footstepSounds.SetVolume(sfx * master);
-        if (uiAudioSource  != null) uiAudioSource.volume         = sfx   * master;
-        Screen.fullScreen = fullscr == 1;
     }
 
     // ── Slider Callbacks (wire to OnValueChanged in Inspector) ──
@@ -127,41 +85,43 @@ public class SettingsPanelUI : MonoBehaviour
     /// <summary>Called by MasterVolumeSlider OnValueChanged.</summary>
     public void OnMasterVolumeChanged(float value)
     {
-        ResolveMixer();
-        ApplyVolume(PARAM_MASTER, value);
-        PlayerPrefs.SetFloat(KEY_MASTER, value);
-
-        // Also scale direct sources by master × their individual saved level
-        // (covers scenes where mixer output route is not wired)
-        ResolveRuntimeRefs();
-        ResolveMusicSource();
-        float music = PlayerPrefs.GetFloat(KEY_MUSIC, 0.75f);
-        float sfx   = PlayerPrefs.GetFloat(KEY_SFX,   0.75f);
-        if (musicSource    != null) musicSource.volume           = music * value;
-        if (footstepSounds != null) footstepSounds.SetVolume(sfx * value);
-        if (uiAudioSource  != null) uiAudioSource.volume         = sfx   * value;
+        if (SettingsManager.Instance != null)
+        {
+            SettingsManager.Instance.SetMasterVolume(value);
+        }
+        else
+        {
+            PlayerPrefs.SetFloat(SettingsManager.KEY_MASTER, value);
+            PlayerPrefs.Save();
+        }
     }
 
     /// <summary>Called by MusicVolumeSlider OnValueChanged.</summary>
     public void OnMusicVolumeChanged(float value)
     {
-        ResolveMixer();
-        ResolveMusicSource();
-        ApplyVolume(PARAM_MUSIC, value);
-        if (musicSource != null) musicSource.volume = value;
-        PlayerPrefs.SetFloat(KEY_MUSIC, value);
+        if (SettingsManager.Instance != null)
+        {
+            SettingsManager.Instance.SetMusicVolume(value);
+        }
+        else
+        {
+            PlayerPrefs.SetFloat(SettingsManager.KEY_MUSIC, value);
+            PlayerPrefs.Save();
+        }
     }
 
     /// <summary>Called by SFXVolumeSlider OnValueChanged.</summary>
     public void OnSFXVolumeChanged(float value)
     {
-        ResolveMixer();
-        ResolveRuntimeRefs();
-        ApplyVolume(PARAM_SFX, value);
-        // Direct volume control for sources not routed through the mixer
-        if (footstepSounds != null) footstepSounds.SetVolume(value);
-        if (uiAudioSource  != null) uiAudioSource.volume = value;
-        PlayerPrefs.SetFloat(KEY_SFX, value);
+        if (SettingsManager.Instance != null)
+        {
+            SettingsManager.Instance.SetSFXVolume(value);
+        }
+        else
+        {
+            PlayerPrefs.SetFloat(SettingsManager.KEY_SFX, value);
+            PlayerPrefs.Save();
+        }
     }
 
     // ── Toggle Callback (wire to OnValueChanged in Inspector) ──
@@ -170,8 +130,16 @@ public class SettingsPanelUI : MonoBehaviour
     public void OnFullscreenToggleChanged(bool isOn)
     {
         PlaySound(toggleClip);
-        Screen.fullScreen = isOn;
-        PlayerPrefs.SetInt(KEY_FULLSCR, isOn ? 1 : 0);
+        if (SettingsManager.Instance != null)
+        {
+            SettingsManager.Instance.SetFullscreen(isOn);
+        }
+        else
+        {
+            Screen.fullScreen = isOn;
+            PlayerPrefs.SetInt(SettingsManager.KEY_FULLSCR, isOn ? 1 : 0);
+            PlayerPrefs.Save();
+        }
     }
 
     // ── Private Helpers ──────────────────────────────────────
