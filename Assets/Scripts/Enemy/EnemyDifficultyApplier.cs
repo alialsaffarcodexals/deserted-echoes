@@ -91,13 +91,16 @@ public class EnemyDifficultyApplier : MonoBehaviour
             if (!TryGetEnemyKey(enemy, out string enemyKey, out int currentVariant))
                 continue;
 
-            if (currentVariant == variantIndex)
-                continue;
+            GameObject enemyObject = enemy.gameObject;
+            if (currentVariant != variantIndex)
+            {
+                if (TryGetPrefab(enemyKey, variantIndex, out GameObject prefab))
+                {
+                    enemyObject = ReplaceEnemy(enemy, prefab);
+                }
+            }
 
-            if (!TryGetPrefab(enemyKey, variantIndex, out GameObject prefab))
-                continue;
-
-            ReplaceEnemy(enemy, prefab);
+            SetSortingOrder(enemyObject, 6);
         }
     }
 
@@ -137,7 +140,7 @@ public class EnemyDifficultyApplier : MonoBehaviour
         }
     }
 
-    private static void ReplaceEnemy(EnemyControllerBase enemy, GameObject prefab)
+    private static GameObject ReplaceEnemy(EnemyControllerBase enemy, GameObject prefab)
     {
         Transform transform = enemy.transform;
         Vector3 position = transform.position;
@@ -148,6 +151,24 @@ public class EnemyDifficultyApplier : MonoBehaviour
         Destroy(enemy.gameObject);
         GameObject instance = Instantiate(prefab, position, rotation, parent);
         instance.name = objectName;
+        return instance;
+    }
+
+    private static void SetSortingOrder(GameObject obj, int order)
+    {
+        if (obj == null) return;
+
+        SpriteRenderer[] renderers = obj.GetComponentsInChildren<SpriteRenderer>(true);
+        foreach (SpriteRenderer r in renderers)
+        {
+            r.sortingOrder = order;
+        }
+
+        UnityEngine.Rendering.SortingGroup[] sortingGroups = obj.GetComponentsInChildren<UnityEngine.Rendering.SortingGroup>(true);
+        foreach (UnityEngine.Rendering.SortingGroup sg in sortingGroups)
+        {
+            sg.sortingOrder = order;
+        }
     }
 
     public static bool TryGetEnemyKey(EnemyControllerBase enemy, out string enemyKey, out int currentVariant)
