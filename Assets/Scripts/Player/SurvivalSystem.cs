@@ -25,6 +25,9 @@ public class SurvivalSystem : MonoBehaviour
     public bool canRegenerateHealth = true;
     public float healthRegenRate = 0.5f;
 
+    [Header("Stamina Recovery Boost")]
+    public float staminaRegenMultiplier = 1f;
+
     private float currentHealth, currentStamina, currentHunger, currentThirst;
     private bool isSprinting;
 
@@ -75,7 +78,9 @@ public class SurvivalSystem : MonoBehaviour
     {
         if (!isSprinting && currentStamina < maxStamina)
         {
-            currentStamina += (staminaDepletionRate * 0.5f) * Time.deltaTime;
+            //currentStamina += (staminaDepletionRate * 0.5f) * Time.deltaTime; Replaced this with the below code for the stamina potion to work
+
+            currentStamina += (staminaDepletionRate * 0.5f * staminaRegenMultiplier) * Time.deltaTime;
         }
 
         if (canRegenerateHealth && currentHunger > 20f && currentThirst > 20f && currentHealth < maxHealth)

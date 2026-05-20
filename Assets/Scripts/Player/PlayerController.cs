@@ -11,12 +11,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform attackPoint;
     [SerializeField] private float attackPointDistance = 1f;
     [SerializeField] private float attackRange = 1f;
-    [SerializeField] private int attackDamage = 25;
+    //[SerializeField] private int attackDamage = 25;   commmented this since i will be using baseAttackDamage so i can add sword damage on top of it.
     [SerializeField] private float attackCooldown = 0.5f;
     [SerializeField] private LayerMask enemyLayer;
-
+    // Added this to add weapon damage
+    [SerializeField] private int baseAttackDamage = 25;
+    private int weaponBonusDamage = 0;
+    //----------------------------------
     [Header("Health")]
     [SerializeField] private int maxHealth = 100;
+
+    // adding Armor
+    [SerializeField] private int baseArmorDefense = 0;
+    private int armorDefenseBonus = 0;
+
 
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
@@ -262,7 +270,9 @@ public class PlayerController : MonoBehaviour
             if (enemy.gameObject == gameObject)
                 continue;
 
-            enemy.SendMessage("TakeDamage", attackDamage, SendMessageOptions.DontRequireReceiver);
+            enemy.SendMessage("TakeDamage", GetTotalAttackDamage(), SendMessageOptions.DontRequireReceiver);
+
+            //enemy.SendMessage("TakeDamage", attackDamage, SendMessageOptions.DontRequireReceiver);
         }
 
         Invoke(nameof(EndAttack), attackCooldown);
@@ -276,7 +286,7 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("IsAttacking", false);
     }
 
-    public void TakeDamage(int damage)
+    /*public void TakeDamage(int damage)
     {
         if (isDead)
             return;
@@ -291,7 +301,31 @@ public class PlayerController : MonoBehaviour
 
         if (animator != null)
             animator.SetTrigger("Hurt");
+    }*/
+
+    //replace the above with the below code for taking damage
+    public void TakeDamage(int damage)
+    {
+        if (isDead)
+            return;
+
+        int finalDamage = Mathf.Max(0, damage - GetTotalArmorDefense());
+
+        currentHealth -= finalDamage;
+
+        Debug.Log($"PlayerController: Took {finalDamage} damage after armor reduction.");
+
+        if (currentHealth <= 0)
+        {
+            Die();
+            return;
+        }
+
+        if (animator != null)
+            animator.SetTrigger("Hurt");
     }
+
+
 
     private void Die()
     {
@@ -312,9 +346,37 @@ public class PlayerController : MonoBehaviour
         targetPosition = GetAttackCenterWorld();
         return true;
     }
+    
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.DrawWireSphere(GetAttackCenterWorld(), attackRange);
     }
+
+    public void EquipWeapon(int bonusDamage)
+    {
+        weaponBonusDamage = bonusDamage;
+
+        Debug.Log($"PlayerController: Weapon equipped. Total attack damage: {GetTotalAttackDamage()}");
+    }
+
+    private int GetTotalAttackDamage()
+    {
+        return baseAttackDamage + weaponBonusDamage;
+    }
+
+    // armor equip
+
+    public void EquipArmor(int defenseBonus)
+    {
+        armorDefenseBonus = defenseBonus;
+
+        Debug.Log($"PlayerController: Armor equipped. Total defense: {GetTotalArmorDefense()}");
+    }
+
+    private int GetTotalArmorDefense()
+    {
+        return baseArmorDefense + armorDefenseBonus;
+    }
+
 }

@@ -32,6 +32,18 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         Slot dropSlot = eventData.pointerEnter?.GetComponent<Slot>(); //Check if we dropped on a slot
         Slot originalSlot = originalParent.GetComponent<Slot>(); //Get the original slot
 
+
+        if (dropSlot == null) {
+
+            GameObject item = eventData.pointerEnter;
+            if (item != null) { 
+            dropSlot = item.GetComponentInParent<Slot>();
+            }
+
+        }
+
+
+
         if(dropSlot != null)
         {
             if(dropSlot.currentItem != null)
