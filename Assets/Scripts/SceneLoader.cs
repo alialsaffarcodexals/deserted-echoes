@@ -32,7 +32,10 @@ public static class SceneLoader
     {
         string current = SceneManager.GetActiveScene().name;
         Debug.Log($"SceneLoader: Reloading scene '{current}'");
-        SceneManager.LoadScene(current);
+        if (SceneTransition.Instance != null)
+            SceneTransition.Instance.TransitionToScene(current);
+        else
+            SceneManager.LoadScene(current);
     }
 
     /// <summary>Load scene by build index (useful for sequential level progression).</summary>
