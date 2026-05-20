@@ -34,6 +34,9 @@ public class PlayerController : MonoBehaviour
     private bool isDead;
     private bool isAttacking;
     private float nextAttackTime;
+    private SurvivalSystem survivalSystem;
+
+    public bool IsSprinting { get; private set; }
 
     private void Awake()
     {
@@ -62,6 +65,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
+        survivalSystem = FindObjectOfType<SurvivalSystem>();
 
         if (animator == null)
             return;
@@ -79,6 +83,13 @@ public class PlayerController : MonoBehaviour
         }
 
         ReadMovementInput();
+
+        // Resolve sprinting here (Update) so FootstepSounds reads a current value
+        bool wantsToRun = IsRunPressed();
+        bool canRun = survivalSystem != null ? survivalSystem.CanSprint : true;
+        IsSprinting = wantsToRun && canRun;
+        if (survivalSystem != null)
+            survivalSystem.SetSprinting(IsSprinting);
 
         UpdateAttackPoint();
         UpdateAnimator();
@@ -103,8 +114,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        float currentSpeed = IsRunPressed() ? runSpeed : walkSpeed;
-
+        float currentSpeed = IsSprinting ? runSpeed : walkSpeed;
         rb.MovePosition(rb.position + movement * currentSpeed * Time.fixedDeltaTime);
     }
 
@@ -286,21 +296,35 @@ public class PlayerController : MonoBehaviour
         if (isDead)
             return;
 
+        if (survivalSystem != null)
         currentHealth -= damage;
         SavePlayerData();
 
         if (currentHealth <= 0)
         {
-            Die();
-            return;
+            // SurvivalSystem is the single health authority — it drives the bar
+            // and calls Die() via OnDeath() when it reaches 0
+            survivalSystem.TakeDamage((float)damage);
+        }
+        else
+        {
+            // Fallback: no SurvivalSystem in scene, track internally
+            currentHealth -= damage;
+            if (currentHealth <= 0)
+            {
+                Die();
+                return;
+            }
         }
 
         if (animator != null)
             animator.SetTrigger("Hurt");
     }
 
-    private void Die()
+    public void Die()
     {
+        if (isDead) return;
+
         isDead = true;
         movement = Vector2.zero;
 
@@ -311,6 +335,10 @@ public class PlayerController : MonoBehaviour
         }
 
         rb.linearVelocity = Vector2.zero;
+
+        // SurvivalSystem shows game over after Die(); this covers scenes without it.
+        if (survivalSystem == null && GameOverUI.Instance != null)
+            GameOverUI.Instance.ShowAfterDelay(1.5f);
     }
 
     public bool TryGetEnemyAttackTargetPosition(out Vector2 targetPosition)

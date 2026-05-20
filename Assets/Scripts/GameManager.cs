@@ -16,6 +16,9 @@ public class GameManager : MonoBehaviour
     // ── Singleton ────────────────────────────────────────────
     public static GameManager Instance { get; private set; }
 
+    [Header("Difficulty")]
+    [SerializeField] private EnemyDifficultyApplier difficultyApplier;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -25,6 +28,14 @@ public class GameManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        GameDifficultySettings.Load();
+
+        if (difficultyApplier == null)
+            difficultyApplier = GetComponent<EnemyDifficultyApplier>();
+
+        if (difficultyApplier == null)
+            difficultyApplier = gameObject.AddComponent<EnemyDifficultyApplier>();
     }
 
     // ── Game State ───────────────────────────────────────────
@@ -54,13 +65,18 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    /// <summary>Trigger game over: load the game-over scene.</summary>
+    /// <summary>Trigger game over overlay (or fallback if no UI in scene).</summary>
     public void GameOver()
     {
         Debug.Log("GameManager: Game Over triggered.");
-        Time.timeScale = 1f;
-        isGamePaused = false;
-        SceneLoader.LoadScene("game-over");
+
+        if (GameOverUI.Instance != null)
+        {
+            GameOverUI.Instance.Show();
+            return;
+        }
+
+        Debug.LogWarning("GameManager: No GameOverUI in scene. Add GameOverCanvas prefab to the level.");
     }
 
     /// <summary>Add points to the player score.</summary>

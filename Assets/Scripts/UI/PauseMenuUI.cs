@@ -11,6 +11,7 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class PauseMenuUI : MonoBehaviour
 {
@@ -28,7 +29,7 @@ public class PauseMenuUI : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             if (pausePanel != null && pausePanel.activeSelf)
                 OnResume();
