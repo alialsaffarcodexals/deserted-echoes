@@ -20,27 +20,31 @@ public class LichController : EnemyControllerBase
         }
     }
 
-    // Override the melee attack to use ranged attack instead
+    // Called by animation events to throw fireball
     public void ThrowFireball()
     {
+        Debug.Log("LichController.ThrowFireball() called!");
+        
         if (lichFireProjectilePrefab == null)
         {
-            Debug.LogWarning("LichController: lichFireProjectilePrefab not assigned!");
+            Debug.LogError("LichController: lichFireProjectilePrefab is NOT ASSIGNED in Inspector!");
             return;
         }
 
-        // Get throw direction
-        Vector2 throwDirection = GetLastMoveDirection();
-        if (throwDirection == Vector2.zero)
-            throwDirection = Vector2.right;
+        Debug.Log("Spawning Lich fireball at position: " + throwPoint.position);
 
         // Spawn projectile
         GameObject projectileObj = Instantiate(lichFireProjectilePrefab, throwPoint.position, Quaternion.identity);
+        Debug.Log("Projectile instantiated: " + projectileObj.name);
+        
         ProjectileBase projectile = projectileObj.GetComponent<ProjectileBase>();
         Animator projAnimator = projectileObj.GetComponent<Animator>();
 
         if (projectile != null)
         {
+            Debug.Log("ProjectileBase component found!");
+            // Default to right direction
+            Vector2 throwDirection = Vector2.right;
             projectile.SetDirection(throwDirection);
 
             // Set animator direction parameters
@@ -54,15 +58,17 @@ public class LichController : EnemyControllerBase
             Rigidbody2D projRb = projectileObj.GetComponent<Rigidbody2D>();
             if (projRb != null)
             {
+                Debug.Log("Projectile Rigidbody found, setting velocity to: " + (throwDirection * projectileSpeed));
                 projRb.linearVelocity = throwDirection * projectileSpeed;
             }
+            else
+            {
+                Debug.LogError("Projectile has NO Rigidbody2D!");
+            }
         }
-    }
-
-    private Vector2 GetLastMoveDirection()
-    {
-        // This is a simplified approach - in a real scenario, 
-        // you might want to expose lastMoveDirection from base class
-        return Vector2.right;
+        else
+        {
+            Debug.LogError("Projectile has NO ProjectileBase component!");
+        }
     }
 }
