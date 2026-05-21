@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using TMPro;
 
 // main dialogue script handles showing the box, typing text, music, pause, everything
@@ -53,7 +54,11 @@ public class DialogueManager : MonoBehaviour
         if (current == null) return;
 
         // press enter to skip typing or go to next line
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        bool enterPressed = Keyboard.current != null &&
+            (Keyboard.current.enterKey.wasPressedThisFrame ||
+             Keyboard.current.numpadEnterKey.wasPressedThisFrame);
+
+        if (enterPressed)
         {
             if (isTyping) FinishLineInstantly();
             else AdvanceLine();
