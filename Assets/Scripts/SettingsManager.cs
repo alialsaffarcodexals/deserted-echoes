@@ -105,16 +105,13 @@ public class SettingsManager : MonoBehaviour
         ApplyVolume(PARAM_MUSIC,  music);
         ApplyVolume(PARAM_SFX,    sfx);
 
-        // 2. Apply directly to scene-specific direct audio sources for fallback/scaling
-        // Find main music source in scene
-        GameObject musicGO = GameObject.Find("negev_desert_music");
-        if (musicGO != null)
+        // 2. Apply music volume to all looping 2D AudioSources in the scene
+        //    (covers MainMenuMusic, negev_desert_music, and any future background tracks
+        //    without needing to hard-code object names per scene)
+        foreach (AudioSource src in FindObjectsOfType<AudioSource>())
         {
-            AudioSource musicSrc = musicGO.GetComponent<AudioSource>();
-            if (musicSrc != null)
-            {
-                musicSrc.volume = music * master;
-            }
+            if (src.loop && src.spatialBlend == 0f)
+                src.volume = music * master;
         }
 
         // Find footstep sounds component in scene
