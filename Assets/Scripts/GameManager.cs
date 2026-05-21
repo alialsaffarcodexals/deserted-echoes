@@ -8,8 +8,8 @@
 //              in the MainMenu scene — it will never be destroyed.
 //              Access from any script via GameManager.Instance
 // ─────────────────────────────────────────────────────────────
-
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -33,7 +33,6 @@ public class GameManager : MonoBehaviour
 
         if (difficultyApplier == null)
             difficultyApplier = GetComponent<EnemyDifficultyApplier>();
-
         if (difficultyApplier == null)
             difficultyApplier = gameObject.AddComponent<EnemyDifficultyApplier>();
     }
@@ -50,7 +49,6 @@ public class GameManager : MonoBehaviour
     public bool isGamePaused = false;
 
     // ── Methods ──────────────────────────────────────────────
-
     /// <summary>Pause the game: freeze time and set pause flag.</summary>
     public void PauseGame()
     {
@@ -69,13 +67,11 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         Debug.Log("GameManager: Game Over triggered.");
-
         if (GameOverUI.Instance != null)
         {
             GameOverUI.Instance.Show();
             return;
         }
-
         Debug.LogWarning("GameManager: No GameOverUI in scene. Add GameOverCanvas prefab to the level.");
     }
 
@@ -94,5 +90,63 @@ public class GameManager : MonoBehaviour
         playerScore = 0;
         isGamePaused = false;
         Time.timeScale = 1f;
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // OTHER SCRIPT
+    // ─────────────────────────────────────────────────────────
+
+    private void Start()
+    {
+        if (SaveManager.Instance == null)
+        {
+            GameObject saveManagerObj = new GameObject("SaveManager");
+            saveManagerObj.AddComponent<SaveManager>();
+        }
+
+        SaveManager.Instance.LoadGame();
+        ApplySavedData();
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Debug.Log("Scene loaded: " + scene.name);
+        SaveManager.Instance.UpdateSceneName(scene.name);
+        ApplySavedData();
+    }
+
+    private void ApplySavedData()
+    {
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject == null)
+            return;
+
+        PlayerController playerController = playerObject.GetComponent<PlayerController>();
+        if (playerController != null)
+        {
+            playerController.LoadFromSave(SaveManager.Instance.CurrentSaveData);
+        }
+    }
+
+    public void LoadScene(string sceneName)
+    {
+        SaveManager.Instance.SaveGame();
+        SceneManager.LoadScene(sceneName);
+    }
+
+    public void SaveGameState()
+    {
+        SaveManager.Instance.SaveGame();
+        Debug.Log("Game state saved!");
     }
 }
