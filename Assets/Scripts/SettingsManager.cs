@@ -94,10 +94,10 @@ public class SettingsManager : MonoBehaviour
     {
         ResolveMixer();
 
-        // Load volumes (defaults to 0.75f)
-        float master  = PlayerPrefs.GetFloat(KEY_MASTER,  0.75f);
-        float music   = PlayerPrefs.GetFloat(KEY_MUSIC,   0.75f);
-        float sfx     = PlayerPrefs.GetFloat(KEY_SFX,     0.75f);
+        // Load volumes (defaults to 0.5f = 50%)
+        float master  = PlayerPrefs.GetFloat(KEY_MASTER,  0.5f);
+        float music   = PlayerPrefs.GetFloat(KEY_MUSIC,   0.5f);
+        float sfx     = PlayerPrefs.GetFloat(KEY_SFX,     0.5f);
         int   fullscr = PlayerPrefs.GetInt(KEY_FULLSCR,   Screen.fullScreen ? 1 : 0);
 
         // 1. Apply to Audio Mixer
