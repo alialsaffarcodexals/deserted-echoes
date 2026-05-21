@@ -297,19 +297,13 @@ public class PlayerController : MonoBehaviour
             return;
 
         if (survivalSystem != null)
-        currentHealth -= damage;
-        SavePlayerData();
-
-        if (currentHealth <= 0)
         {
-            // SurvivalSystem is the single health authority — it drives the bar
-            // and calls Die() via OnDeath() when it reaches 0
             survivalSystem.TakeDamage((float)damage);
         }
         else
         {
-            // Fallback: no SurvivalSystem in scene, track internally
             currentHealth -= damage;
+            SavePlayerData();
             if (currentHealth <= 0)
             {
                 Die();
