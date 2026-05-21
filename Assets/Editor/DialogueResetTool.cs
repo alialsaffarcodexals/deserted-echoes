@@ -23,6 +23,15 @@ public static class DialogueResetTool
         EditorUtility.DisplayDialog("Dialogue Reset", "Level-02 dialogue has been reset.\nIt will show again the next time you play Level-02.", "OK");
     }
 
+    [MenuItem("Tools/Dialogue/Reset Open-World Dialogue")]
+    private static void ResetOpenWorld()
+    {
+        PlayerPrefs.DeleteKey(PREFIX + "game_start");
+        PlayerPrefs.Save();
+        Debug.Log("[DialogueResetTool] Open-World dialogue reset — will show again on next entry.");
+        EditorUtility.DisplayDialog("Dialogue Reset", "Open-World dialogue has been reset.\nIt will show again the next time you play the Open-World scene.", "OK");
+    }
+
     [MenuItem("Tools/Dialogue/Reset All Dialogues")]
     private static void ResetAll()
     {
