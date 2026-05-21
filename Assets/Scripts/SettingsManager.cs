@@ -8,6 +8,7 @@
 //              PlayerPrefs volumes and fullscreen settings when a scene loads.
 // ─────────────────────────────────────────────────────────────
 
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
@@ -63,13 +64,20 @@ public class SettingsManager : MonoBehaviour
 
     private void Start()
     {
-        // Apply settings immediately on startup
-        ApplyAllSettings();
+        StartCoroutine(ApplySettingsNextFrame());
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"SettingsManager: Scene '{scene.name}' loaded. Re-applying settings to maintain consistency.");
+        StartCoroutine(ApplySettingsNextFrame());
+    }
+
+    // Waits one frame so the audio engine has fully initialized all PlayOnAwake
+    // sources before we change their volume — calling ApplyAllSettings() during
+    // sceneLoaded itself is too early and gets overridden by the audio frame.
+    private IEnumerator ApplySettingsNextFrame()
+    {
+        yield return null;
         ApplyAllSettings();
     }
 
