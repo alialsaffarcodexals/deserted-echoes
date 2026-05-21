@@ -60,6 +60,32 @@ public class MainMenuUI : MonoBehaviour
     {
         PlaySound(buttonClickClip);
         GameDifficultySettings.Set(difficulty);
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.StartNewGame(firstLevelScene);
+        else
+            SceneLoader.LoadScene(firstLevelScene);
+    }
+
+    /// <summary>Load Game button → loads the last saved scene and player data.</summary>
+    public void OnLoadGame()
+    {
+        PlaySound(buttonClickClip);
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.LoadSavedGame(firstLevelScene);
+            return;
+        }
+
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.LoadGame();
+            string savedScene = SaveManager.Instance.CurrentSaveData.lastSceneName;
+            SceneLoader.LoadScene(string.IsNullOrWhiteSpace(savedScene) ? firstLevelScene : savedScene);
+            return;
+        }
+
         SceneLoader.LoadScene(firstLevelScene);
     }
 

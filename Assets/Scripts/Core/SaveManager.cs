@@ -10,6 +10,18 @@ public class SaveManager : MonoBehaviour
     
     public SaveData CurrentSaveData { get; private set; }
 
+    public bool HasSaveFile()
+    {
+        return File.Exists(savePath);
+    }
+
+    public void CreateNewGame(string startingSceneName)
+    {
+        CurrentSaveData = new SaveData();
+        CurrentSaveData.lastSceneName = startingSceneName;
+        SaveGame();
+    }
+
     private void Awake()
     {
         // Singleton pattern
@@ -66,6 +78,7 @@ public class SaveManager : MonoBehaviour
 
         try
         {
+            CaptureActivePlayerData();
             CurrentSaveData.saveTimestamp = System.DateTime.Now.Ticks;
             string json = JsonUtility.ToJson(CurrentSaveData, true);
             File.WriteAllText(savePath, json);
@@ -136,5 +149,16 @@ public class SaveManager : MonoBehaviour
         {
             SaveGame();
         }
+    }
+
+    private void CaptureActivePlayerData()
+    {
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject == null)
+            return;
+
+        PlayerController playerController = playerObject.GetComponent<PlayerController>();
+        if (playerController != null)
+            playerController.SavePlayerData();
     }
 }
