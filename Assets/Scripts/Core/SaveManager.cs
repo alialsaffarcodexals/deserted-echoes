@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.IO;
+using System.Collections.Generic;
 
 public class SaveManager : MonoBehaviour
 {
@@ -59,6 +60,7 @@ public class SaveManager : MonoBehaviour
         {
             string json = File.ReadAllText(path);
             CurrentSaveData = JsonUtility.FromJson<SaveData>(json);
+            NormalizeSaveData();
             Debug.Log("Game loaded successfully from: " + path);
         }
         catch (System.Exception e)
@@ -120,6 +122,27 @@ public class SaveManager : MonoBehaviour
         CurrentSaveData.lastSceneName = sceneName;
     }
 
+    public bool HasSeenDialogue(string key)
+    {
+        if (string.IsNullOrEmpty(key))
+            return false;
+
+        NormalizeSaveData();
+        return CurrentSaveData.seenDialogueKeys.Contains(key);
+    }
+
+    public void MarkDialogueSeen(string key)
+    {
+        if (string.IsNullOrEmpty(key))
+            return;
+
+        NormalizeSaveData();
+        if (CurrentSaveData.seenDialogueKeys.Contains(key))
+            return;
+
+        CurrentSaveData.seenDialogueKeys.Add(key);
+    }
+
     /// <summary>
     /// Gets the saved player position.
     /// </summary>
@@ -170,6 +193,15 @@ public class SaveManager : MonoBehaviour
         PlayerController playerController = playerObject.GetComponent<PlayerController>();
         if (playerController != null)
             playerController.SavePlayerData();
+    }
+
+    private void NormalizeSaveData()
+    {
+        if (CurrentSaveData == null)
+            CurrentSaveData = new SaveData();
+
+        if (CurrentSaveData.seenDialogueKeys == null)
+            CurrentSaveData.seenDialogueKeys = new List<string>();
     }
 
     private string GetSavePath()
