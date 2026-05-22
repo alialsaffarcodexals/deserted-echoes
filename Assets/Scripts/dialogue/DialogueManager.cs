@@ -35,6 +35,7 @@ public class DialogueManager : MonoBehaviour
     private Coroutine typingRoutine;
     private bool isTyping;
     private string currentFullLine;
+    private System.Collections.Generic.List<AudioSource> pausedMusicSources = new System.Collections.Generic.List<AudioSource>();
 
     private void Awake()
     {
@@ -80,6 +81,8 @@ public class DialogueManager : MonoBehaviour
         Time.timeScale = 0f;
         dialogueRoot.SetActive(true);
 
+        PauseOtherMusic();
+
         // pick the music based on the mood set on the conversation asset
         var clip = conversation.mood == DialogueMood.Tense ? tenseTrack : calmTrack;
         if (clip != null)
@@ -92,6 +95,30 @@ public class DialogueManager : MonoBehaviour
         }
 
         ShowLine(current.lines[0]);
+    }
+
+    private void PauseOtherMusic()
+    {
+        pausedMusicSources.Clear();
+        AudioSource[] allSources = Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+        foreach (var src in allSources)
+        {
+            // If it's playing music (looping, 2D) and it's not our own music source
+            if (src != musicSource && src.isPlaying && src.loop && src.spatialBlend == 0f)
+            {
+                src.Pause();
+                pausedMusicSources.Add(src);
+            }
+        }
+    }
+
+    private void ResumeOtherMusic()
+    {
+        foreach (var src in pausedMusicSources)
+        {
+            if (src != null) src.UnPause();
+        }
+        pausedMusicSources.Clear();
     }
 
     private void ShowLine(DialogueLine line)
@@ -163,6 +190,7 @@ public class DialogueManager : MonoBehaviour
         current = null;
         dialogueRoot.SetActive(false);
         musicSource.Stop();
+        ResumeOtherMusic();
         Time.timeScale = 1f;
     }
 

@@ -224,12 +224,27 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 4237447862873925021}
   animator: {fileID: 2102067250570706803}
   lichFireProjectilePrefab: {fileID: 1309040597552750176, guid: a880d846fde9a4e71b3aa313cb4db98a, type: 3}
   throwPoint: {fileID: 5936950714449338567}
   projectileSpeed: 8
+--- !u!114 &1882106029607952901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6798937514333139152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: 89ae189b62c51f345b3f889b0146c736, type: 3}
+  hurtClip: {fileID: 8300000, guid: 28fdfa446bbca4245b4cf3e74c1f55a9, type: 3}
 --- !u!1 &8255693118433499937
 GameObject:
   m_ObjectHideFlags: 0
@@ -261,17 +276,3 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5074506433737454745}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1882106029607952901
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6798937514333139152}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
-  attackClip: {fileID: 8300000, guid: 89ae189b62c51f345b3f889b0146c736, type: 3}
-  hurtClip: {fileID: 8300000, guid: 28fdfa446bbca4245b4cf3e74c1f55a9, type: 3}

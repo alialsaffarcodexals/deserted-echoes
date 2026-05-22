@@ -32,6 +32,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6399343465241090047}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5709734468109967772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 39048915899267957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: 89ae189b62c51f345b3f889b0146c736, type: 3}
+  hurtClip: {fileID: 8300000, guid: 28fdfa446bbca4245b4cf3e74c1f55a9, type: 3}
 --- !u!1 &5069082594526629160
 GameObject:
   m_ObjectHideFlags: 0
@@ -46,6 +60,7 @@ GameObject:
   - component: {fileID: 6067497610873125024}
   - component: {fileID: 3922725597326278922}
   - component: {fileID: 5156868957569550868}
+  - component: {fileID: 8481349580687247230}
   m_Layer: 6
   m_Name: Lich3
   m_TagString: Enemy
@@ -255,23 +270,24 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 8023236806532921126}
   animator: {fileID: 3922725597326278922}
   lichFireProjectilePrefab: {fileID: 1309040597552750176, guid: a880d846fde9a4e71b3aa313cb4db98a, type: 3}
   throwPoint: {fileID: 3869416321638335824}
   projectileSpeed: 8
---- !u!114 &5709734468109967772
+--- !u!114 &8481349580687247230
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 39048915899267957}
+  m_GameObject: {fileID: 5069082594526629160}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
   attackClip: {fileID: 8300000, guid: 89ae189b62c51f345b3f889b0146c736, type: 3}
   hurtClip: {fileID: 8300000, guid: 28fdfa446bbca4245b4cf3e74c1f55a9, type: 3}
