@@ -144,6 +144,12 @@ public class DialogueManager : MonoBehaviour
         {
             PlayerPrefs.SetInt(FirstVisitPref(current.firstVisitKey), 1);
             PlayerPrefs.Save();
+
+            if (SaveManager.Instance != null)
+            {
+                SaveManager.Instance.MarkDialogueSeen(current.firstVisitKey);
+                SaveManager.Instance.SaveGame();
+            }
         }
 
         current = null;
@@ -156,6 +162,14 @@ public class DialogueManager : MonoBehaviour
     public static string FirstVisitPref(string key) => $"dlg_seen_{key}";
 
     // used by dialoguetrigger to check if a convo was already seen
-    public static bool HasSeen(string key) =>
-        !string.IsNullOrEmpty(key) && PlayerPrefs.GetInt(FirstVisitPref(key), 0) == 1;
+    public static bool HasSeen(string key)
+    {
+        if (string.IsNullOrEmpty(key))
+            return false;
+
+        if (SaveManager.Instance != null)
+            return SaveManager.Instance.HasSeenDialogue(key);
+
+        return PlayerPrefs.GetInt(FirstVisitPref(key), 0) == 1;
+    }
 }
