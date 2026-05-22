@@ -23,8 +23,6 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private AudioClip calmTrack;
     [SerializeField] private AudioClip tenseTrack;
     [SerializeField] private AudioClip blipClip;
-    [SerializeField, Range(0f, 1f)] private float musicVolume = 0.4f;
-    [SerializeField, Range(0f, 1f)] private float blipVolume = 0.6f;
 
     [Header("Typewriter")]
     [SerializeField] private float charactersPerSecond = 35f;
@@ -88,7 +86,19 @@ public class DialogueManager : MonoBehaviour
         if (clip != null)
         {
             musicSource.clip = clip;
-            musicSource.volume = musicVolume;
+            
+            // Sync with settings
+            if (SettingsManager.Instance != null)
+            {
+                float music = PlayerPrefs.GetFloat(SettingsManager.KEY_MUSIC, 0.2f);
+                float master = PlayerPrefs.GetFloat(SettingsManager.KEY_MASTER, 0.2f);
+                musicSource.volume = music * master;
+            }
+            else
+            {
+                musicSource.volume = 0.4f; // Fallback
+            }
+
             musicSource.loop = true;
             musicSource.ignoreListenerPause = true;
             musicSource.Play();
@@ -142,7 +152,7 @@ public class DialogueManager : MonoBehaviour
 
             if (!char.IsWhiteSpace(text[i]) && i % blipEveryNChars == 0 && blipClip != null)
             {
-                sfxSource.PlayOneShot(blipClip, blipVolume);
+                sfxSource.PlayOneShot(blipClip, 1f);
             }
 
             // realtime because time.timescale is 0 during dialogue
