@@ -344,7 +344,6 @@ public class PlayerController : MonoBehaviour
         {
             currentHealth -= damage;
             SavePlayerData();
-
             if (currentHealth <= 0)
             {
                 Die();
@@ -394,6 +393,9 @@ public class PlayerController : MonoBehaviour
         maxHealth = saveData.maxHealth;
         level = saveData.level;
         experience = saveData.experience;
+        if (saveData.attackDamage > 0)
+            attackDamage = saveData.attackDamage;
+
         hasLoadedSave = true;
         ApplyLevelProgression();
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);

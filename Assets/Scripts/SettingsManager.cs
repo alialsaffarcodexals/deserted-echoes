@@ -8,6 +8,7 @@
 //              PlayerPrefs volumes and fullscreen settings when a scene loads.
 // ─────────────────────────────────────────────────────────────
 
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
@@ -63,13 +64,20 @@ public class SettingsManager : MonoBehaviour
 
     private void Start()
     {
-        // Apply settings immediately on startup
-        ApplyAllSettings();
+        StartCoroutine(ApplySettingsNextFrame());
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"SettingsManager: Scene '{scene.name}' loaded. Re-applying settings to maintain consistency.");
+        StartCoroutine(ApplySettingsNextFrame());
+    }
+
+    // Waits one frame so the audio engine has fully initialized all PlayOnAwake
+    // sources before we change their volume — calling ApplyAllSettings() during
+    // sceneLoaded itself is too early and gets overridden by the audio frame.
+    private IEnumerator ApplySettingsNextFrame()
+    {
+        yield return null;
         ApplyAllSettings();
     }
 
@@ -94,10 +102,10 @@ public class SettingsManager : MonoBehaviour
     {
         ResolveMixer();
 
-        // Load volumes (defaults to 0.75f)
-        float master  = PlayerPrefs.GetFloat(KEY_MASTER,  0.75f);
-        float music   = PlayerPrefs.GetFloat(KEY_MUSIC,   0.75f);
-        float sfx     = PlayerPrefs.GetFloat(KEY_SFX,     0.75f);
+        // Load volumes (defaults to 0.5f = 50%)
+        float master  = PlayerPrefs.GetFloat(KEY_MASTER,  0.5f);
+        float music   = PlayerPrefs.GetFloat(KEY_MUSIC,   0.5f);
+        float sfx     = PlayerPrefs.GetFloat(KEY_SFX,     0.5f);
         int   fullscr = PlayerPrefs.GetInt(KEY_FULLSCR,   Screen.fullScreen ? 1 : 0);
 
         // 1. Apply to Audio Mixer
@@ -105,16 +113,13 @@ public class SettingsManager : MonoBehaviour
         ApplyVolume(PARAM_MUSIC,  music);
         ApplyVolume(PARAM_SFX,    sfx);
 
-        // 2. Apply directly to scene-specific direct audio sources for fallback/scaling
-        // Find main music source in scene
-        GameObject musicGO = GameObject.Find("negev_desert_music");
-        if (musicGO != null)
+        // 2. Apply music volume to all looping 2D AudioSources in the scene
+        //    (covers MainMenuMusic, negev_desert_music, and any future background tracks
+        //    without needing to hard-code object names per scene)
+        foreach (AudioSource src in FindObjectsOfType<AudioSource>())
         {
-            AudioSource musicSrc = musicGO.GetComponent<AudioSource>();
-            if (musicSrc != null)
-            {
-                musicSrc.volume = music * master;
-            }
+            if (src.loop && src.spatialBlend == 0f)
+                src.volume = music * master;
         }
 
         // Find footstep sounds component in scene
@@ -147,6 +152,19 @@ public class SettingsManager : MonoBehaviour
         // Clamp to avoid log(0) — minimum slider value maps to -80 dB (silence)
         float dB = value > 0.0001f ? Mathf.Log10(value) * 20f : -80f;
         audioMixer.SetFloat(parameter, dB);
+    }
+
+    /// <summary>Applies only the AudioMixer parameters from saved settings.
+    /// Call this before a scene activates so audio starts at the correct level.</summary>
+    public void ApplyMixerSettings()
+    {
+        ResolveMixer();
+        float master = PlayerPrefs.GetFloat(KEY_MASTER, 0.5f);
+        float music  = PlayerPrefs.GetFloat(KEY_MUSIC,  0.5f);
+        float sfx    = PlayerPrefs.GetFloat(KEY_SFX,    0.5f);
+        ApplyVolume(PARAM_MASTER, master);
+        ApplyVolume(PARAM_MUSIC,  music);
+        ApplyVolume(PARAM_SFX,    sfx);
     }
 
     // ── Public Setters ───────────────────────────────────────
