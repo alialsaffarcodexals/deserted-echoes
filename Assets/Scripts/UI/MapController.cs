@@ -16,7 +16,6 @@ public class MapController : MonoBehaviour
     [SerializeField] private Vector2 worldMin = new Vector2(-51f, -54f);
     [SerializeField] private Vector2 worldSize = new Vector2(88f, 63f);
 
-    private InputAction mapAction;
     private bool isMapOpen = false;
     private Transform playerTransform;
 
@@ -34,35 +33,51 @@ public class MapController : MonoBehaviour
 
     private void Start()
     {
-        // Use the new input system to find the Map action
-        var playerInput = FindFirstObjectByType<PlayerInput>();
-        if (playerInput != null)
-        {
-            mapAction = playerInput.actions.FindAction("Map");
-            if (mapAction != null)
-            {
-                mapAction.performed += OnMapAction;
-            }
-        }
-
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
 
-    private void OnDestroy()
+    private void Update()
     {
-        if (mapAction != null)
-        {
-            mapAction.performed -= OnMapAction;
-        }
-    }
+        bool mPressed = false;
+        bool escPressed = false;
 
-    private void OnMapAction(InputAction.CallbackContext context)
-    {
-        ToggleMap();
+        if (Keyboard.current != null)
+        {
+            mPressed = Keyboard.current.mKey.wasPressedThisFrame;
+            escPressed = Keyboard.current.escapeKey.wasPressedThisFrame;
+        }
+        else
+        {
+            // Legacy fallback
+            mPressed = Input.GetKeyDown(KeyCode.M);
+            escPressed = Input.GetKeyDown(KeyCode.Escape);
+        }
+
+        if (mPressed)
+        {
+            Debug.Log("Map Toggle Input Detected.");
+            ToggleMap();
+        }
+        else if (isMapOpen && escPressed)
+        {
+            Debug.Log("Map Close Input Detected (ESC).");
+            ToggleMap();
+        }
+
+        if (isMapOpen)
+        {
+            UpdatePlayerMarker();
+        }
     }
 
     public void ToggleMap()
     {
+        if (mapPanel == null)
+        {
+            Debug.LogError("MapController: mapPanel is not assigned!");
+            return;
+        }
+
         isMapOpen = !isMapOpen;
         mapPanel.SetActive(isMapOpen);
 
@@ -70,26 +85,12 @@ public class MapController : MonoBehaviour
         {
             Time.timeScale = 0f;
             UpdatePlayerMarker();
+            Debug.Log("Map Opened.");
         }
         else
         {
             Time.timeScale = 1f;
-        }
-    }
-
-    private void Update()
-    {
-        if (isMapOpen)
-        {
-            UpdatePlayerMarker();
-            
-            // Allow ESC to close even if PauseMenu might consume it (if map is open, we close it first)
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
-                // ToggleMap will set isMapOpen to false
-                // But we need to make sure we don't double toggle if ESC is bound to Map action too
-                // Actually if it's bound to Map action, OnMapAction already handled it.
-            }
+            Debug.Log("Map Closed.");
         }
     }
 
