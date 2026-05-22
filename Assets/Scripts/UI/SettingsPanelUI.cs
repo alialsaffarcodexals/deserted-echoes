@@ -68,9 +68,9 @@ public class SettingsPanelUI : MonoBehaviour
         }
 
         // Fetch current values from PlayerPrefs using standard keys
-        float master  = PlayerPrefs.GetFloat(SettingsManager.KEY_MASTER,  0.5f);
-        float music   = PlayerPrefs.GetFloat(SettingsManager.KEY_MUSIC,   0.5f);
-        float sfx     = PlayerPrefs.GetFloat(SettingsManager.KEY_SFX,     0.5f);
+        float master  = PlayerPrefs.GetFloat(SettingsManager.KEY_MASTER,  0.2f);
+        float music   = PlayerPrefs.GetFloat(SettingsManager.KEY_MUSIC,   0.2f);
+        float sfx     = PlayerPrefs.GetFloat(SettingsManager.KEY_SFX,     0.2f);
         int   fullscr = PlayerPrefs.GetInt(SettingsManager.KEY_FULLSCR,   Screen.fullScreen ? 1 : 0);
 
         // Update UI components silently without triggering their onValueChanged callbacks

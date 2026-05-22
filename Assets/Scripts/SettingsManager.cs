@@ -123,10 +123,10 @@ public const string KEY_MASTER  = "MasterVolume";
     {
         ResolveMixer();
 
-        // Load volumes (defaults to 0.5f = 50%)
-        float master  = PlayerPrefs.GetFloat(KEY_MASTER,  0.5f);
-        float music   = PlayerPrefs.GetFloat(KEY_MUSIC,   0.5f);
-        float sfx     = PlayerPrefs.GetFloat(KEY_SFX,     0.5f);
+        // Load volumes (defaults to 0.2f = 20%)
+        float master  = PlayerPrefs.GetFloat(KEY_MASTER,  0.2f);
+        float music   = PlayerPrefs.GetFloat(KEY_MUSIC,   0.2f);
+        float sfx     = PlayerPrefs.GetFloat(KEY_SFX,     0.2f);
         int   fullscr = PlayerPrefs.GetInt(KEY_FULLSCR,   Screen.fullScreen ? 1 : 0);
 
         // 1. Apply to Audio Mixer
@@ -174,9 +174,9 @@ public const string KEY_MASTER  = "MasterVolume";
     public void ApplyMixerSettings()
     {
         ResolveMixer();
-        float master = PlayerPrefs.GetFloat(KEY_MASTER, 0.5f);
-        float music  = PlayerPrefs.GetFloat(KEY_MUSIC,  0.5f);
-        float sfx    = PlayerPrefs.GetFloat(KEY_SFX,    0.5f);
+        float master = PlayerPrefs.GetFloat(KEY_MASTER, 0.2f);
+        float music  = PlayerPrefs.GetFloat(KEY_MUSIC,  0.2f);
+        float sfx    = PlayerPrefs.GetFloat(KEY_SFX,    0.2f);
         ApplyVolume(PARAM_MASTER, master);
         ApplyVolume(PARAM_MUSIC,  music);
         ApplyVolume(PARAM_SFX,    sfx);
