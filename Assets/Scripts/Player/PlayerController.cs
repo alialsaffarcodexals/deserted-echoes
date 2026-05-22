@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    private const int MaxPlayerAnimationLevel = 9;
+
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private float runSpeed = 10f;
@@ -23,6 +25,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int experience = 0;
     [SerializeField] private int experiencePerLevel = 100;
 
+    [Header("Level Progression")]
+    [SerializeField] private RuntimeAnimatorController[] levelAnimatorControllers = new RuntimeAnimatorController[MaxPlayerAnimationLevel];
+    [SerializeField] private int attackDamagePerLevel = 5;
+    [SerializeField] private int maxHealthPerLevel = 10;
+
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Animator animator;
@@ -35,11 +42,17 @@ public class PlayerController : MonoBehaviour
     private bool isAttacking;
     private float nextAttackTime;
     private SurvivalSystem survivalSystem;
+    private int baseAttackDamage;
+    private int currentAnimationLevel = -1;
+    private bool hasLoadedSave;
 
     public bool IsSprinting { get; private set; }
 
     private void Awake()
     {
+        baseAttackDamage = attackDamage;
+        currentHealth = maxHealth;
+
         if (rb == null)
             rb = GetComponent<Rigidbody2D>();
 
@@ -59,13 +72,17 @@ public class PlayerController : MonoBehaviour
             animator.applyRootMotion = false;
         }
 
+        ApplyLevelProgression();
         DisableOtherRigidbodyControllers();
     }
 
     private void Start()
     {
-        currentHealth = maxHealth;
+        if (!hasLoadedSave)
+            currentHealth = maxHealth;
+
         survivalSystem = FindObjectOfType<SurvivalSystem>();
+        SyncSurvivalHealth();
 
         if (animator == null)
             return;
@@ -73,6 +90,24 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat("LastMoveX", 0);
         animator.SetFloat("LastMoveY", -1);
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (levelAnimatorControllers == null || levelAnimatorControllers.Length != MaxPlayerAnimationLevel)
+            System.Array.Resize(ref levelAnimatorControllers, MaxPlayerAnimationLevel);
+
+        for (int i = 0; i < levelAnimatorControllers.Length; i++)
+        {
+            if (levelAnimatorControllers[i] != null)
+                continue;
+
+            string controllerName = $"Player_Lvl{i + 1}";
+            string controllerPath = $"Assets/Animations/Player/{controllerName}/{controllerName}.controller";
+            levelAnimatorControllers[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(controllerPath);
+        }
+    }
+#endif
 
     private void Update()
     {
@@ -299,6 +334,11 @@ public class PlayerController : MonoBehaviour
         if (survivalSystem != null)
         {
             survivalSystem.TakeDamage((float)damage);
+            currentHealth = Mathf.RoundToInt(survivalSystem.CurrentHealth);
+            SavePlayerData();
+
+            if (isDead)
+                return;
         }
         else
         {
@@ -353,7 +393,19 @@ public class PlayerController : MonoBehaviour
         maxHealth = saveData.maxHealth;
         level = saveData.level;
         experience = saveData.experience;
-        attackDamage = saveData.attackDamage;
+        if (saveData.attackDamage > 0)
+            attackDamage = saveData.attackDamage;
+
+        hasLoadedSave = true;
+        ApplyLevelProgression();
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        SyncSurvivalHealth();
+        
+        // Restore position if different scene
+        if (saveData.lastSceneName == UnityEngine.SceneManagement.SceneManager.GetActiveScene().name)
+        {
+            transform.position = new Vector2(saveData.playerPositionX, saveData.playerPositionY);
+        }
 
         Debug.Log($"Player loaded: HP={currentHealth}/{maxHealth}, Level={level}, Exp={experience}");
     }
@@ -366,11 +418,15 @@ public class PlayerController : MonoBehaviour
         if (SaveManager.Instance == null)
             return;
 
+        if (survivalSystem != null)
+            currentHealth = Mathf.RoundToInt(survivalSystem.CurrentHealth);
+
         SaveManager.Instance.UpdatePlayerStats(
             currentHealth,
             maxHealth,
             level,
             experience,
+            attackDamage,
             transform.position
         );
     }
@@ -399,11 +455,12 @@ public class PlayerController : MonoBehaviour
     private void LevelUp()
     {
         level++;
-        maxHealth += 10;
+        maxHealth += maxHealthPerLevel;
         currentHealth = maxHealth;
-        attackDamage += 5;
+        ApplyLevelProgression();
+        SyncSurvivalHealth();
 
-        Debug.Log($"LEVEL UP! Now Level {level}");
+        Debug.Log($"LEVEL UP! Now Level {level}, HP {currentHealth}/{maxHealth}, Power {attackDamage}, Animation Player_Lvl{currentAnimationLevel}");
         SavePlayerData();
     }
 
@@ -429,6 +486,64 @@ public class PlayerController : MonoBehaviour
     public int GetMaxHealth()
     {
         return maxHealth;
+    }
+
+    private void ApplyLevelProgression()
+    {
+        level = Mathf.Max(1, level);
+        attackDamage = baseAttackDamage + ((level - 1) * attackDamagePerLevel);
+        ApplyAnimationForLevel();
+    }
+
+    private void SyncSurvivalHealth()
+    {
+        if (survivalSystem != null)
+            survivalSystem.SetHealthStats(maxHealth, currentHealth);
+    }
+
+    private void ApplyAnimationForLevel()
+    {
+        if (animator == null || levelAnimatorControllers == null)
+            return;
+
+        int animationLevel = GetAnimationLevelForPlayerLevel(level);
+        int controllerIndex = animationLevel - 1;
+        if (controllerIndex < 0 || controllerIndex >= levelAnimatorControllers.Length)
+            return;
+
+        RuntimeAnimatorController controller = levelAnimatorControllers[controllerIndex];
+        if (controller == null)
+        {
+            Debug.LogWarning($"PlayerController: Missing Animator Controller for Player_Lvl{animationLevel}.");
+            return;
+        }
+
+        if (animator.runtimeAnimatorController == controller)
+        {
+            currentAnimationLevel = animationLevel;
+            return;
+        }
+
+        animator.runtimeAnimatorController = controller;
+        currentAnimationLevel = animationLevel;
+
+        animator.SetFloat("LastMoveX", lastMoveDirection.x);
+        animator.SetFloat("LastMoveY", lastMoveDirection.y);
+        animator.SetBool("IsAttacking", isAttacking);
+        animator.SetBool("IsDead", isDead);
+    }
+
+    private int GetAnimationLevelForPlayerLevel(int playerLevel)
+    {
+        if (playerLevel <= 5) return 1;
+        if (playerLevel <= 10) return 2;
+        if (playerLevel <= 15) return 3;
+        if (playerLevel <= 25) return 4;
+        if (playerLevel <= 35) return 5;
+        if (playerLevel <= 45) return 6;
+        if (playerLevel <= 60) return 7;
+        if (playerLevel <= 75) return 8;
+        return 9;
     }
 
     private void OnDrawGizmosSelected()

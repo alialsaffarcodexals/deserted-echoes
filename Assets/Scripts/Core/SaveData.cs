@@ -34,7 +34,7 @@ public class SaveData
         attackSpeed = 0.5f;
         coins = 0;
         killedEnemies = 0;
-        lastSceneName = "Level1";
+        lastSceneName = "Open-World";
         saveTimestamp = System.DateTime.Now.Ticks;
     }
 }

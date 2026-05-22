@@ -140,13 +140,67 @@ public class GameManager : MonoBehaviour
 
     public void LoadScene(string sceneName)
     {
+        SaveCurrentPlayerData();
         SaveManager.Instance.SaveGame();
         SceneManager.LoadScene(sceneName);
     }
 
     public void SaveGameState()
     {
+        SaveCurrentPlayerData();
         SaveManager.Instance.SaveGame();
         Debug.Log("Game state saved!");
+    }
+
+    public void StartNewGame(string startingSceneName)
+    {
+        ResetGame();
+        EnsureSaveManagerExists();
+        SaveManager.Instance.CreateNewGame(startingSceneName);
+        SceneLoader.LoadScene(startingSceneName);
+    }
+
+    public void LoadSavedGame(string fallbackSceneName)
+    {
+        EnsureSaveManagerExists();
+
+        if (!SaveManager.Instance.HasSaveFile())
+        {
+            Debug.LogWarning("No save file found. Load game cancelled.");
+            return;
+        }
+
+        SaveManager.Instance.LoadGame();
+
+        string sceneToLoad = SaveManager.Instance.CurrentSaveData.lastSceneName;
+        if (string.IsNullOrWhiteSpace(sceneToLoad))
+            sceneToLoad = fallbackSceneName;
+
+        Time.timeScale = 1f;
+        isGamePaused = false;
+        SceneLoader.LoadScene(sceneToLoad);
+    }
+
+    private void EnsureSaveManagerExists()
+    {
+        if (SaveManager.Instance != null)
+            return;
+
+        GameObject saveManagerObj = new GameObject("SaveManager");
+        saveManagerObj.AddComponent<SaveManager>();
+    }
+
+    private void SaveCurrentPlayerData()
+    {
+        if (SaveManager.Instance == null)
+            return;
+
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject == null)
+            return;
+
+        PlayerController playerController = playerObject.GetComponent<PlayerController>();
+        if (playerController != null)
+            playerController.SavePlayerData();
     }
 }
