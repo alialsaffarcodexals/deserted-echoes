@@ -3,6 +3,7 @@ using UnityEngine;
 public class PlayerCombatSFX : MonoBehaviour
 {
     [SerializeField] AudioClip weaponSwingClip;
+    [SerializeField] AudioClip playerHurtClip;
 
     AudioSource audioSource;
     PlayerController playerController;
@@ -20,18 +21,30 @@ public class PlayerCombatSFX : MonoBehaviour
     void OnEnable()
     {
         if (playerController != null)
+        {
             playerController.OnAttackPerformed += PlayAttackSFX;
+            playerController.OnHitReceived += PlayHurtSFX;
+        }
     }
 
     void OnDisable()
     {
         if (playerController != null)
+        {
             playerController.OnAttackPerformed -= PlayAttackSFX;
+            playerController.OnHitReceived -= PlayHurtSFX;
+        }
     }
 
     void PlayAttackSFX()
     {
         if (weaponSwingClip != null)
             audioSource.PlayOneShot(weaponSwingClip);
+    }
+
+    void PlayHurtSFX()
+    {
+        if (playerHurtClip != null)
+            audioSource.PlayOneShot(playerHurtClip);
     }
 }

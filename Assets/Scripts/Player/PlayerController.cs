@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour
     private float nextAttackTime;
 
     public event System.Action OnAttackPerformed;
+    public event System.Action OnHitReceived;
     private SurvivalSystem survivalSystem;
     private int baseAttackDamage;
     private int currentAnimationLevel = -1;
@@ -333,6 +334,8 @@ public class PlayerController : MonoBehaviour
     {
         if (isDead)
             return;
+
+        OnHitReceived?.Invoke();
 
         if (survivalSystem != null)
         {
