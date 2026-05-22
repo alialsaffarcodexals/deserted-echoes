@@ -101,12 +101,13 @@ public class SaveManager : MonoBehaviour
     /// <summary>
     /// Updates player stats in the save data.
     /// </summary>
-    public void UpdatePlayerStats(int health, int maxHealth, int level, int experience, Vector2 position)
+    public void UpdatePlayerStats(int health, int maxHealth, int level, int experience, int attackDamage, Vector2 position)
     {
         CurrentSaveData.currentHealth = health;
         CurrentSaveData.maxHealth = maxHealth;
         CurrentSaveData.level = level;
         CurrentSaveData.experience = experience;
+        CurrentSaveData.attackDamage = attackDamage;
         CurrentSaveData.playerPositionX = position.x;
         CurrentSaveData.playerPositionY = position.y;
     }
