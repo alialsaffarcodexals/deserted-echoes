@@ -127,14 +127,20 @@ public class SceneTransition : MonoBehaviour
         while (op.progress < 0.9f)
             yield return null;
 
-        // Apply mixer volumes before the scene activates so AudioSources
-        // start at the correct level on their very first frame (Play On Awake).
+        // Silence the listener and apply the mixer before the scene activates so
+        // no audio leaks through on the first frame regardless of mixer routing.
+        AudioListener.volume = 0f;
         if (SettingsManager.Instance != null)
             SettingsManager.Instance.ApplyMixerSettings();
 
         // Activate scene
         op.allowSceneActivation = true;
+
+        // Wait two frames: frame 1 lets SettingsManager.ApplySettingsNextFrame run,
+        // frame 2 is a safety buffer before restoring the listener.
         yield return null;
+        yield return null;
+        AudioListener.volume = 1f;
 
         // Fade back in from black
         yield return StartCoroutine(Fade(1f, 0f, fadeInDuration));
