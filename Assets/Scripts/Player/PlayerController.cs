@@ -41,6 +41,8 @@ public class PlayerController : MonoBehaviour
     private bool isDead;
     private bool isAttacking;
     private float nextAttackTime;
+
+    public event System.Action OnAttackPerformed;
     private SurvivalSystem survivalSystem;
     private int baseAttackDamage;
     private int currentAnimationLevel = -1;
@@ -131,6 +133,7 @@ public class PlayerController : MonoBehaviour
 
         if (IsAttackPressed() && Time.time >= nextAttackTime)
         {
+            OnAttackPerformed?.Invoke();
             Attack();
         }
     }
