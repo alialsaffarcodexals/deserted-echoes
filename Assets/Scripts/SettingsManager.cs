@@ -154,6 +154,19 @@ public class SettingsManager : MonoBehaviour
         audioMixer.SetFloat(parameter, dB);
     }
 
+    /// <summary>Applies only the AudioMixer parameters from saved settings.
+    /// Call this before a scene activates so audio starts at the correct level.</summary>
+    public void ApplyMixerSettings()
+    {
+        ResolveMixer();
+        float master = PlayerPrefs.GetFloat(KEY_MASTER, 0.5f);
+        float music  = PlayerPrefs.GetFloat(KEY_MUSIC,  0.5f);
+        float sfx    = PlayerPrefs.GetFloat(KEY_SFX,    0.5f);
+        ApplyVolume(PARAM_MASTER, master);
+        ApplyVolume(PARAM_MUSIC,  music);
+        ApplyVolume(PARAM_SFX,    sfx);
+    }
+
     // ── Public Setters ───────────────────────────────────────
 
     public void SetMasterVolume(float value)

@@ -127,6 +127,11 @@ public class SceneTransition : MonoBehaviour
         while (op.progress < 0.9f)
             yield return null;
 
+        // Apply mixer volumes before the scene activates so AudioSources
+        // start at the correct level on their very first frame (Play On Awake).
+        if (SettingsManager.Instance != null)
+            SettingsManager.Instance.ApplyMixerSettings();
+
         // Activate scene
         op.allowSceneActivation = true;
         yield return null;
