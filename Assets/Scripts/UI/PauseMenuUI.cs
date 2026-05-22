@@ -31,6 +31,11 @@ public class PauseMenuUI : MonoBehaviour
     {
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
+            if (MapController.Instance != null && MapController.Instance.IsMapOpen)
+            {
+                return;
+            }
+
             if (pausePanel != null && pausePanel.activeSelf)
                 OnResume();
             else
