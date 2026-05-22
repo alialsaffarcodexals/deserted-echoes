@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6105927018542015626}
   - component: {fileID: 2102067250570706803}
   - component: {fileID: 4922798353903299441}
+  - component: {fileID: 1882106029607952901}
   m_Layer: 6
   m_Name: Lich2
   m_TagString: Enemy
@@ -260,3 +261,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5074506433737454745}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1882106029607952901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6798937514333139152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: 89ae189b62c51f345b3f889b0146c736, type: 3}
+  hurtClip: {fileID: 8300000, guid: 28fdfa446bbca4245b4cf3e74c1f55a9, type: 3}

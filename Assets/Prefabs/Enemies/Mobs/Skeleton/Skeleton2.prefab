@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7433432261044714597}
   - component: {fileID: 499145047030572257}
   - component: {fileID: 3671584915757996456}
+  - component: {fileID: 8072778586707315513}
   m_Layer: 6
   m_Name: Skeleton2
   m_TagString: Enemy
@@ -225,3 +226,17 @@ MonoBehaviour:
   attackAnimationMode: 0
   rb: {fileID: 5509556615294822992}
   animator: {fileID: 499145047030572257}
+--- !u!114 &8072778586707315513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5684152279918647826}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: ff559b7a78df4ca49bfde4fb331679f6, type: 3}
+  hurtClip: {fileID: 8300000, guid: 316ae0a9288b26745a290d62583ce33f, type: 3}

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2883521186164651865}
   - component: {fileID: 3843560685404306825}
   - component: {fileID: 4915981128229840875}
+  - component: {fileID: 2241829592712077231}
   m_Layer: 6
   m_Name: Slime1
   m_TagString: Enemy
@@ -225,3 +226,17 @@ MonoBehaviour:
   attackAnimationMode: 0
   rb: {fileID: 1742282328847080332}
   animator: {fileID: 3843560685404306825}
+--- !u!114 &2241829592712077231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7895560491983936165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: 650c87cba2c7305429aa9d757ca85443, type: 3}
+  hurtClip: {fileID: 8300000, guid: f70df2d7c4c9cc345a811aee15ca8a6e, type: 3}

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8622372148281672701}
   - component: {fileID: 5157753671415426971}
   - component: {fileID: 3330784928892207087}
+  - component: {fileID: 3364736106070165698}
   m_Layer: 6
   m_Name: Demon3
   m_TagString: Enemy
@@ -225,3 +226,17 @@ MonoBehaviour:
   attackAnimationMode: 0
   rb: {fileID: 5260970655635259610}
   animator: {fileID: 5157753671415426971}
+--- !u!114 &3364736106070165698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5418760533011881916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: 21bb7b64da4cc494fb88f14e17b8c6b4, type: 3}
+  hurtClip: {fileID: 8300000, guid: fb00af659e1476449a9efdf2e552c675, type: 3}

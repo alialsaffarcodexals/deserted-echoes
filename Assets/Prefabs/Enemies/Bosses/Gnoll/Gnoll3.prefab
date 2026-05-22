@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1928162288644235599}
   - component: {fileID: 9128291293984413068}
   - component: {fileID: 8924190304992766497}
+  - component: {fileID: 6944169785983525916}
   m_Layer: 6
   m_Name: Gnoll3
   m_TagString: Enemy
@@ -225,3 +226,17 @@ MonoBehaviour:
   attackAnimationMode: 0
   rb: {fileID: 4278376458469121341}
   animator: {fileID: 9128291293984413068}
+--- !u!114 &6944169785983525916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6763998468583648682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: fa7c4533ef938ed4aaf575223082a0bd, type: 3}
+  hurtClip: {fileID: 8300000, guid: 09d67019baa5f694195765500954a2ca, type: 3}

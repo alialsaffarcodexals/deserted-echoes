@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1797101816227728592}
   - component: {fileID: 4527105814204638036}
   - component: {fileID: 8306254706151073}
+  - component: {fileID: 7059359686740150368}
   m_Layer: 6
   m_Name: Orc3
   m_TagString: Enemy
@@ -225,3 +226,17 @@ MonoBehaviour:
   attackAnimationMode: 0
   rb: {fileID: 8114205238973739548}
   animator: {fileID: 4527105814204638036}
+--- !u!114 &7059359686740150368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2407005153670123757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: 6ebca6f3af588ef4aa71d3a5780a8114, type: 3}
+  hurtClip: {fileID: 8300000, guid: e1702f7e7fc43124aabfbd8d254337c9, type: 3}

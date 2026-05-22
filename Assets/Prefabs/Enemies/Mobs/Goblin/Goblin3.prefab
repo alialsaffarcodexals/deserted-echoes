@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5800587260631418326}
   - component: {fileID: 7623859290198029276}
   - component: {fileID: 547918928549582156}
+  - component: {fileID: 3957107168567280024}
   m_Layer: 6
   m_Name: Goblin3
   m_TagString: Enemy
@@ -225,3 +226,17 @@ MonoBehaviour:
   attackAnimationMode: 0
   rb: {fileID: 8083377525786353732}
   animator: {fileID: 7623859290198029276}
+--- !u!114 &3957107168567280024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2214946656072557936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: 4a2e267de93604b448ec89b980eaa5a5, type: 3}
+  hurtClip: {fileID: 8300000, guid: a83f58aad36d7dc4bbcd1295d006ecd8, type: 3}
