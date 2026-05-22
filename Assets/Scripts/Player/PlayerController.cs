@@ -354,12 +354,6 @@ public class PlayerController : MonoBehaviour
         level = saveData.level;
         experience = saveData.experience;
         attackDamage = saveData.attackDamage;
-        
-        // Restore position if different scene
-        if (saveData.lastSceneName == UnityEngine.SceneManagement.SceneManager.GetActiveScene().name)
-        {
-            transform.position = new Vector2(saveData.playerPositionX, saveData.playerPositionY);
-        }
 
         Debug.Log($"Player loaded: HP={currentHealth}/{maxHealth}, Level={level}, Exp={experience}");
     }
