@@ -40,6 +40,13 @@ public class FootstepSounds : MonoBehaviour
     {
         audioSource      = GetComponent<AudioSource>();
         playerController = GetComponent<PlayerController>();
+
+        // Route to SFX group in mixer
+        if (audioSource != null && SettingsManager.Instance != null)
+        {
+            audioSource.outputAudioMixerGroup = SettingsManager.Instance.SFXGroup;
+        }
+
         lastPosition     = transform.position;
         footstepTimer    = 0f;
     }

@@ -45,6 +45,14 @@ public class DialogueManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // Route to mixer groups
+        if (SettingsManager.Instance != null)
+        {
+            if (musicSource != null) musicSource.outputAudioMixerGroup = SettingsManager.Instance.MusicGroup;
+            if (sfxSource != null) sfxSource.outputAudioMixerGroup = SettingsManager.Instance.SFXGroup;
+        }
+
         dialogueRoot.SetActive(false);
     }
 

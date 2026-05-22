@@ -13,6 +13,13 @@ public class EnemyCombatSFX : MonoBehaviour
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
+
+        // Route to SFX group in mixer
+        if (SettingsManager.Instance != null)
+        {
+            audioSource.outputAudioMixerGroup = SettingsManager.Instance.SFXGroup;
+        }
+
         enemyController = GetComponent<EnemyControllerBase>();
     }
 
