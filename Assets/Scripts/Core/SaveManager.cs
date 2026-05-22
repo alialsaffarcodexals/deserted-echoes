@@ -9,10 +9,11 @@ public class SaveManager : MonoBehaviour
     private const string SAVE_FILE_NAME = "gamesave.json";
     
     public SaveData CurrentSaveData { get; private set; }
+    public string SaveFilePath => GetSavePath();
 
     public bool HasSaveFile()
     {
-        return File.Exists(savePath);
+        return File.Exists(GetSavePath());
     }
 
     public void CreateNewGame(string startingSceneName)
@@ -20,6 +21,7 @@ public class SaveManager : MonoBehaviour
         CurrentSaveData = new SaveData();
         CurrentSaveData.lastSceneName = startingSceneName;
         SaveGame();
+        Debug.Log("New game save created at: " + GetSavePath());
     }
 
     private void Awake()
@@ -45,18 +47,19 @@ public class SaveManager : MonoBehaviour
     /// </summary>
     public void LoadGame()
     {
-        if (!File.Exists(savePath))
+        string path = GetSavePath();
+        if (!File.Exists(path))
         {
-            Debug.LogWarning("Save file not found. Creating new game...");
+            Debug.LogWarning("Save file not found at: " + path);
             CurrentSaveData = new SaveData();
             return;
         }
 
         try
         {
-            string json = File.ReadAllText(savePath);
+            string json = File.ReadAllText(path);
             CurrentSaveData = JsonUtility.FromJson<SaveData>(json);
-            Debug.Log("Game loaded successfully!");
+            Debug.Log("Game loaded successfully from: " + path);
         }
         catch (System.Exception e)
         {
@@ -78,11 +81,16 @@ public class SaveManager : MonoBehaviour
 
         try
         {
+            string path = GetSavePath();
+            string directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrWhiteSpace(directory))
+                Directory.CreateDirectory(directory);
+
             CaptureActivePlayerData();
             CurrentSaveData.saveTimestamp = System.DateTime.Now.Ticks;
             string json = JsonUtility.ToJson(CurrentSaveData, true);
-            File.WriteAllText(savePath, json);
-            Debug.Log("Game saved successfully!");
+            File.WriteAllText(path, json);
+            Debug.Log("Game saved successfully at: " + path);
         }
         catch (System.Exception e)
         {
@@ -124,11 +132,12 @@ public class SaveManager : MonoBehaviour
     /// </summary>
     public void DeleteSave()
     {
-        if (File.Exists(savePath))
+        string path = GetSavePath();
+        if (File.Exists(path))
         {
-            File.Delete(savePath);
+            File.Delete(path);
             CurrentSaveData = new SaveData();
-            Debug.Log("Save file deleted.");
+            Debug.Log("Save file deleted at: " + path);
         }
     }
 
@@ -160,5 +169,13 @@ public class SaveManager : MonoBehaviour
         PlayerController playerController = playerObject.GetComponent<PlayerController>();
         if (playerController != null)
             playerController.SavePlayerData();
+    }
+
+    private string GetSavePath()
+    {
+        if (string.IsNullOrWhiteSpace(savePath))
+            savePath = Path.Combine(Application.persistentDataPath, SAVE_FILE_NAME);
+
+        return savePath;
     }
 }

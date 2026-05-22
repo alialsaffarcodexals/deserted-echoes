@@ -33,6 +33,7 @@ public class MainMenuUI : MonoBehaviour
     private void Start()
     {
         GameDifficultySettings.Load();
+        ResolvePanelReferences();
         CloseAllPanels();
         ShowButtonList();
     }
@@ -43,10 +44,7 @@ public class MainMenuUI : MonoBehaviour
     public void OnStartGame()
     {
         PlaySound(panelOpenClip);
-        CloseAllPanels();
-        HideButtonList();
-        if (difficultyPanel != null)
-            difficultyPanel.SetActive(true);
+        OpenPanel(difficultyPanel, "DifficultyPanel");
     }
 
     public void OnSelectEasy() => OnSelectDifficulty(GameDifficulty.Easy);
@@ -62,9 +60,14 @@ public class MainMenuUI : MonoBehaviour
         GameDifficultySettings.Set(difficulty);
 
         if (GameManager.Instance != null)
+        {
             GameManager.Instance.StartNewGame(firstLevelScene);
-        else
-            SceneLoader.LoadScene(firstLevelScene);
+            return;
+        }
+
+        SaveManager saveManager = EnsureSaveManagerExists();
+        saveManager.CreateNewGame(firstLevelScene);
+        SceneLoader.LoadScene(firstLevelScene);
     }
 
     /// <summary>Load Game button → loads the last saved scene and player data.</summary>
@@ -78,45 +81,37 @@ public class MainMenuUI : MonoBehaviour
             return;
         }
 
-        if (SaveManager.Instance != null)
+        SaveManager saveManager = EnsureSaveManagerExists();
+        if (!saveManager.HasSaveFile())
         {
-            SaveManager.Instance.LoadGame();
-            string savedScene = SaveManager.Instance.CurrentSaveData.lastSceneName;
-            SceneLoader.LoadScene(string.IsNullOrWhiteSpace(savedScene) ? firstLevelScene : savedScene);
+            Debug.LogWarning("No save file found. Load game cancelled.");
             return;
         }
 
-        SceneLoader.LoadScene(firstLevelScene);
+        saveManager.LoadGame();
+        string savedScene = saveManager.CurrentSaveData.lastSceneName;
+        SceneLoader.LoadScene(string.IsNullOrWhiteSpace(savedScene) ? firstLevelScene : savedScene);
     }
 
     /// <summary>Instructions button → shows instructions panel.</summary>
     public void OnInstructions()
     {
         PlaySound(panelOpenClip);
-        CloseAllPanels();
-        HideButtonList();
-        if (instructionsPanel != null)
-            instructionsPanel.SetActive(true);
+        OpenPanel(instructionsPanel, "InstructionsPanel");
     }
 
     /// <summary>Credits button → shows credits panel.</summary>
     public void OnCredits()
     {
         PlaySound(panelOpenClip);
-        CloseAllPanels();
-        HideButtonList();
-        if (creditsPanel != null)
-            creditsPanel.SetActive(true);
+        OpenPanel(creditsPanel, "CreditsPanel");
     }
 
     /// <summary>Settings button → shows settings panel.</summary>
     public void OnSettings()
     {
         PlaySound(panelOpenClip);
-        CloseAllPanels();
-        HideButtonList();
-        if (settingsPanel != null)
-            settingsPanel.SetActive(true);
+        OpenPanel(settingsPanel, "SettingsPanel");
     }
 
     /// <summary>Quit button → exits the application.</summary>
@@ -152,6 +147,63 @@ public class MainMenuUI : MonoBehaviour
         if (creditsPanel != null)      creditsPanel.SetActive(false);
         if (settingsPanel != null)     settingsPanel.SetActive(false);
         if (difficultyPanel != null)   difficultyPanel.SetActive(false);
+    }
+
+    private void OpenPanel(GameObject panel, string panelName)
+    {
+        if (panel == null)
+            panel = FindPanel(panelName);
+
+        if (panel == null)
+        {
+            Debug.LogWarning($"MainMenuUI: {panelName} is not assigned or found in the scene.");
+            CloseAllPanels();
+            ShowButtonList();
+            return;
+        }
+
+        CloseAllPanels();
+
+        if (IsPanelInsideButtonList(panel))
+            panel.transform.SetParent(transform, false);
+
+        panel.SetActive(true);
+        panel.transform.SetAsLastSibling();
+        HideButtonList();
+    }
+
+    private GameObject FindPanel(string panelName)
+    {
+        Transform[] children = GetComponentsInChildren<Transform>(true);
+        foreach (Transform child in children)
+        {
+            if (child.name == panelName)
+                return child.gameObject;
+        }
+
+        return null;
+    }
+
+    private void ResolvePanelReferences()
+    {
+        if (instructionsPanel == null) instructionsPanel = FindPanel("InstructionsPanel");
+        if (creditsPanel == null)      creditsPanel = FindPanel("CreditsPanel");
+        if (settingsPanel == null)     settingsPanel = FindPanel("SettingsPanel");
+        if (difficultyPanel == null)   difficultyPanel = FindPanel("DifficultyPanel");
+    }
+
+    private bool IsPanelInsideButtonList(GameObject panel)
+    {
+        return buttonList != null && panel.transform.IsChildOf(buttonList.transform);
+    }
+
+    private SaveManager EnsureSaveManagerExists()
+    {
+        if (SaveManager.Instance != null)
+            return SaveManager.Instance;
+
+        GameObject saveManagerObj = new GameObject("SaveManager");
+        return saveManagerObj.AddComponent<SaveManager>();
     }
 
     private void ShowButtonList()

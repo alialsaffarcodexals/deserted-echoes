@@ -511,7 +511,7 @@ MonoBehaviour:
   instructionsPanel: {fileID: 450057000}
   creditsPanel: {fileID: 1035966176}
   settingsPanel: {fileID: 1733239881}
-  difficultyPanel: {fileID: 1990140710}
+  difficultyPanel: {fileID: 0}
   buttonList: {fileID: 375972832}
   firstLevelScene: Open-World
   uiAudio: {fileID: 380660471}
@@ -1088,7 +1088,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 460ada7ed4fb8e44088571d0c8bf17e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  difficultyApplier: {fileID: 639200801}
+  difficultyApplier: {fileID: 0}
   currentLevel: 1
   playerLives: 3
   playerScore: 0
@@ -3632,7 +3632,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1852813032}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 380660466}
+        m_TargetAssemblyTypeName: MainMenuUI, Assembly-CSharp
+        m_MethodName: OnLoadGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1852813032
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -166,8 +166,7 @@ public class GameManager : MonoBehaviour
 
         if (!SaveManager.Instance.HasSaveFile())
         {
-            Debug.LogWarning("No save file found. Starting a new game instead.");
-            StartNewGame(fallbackSceneName);
+            Debug.LogWarning("No save file found. Load game cancelled.");
             return;
         }
 
