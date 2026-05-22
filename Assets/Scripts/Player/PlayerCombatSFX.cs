@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[RequireComponent(typeof(AudioSource))]
 public class PlayerCombatSFX : MonoBehaviour
 {
     [SerializeField] AudioClip weaponSwingClip;
@@ -10,7 +9,11 @@ public class PlayerCombatSFX : MonoBehaviour
 
     void Awake()
     {
-        audioSource = GetComponent<AudioSource>();
+        // Add a dedicated AudioSource so FootstepSounds.Stop() on the shared
+        // source can never kill in-flight combat sounds.
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f;
         playerController = GetComponent<PlayerController>();
     }
 
