@@ -7,11 +7,22 @@ public class MinimapController : MonoBehaviour
     [SerializeField] private RectTransform mapContent; // The large map image
     [SerializeField] private RectTransform playerMarker; // Stationary in center of mask
 
-    [Header("Level Configuration (Level-01)")]
+    [Header("Level Configuration")]
     [SerializeField] private Vector2 worldMin = new Vector2(-51f, -54f);
     [SerializeField] private Vector2 worldSize = new Vector2(88f, 63f);
 
     private Transform playerTransform;
+
+    public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
+    {
+        worldMin = min;
+        worldSize = size;
+        if (mapContent != null)
+        {
+            var img = mapContent.GetComponent<UnityEngine.UI.Image>();
+            if (img != null) img.sprite = mapSprite;
+        }
+    }
 
     private void Start()
     {

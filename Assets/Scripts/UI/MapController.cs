@@ -12,12 +12,23 @@ public class MapController : MonoBehaviour
     [SerializeField] private RectTransform playerMarker;
     [SerializeField] private RectTransform mapImage;
 
-    [Header("Level Configuration (Level-01)")]
+    [Header("Level Configuration")]
     [SerializeField] private Vector2 worldMin = new Vector2(-51f, -54f);
     [SerializeField] private Vector2 worldSize = new Vector2(88f, 63f);
 
     private bool isMapOpen = false;
     private Transform playerTransform;
+
+    public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
+    {
+        worldMin = min;
+        worldSize = size;
+        if (mapImage != null)
+        {
+            var img = mapImage.GetComponent<UnityEngine.UI.Image>();
+            if (img != null) img.sprite = mapSprite;
+        }
+    }
 
     private void Awake()
     {
