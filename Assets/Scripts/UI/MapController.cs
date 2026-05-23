@@ -19,6 +19,7 @@ public class MapController : MonoBehaviour
     [SerializeField] private Vector2 worldSize = new Vector2(88f, 63f);
     [SerializeField] private Vector2 markerOffset = Vector2.zero;
     [SerializeField] private float markerSize = 30f;
+    [SerializeField] private Vector2 mapImageOffset = Vector2.zero;
 
     [Header("Zoom Settings")]
     [SerializeField] private float minZoom = 0.5f;
@@ -230,7 +231,8 @@ public class MapController : MonoBehaviour
         float uiX = (normX - 0.5f) * mapSize.x; 
         float uiY = (normY - 0.5f) * mapSize.y;
 
-        playerMarker.anchoredPosition = new Vector2(uiX + markerOffset.x, uiY + markerOffset.y);
+        mapImage.anchoredPosition = mapImageOffset;
+        playerMarker.anchoredPosition = new Vector2(uiX + markerOffset.x - mapImageOffset.x, uiY + markerOffset.y - mapImageOffset.y);
         playerMarker.sizeDelta = new Vector2(markerSize, markerSize);
         playerMarker.localRotation = Quaternion.Euler(0, 0, playerTransform.eulerAngles.z);
     }
