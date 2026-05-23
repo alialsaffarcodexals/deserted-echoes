@@ -12,6 +12,7 @@ public class MinimapController : MonoBehaviour
     [SerializeField] private Vector2 worldSize = new Vector2(88f, 63f);
 
     private Transform playerTransform;
+    private RawImage fogOverlay;
 
     public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
     {
@@ -27,6 +28,31 @@ public class MinimapController : MonoBehaviour
     private void Start()
     {
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
+        CreateFogOverlay();
+    }
+
+    private void CreateFogOverlay()
+    {
+        if (mapContent == null) return;
+
+        var go = new GameObject("MinimapFog");
+        go.transform.SetParent(mapContent, false);
+
+        fogOverlay = go.AddComponent<RawImage>();
+
+        var rt = fogOverlay.rectTransform;
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        SyncFogTexture();
+    }
+
+    private void SyncFogTexture()
+    {
+        if (fogOverlay == null || MapController.Instance == null) return;
+        fogOverlay.texture = MapController.Instance.DiscoveryTexture;
     }
 
     private void Update()
@@ -36,6 +62,9 @@ public class MinimapController : MonoBehaviour
             playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
             if (playerTransform == null) return;
         }
+
+        if (fogOverlay != null && fogOverlay.texture == null)
+            SyncFogTexture();
 
         UpdateMapPosition();
     }
