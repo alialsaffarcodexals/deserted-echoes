@@ -6,6 +6,7 @@ public class MapController : MonoBehaviour
 {
     public static MapController Instance { get; private set; }
     public bool IsMapOpen => isMapOpen;
+    public Texture2D DiscoveryTexture => discoveryTexture;
 
     [Header("UI References")]
     [SerializeField] private GameObject mapPanel;
