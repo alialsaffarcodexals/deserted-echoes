@@ -1,0 +1,65 @@
+// ─────────────────────────────────────────────────────────────
+// PortalTrigger.cs
+// Deserted Echoes | IT8101 Games Development | Group 3
+// Author: Ali Husain Ali Alsaffar
+// Sprint: 4 | Created: May 7, 2026
+// Description: Attach to any portal/gate GameObject that has a
+//              Collider2D set as a Trigger. When the Player walks
+//              into the trigger, loads the target scene.
+//              Set the Target Scene Name in the Inspector.
+// ─────────────────────────────────────────────────────────────
+
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class PortalTrigger : MonoBehaviour
+{
+    [Header("Portal Settings")]
+    [Tooltip("Exact name of the scene to load (must match Build Settings)")]
+    [SerializeField] private string targetSceneName;
+
+    private bool playerInRange = false;
+    private bool hasTriggered   = false;
+
+    private void Update()
+    {
+        if (playerInRange && !hasTriggered && Input.GetKeyDown(KeyCode.E))
+            EnterPortal();
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        playerInRange = true;
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        playerInRange = false;
+    }
+
+    private void EnterPortal()
+    {
+        if (string.IsNullOrEmpty(targetSceneName))
+        {
+            Debug.LogWarning("PortalTrigger: No target scene name set on " + gameObject.name);
+            return;
+        }
+
+        // Save the player's current position so returning to this scene
+        // spawns them back at this portal instead of the default spawn point.
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player != null && PortalSpawnManager.Instance != null)
+            PortalSpawnManager.Instance.SetReturnPosition(
+                SceneManager.GetActiveScene().name,
+                player.transform.position
+            );
+
+        hasTriggered   = true;
+        Time.timeScale = 1f;
+        SceneLoader.LoadScene(targetSceneName);
+    }
+}

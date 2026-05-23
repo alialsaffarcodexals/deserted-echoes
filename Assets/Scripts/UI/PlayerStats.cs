@@ -40,7 +40,11 @@ public class PlayerStats : MonoBehaviour
 
     void UpdateLivesUI()
     {
+<<<<<<< HEAD
         livesText.text = "Lives: " + lives.ToString();
+=======
+        if (livesText != null) livesText.text = $"<b>x{lives}</b>";
+>>>>>>> develop
     }
 
     public void AddScore(int points)
@@ -51,7 +55,11 @@ public class PlayerStats : MonoBehaviour
 
     void UpdateScoreUI()
     {
+<<<<<<< HEAD
         // D6 format for score (e.g., 000001, 000010, etc.)
         scoreText.text = "Score: " + score.ToString("D6");
+=======
+        if (scoreText != null) scoreText.text = $"<b>{score:D6}</b>";
+>>>>>>> develop
     }
 }

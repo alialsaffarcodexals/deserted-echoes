@@ -21,8 +21,10 @@ public static class SceneLoader
     public static void LoadScene(string sceneName)
     {
         Debug.Log($"SceneLoader: Loading scene '{sceneName}'");
-        // Sprint 3: add fade-out coroutine here before loading
-        SceneManager.LoadScene(sceneName);
+        if (SceneTransition.Instance != null)
+            SceneTransition.Instance.TransitionToScene(sceneName);
+        else
+            SceneManager.LoadScene(sceneName);
     }
 
     /// <summary>Reload the currently active scene.</summary>
@@ -30,7 +32,10 @@ public static class SceneLoader
     {
         string current = SceneManager.GetActiveScene().name;
         Debug.Log($"SceneLoader: Reloading scene '{current}'");
-        SceneManager.LoadScene(current);
+        if (SceneTransition.Instance != null)
+            SceneTransition.Instance.TransitionToScene(current);
+        else
+            SceneManager.LoadScene(current);
     }
 
     /// <summary>Load scene by build index (useful for sequential level progression).</summary>
