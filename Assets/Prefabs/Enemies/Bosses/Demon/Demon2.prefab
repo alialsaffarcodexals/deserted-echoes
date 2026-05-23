@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1666998164450969350}
   - component: {fileID: 50830538882666916}
   - component: {fileID: 1161853130309821046}
+  - component: {fileID: 2855710104979856269}
   m_Layer: 6
   m_Name: Demon2
   m_TagString: Enemy
@@ -222,6 +223,21 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 2713308604260872600}
   animator: {fileID: 50830538882666916}
+--- !u!114 &2855710104979856269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4233327274726920782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: 21bb7b64da4cc494fb88f14e17b8c6b4, type: 3}
+  hurtClip: {fileID: 8300000, guid: fb00af659e1476449a9efdf2e552c675, type: 3}

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1656218943932300998}
   - component: {fileID: 4771633712371014504}
   - component: {fileID: 9133202136676846251}
+  - component: {fileID: 4448557708470842365}
   m_Layer: 6
   m_Name: Lizardman2
   m_TagString: Enemy
@@ -222,6 +223,21 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 1701587089191070018}
   animator: {fileID: 4771633712371014504}
+--- !u!114 &4448557708470842365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8857943917986699135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 0}
+  hurtClip: {fileID: 0}

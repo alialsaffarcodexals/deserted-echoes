@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7530576075595638786}
   - component: {fileID: 1306002386398011375}
   - component: {fileID: 6498178509439268691}
+  - component: {fileID: 3863827893215594908}
   m_Layer: 6
   m_Name: GiantRat1
   m_TagString: Enemy
@@ -222,6 +223,21 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 8697896418215096155}
   animator: {fileID: 1306002386398011375}
+--- !u!114 &3863827893215594908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3520273520894195263}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: dfdd645f327402044ba8c3989b210b3c, type: 3}
+  hurtClip: {fileID: 8300000, guid: c9d07cf86f1f0fd41928972a29e9d942, type: 3}

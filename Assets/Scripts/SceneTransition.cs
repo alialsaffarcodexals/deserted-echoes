@@ -90,6 +90,12 @@ public class SceneTransition : MonoBehaviour
         audioSource            = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
 
+        // Route to SFX group in mixer
+        if (SettingsManager.Instance != null)
+        {
+            audioSource.outputAudioMixerGroup = SettingsManager.Instance.SFXGroup;
+        }
+
         if (teleportSound == null)
             teleportSound = Resources.Load<AudioClip>("Audio/teleport_whoosh");
     }

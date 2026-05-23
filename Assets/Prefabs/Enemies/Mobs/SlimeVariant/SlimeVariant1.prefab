@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 577295478110295809}
   - component: {fileID: 5159922260838279195}
   - component: {fileID: 3333027203877362755}
+  - component: {fileID: 1403346144629741758}
   m_Layer: 6
   m_Name: SlimeVariant1
   m_TagString: Enemy
@@ -222,6 +223,21 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 8655934960433541580}
   animator: {fileID: 5159922260838279195}
+--- !u!114 &1403346144629741758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4192749878782529459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: 650c87cba2c7305429aa9d757ca85443, type: 3}
+  hurtClip: {fileID: 8300000, guid: f70df2d7c4c9cc345a811aee15ca8a6e, type: 3}

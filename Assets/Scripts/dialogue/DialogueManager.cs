@@ -23,8 +23,6 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private AudioClip calmTrack;
     [SerializeField] private AudioClip tenseTrack;
     [SerializeField] private AudioClip blipClip;
-    [SerializeField, Range(0f, 1f)] private float musicVolume = 0.4f;
-    [SerializeField, Range(0f, 1f)] private float blipVolume = 0.6f;
 
     [Header("Typewriter")]
     [SerializeField] private float charactersPerSecond = 35f;
@@ -35,6 +33,7 @@ public class DialogueManager : MonoBehaviour
     private Coroutine typingRoutine;
     private bool isTyping;
     private string currentFullLine;
+    private System.Collections.Generic.List<AudioSource> pausedMusicSources = new System.Collections.Generic.List<AudioSource>();
 
     private void Awake()
     {
@@ -45,6 +44,14 @@ public class DialogueManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // Route to mixer groups
+        if (SettingsManager.Instance != null)
+        {
+            if (musicSource != null) musicSource.outputAudioMixerGroup = SettingsManager.Instance.MusicGroup;
+            if (sfxSource != null) sfxSource.outputAudioMixerGroup = SettingsManager.Instance.SFXGroup;
+        }
+
         dialogueRoot.SetActive(false);
     }
 
@@ -72,18 +79,56 @@ public class DialogueManager : MonoBehaviour
         Time.timeScale = 0f;
         dialogueRoot.SetActive(true);
 
+        PauseOtherMusic();
+
         // pick the music based on the mood set on the conversation asset
         var clip = conversation.mood == DialogueMood.Tense ? tenseTrack : calmTrack;
         if (clip != null)
         {
             musicSource.clip = clip;
-            musicSource.volume = musicVolume;
+            
+            // Sync with settings
+            if (SettingsManager.Instance != null)
+            {
+                float music = PlayerPrefs.GetFloat(SettingsManager.KEY_MUSIC, 0.2f);
+                float master = PlayerPrefs.GetFloat(SettingsManager.KEY_MASTER, 0.2f);
+                musicSource.volume = music * master;
+            }
+            else
+            {
+                musicSource.volume = 0.4f; // Fallback
+            }
+
             musicSource.loop = true;
             musicSource.ignoreListenerPause = true;
             musicSource.Play();
         }
 
         ShowLine(current.lines[0]);
+    }
+
+    private void PauseOtherMusic()
+    {
+        pausedMusicSources.Clear();
+        AudioSource[] allSources = Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+        foreach (var src in allSources)
+        {
+            // If it's playing music (looping, 2D) and it's not our own music source
+            if (src != musicSource && src.isPlaying && src.loop && src.spatialBlend == 0f)
+            {
+                src.Pause();
+                pausedMusicSources.Add(src);
+            }
+        }
+    }
+
+    private void ResumeOtherMusic()
+    {
+        foreach (var src in pausedMusicSources)
+        {
+            if (src != null) src.UnPause();
+        }
+        pausedMusicSources.Clear();
     }
 
     private void ShowLine(DialogueLine line)
@@ -107,7 +152,7 @@ public class DialogueManager : MonoBehaviour
 
             if (!char.IsWhiteSpace(text[i]) && i % blipEveryNChars == 0 && blipClip != null)
             {
-                sfxSource.PlayOneShot(blipClip, blipVolume);
+                sfxSource.PlayOneShot(blipClip, 1f);
             }
 
             // realtime because time.timescale is 0 during dialogue
@@ -155,6 +200,7 @@ public class DialogueManager : MonoBehaviour
         current = null;
         dialogueRoot.SetActive(false);
         musicSource.Stop();
+        ResumeOtherMusic();
         Time.timeScale = 1f;
     }
 

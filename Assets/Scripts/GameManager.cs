@@ -121,8 +121,8 @@ public class GameManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         Debug.Log("Scene loaded: " + scene.name);
-        SaveManager.Instance.UpdateSceneName(scene.name);
         ApplySavedData();
+        SaveManager.Instance.UpdateSceneName(scene.name);
     }
 
     private void ApplySavedData()

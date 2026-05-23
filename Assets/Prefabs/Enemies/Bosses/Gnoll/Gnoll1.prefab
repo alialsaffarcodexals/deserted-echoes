@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6999135007196489868}
   - component: {fileID: 1686284176201631480}
   - component: {fileID: 5688695708651043073}
+  - component: {fileID: 8125770888880525387}
   m_Layer: 6
   m_Name: Gnoll1
   m_TagString: Enemy
@@ -222,6 +223,21 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 8014367419194729401}
   animator: {fileID: 1686284176201631480}
+--- !u!114 &8125770888880525387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1731455954736172454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: fa7c4533ef938ed4aaf575223082a0bd, type: 3}
+  hurtClip: {fileID: 8300000, guid: 09d67019baa5f694195765500954a2ca, type: 3}

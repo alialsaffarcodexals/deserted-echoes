@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1073156067407400260}
   - component: {fileID: 6815290909893039457}
   - component: {fileID: 1711101323494852488}
+  - component: {fileID: 2409025749325376458}
   m_Layer: 6
   m_Name: Imp3
   m_TagString: Enemy
@@ -223,12 +224,27 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 2194749864979165290}
   animator: {fileID: 6815290909893039457}
   impFireProjectilePrefab: {fileID: 1104005832880348426, guid: e2f78e29557f24e32b731f63dd34022b, type: 3}
   throwPoint: {fileID: 183269926380106717}
   projectileSpeed: 6
+--- !u!114 &2409025749325376458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5004585663323250240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 0}
+  hurtClip: {fileID: 0}
 --- !u!1 &7464150486598200457
 GameObject:
   m_ObjectHideFlags: 0
