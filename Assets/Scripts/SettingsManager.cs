@@ -118,14 +118,14 @@ public class SettingsManager : MonoBehaviour
         }
 
         // Find footstep sounds component in scene
-        FootstepSounds footstep = FindObjectOfType<FootstepSounds>();
+        FootstepSounds footstep = Object.FindAnyObjectByType<FootstepSounds>();
         if (footstep != null)
         {
             footstep.SetVolume(sfx * master);
         }
 
         // Find parent audio source on active Settings panel if present
-        SettingsPanelUI settingsPanel = FindObjectOfType<SettingsPanelUI>();
+        SettingsPanelUI settingsPanel = Object.FindAnyObjectByType<SettingsPanelUI>();
         if (settingsPanel != null)
         {
             AudioSource uiAS = settingsPanel.GetComponentInParent<AudioSource>();

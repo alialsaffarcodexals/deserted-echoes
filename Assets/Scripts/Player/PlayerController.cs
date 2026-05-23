@@ -65,7 +65,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
-        survivalSystem = FindObjectOfType<SurvivalSystem>();
+        survivalSystem = Object.FindAnyObjectByType<SurvivalSystem>();
 
         if (animator == null)
             return;
