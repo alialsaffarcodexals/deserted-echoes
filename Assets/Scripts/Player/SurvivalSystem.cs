@@ -44,6 +44,8 @@ public class SurvivalSystem : MonoBehaviour
 
     public bool IsDead => currentHealth <= 0;
     public bool CanSprint => currentStamina > 0 && !isExhausted && !IsDead;
+    public float CurrentHealth => currentHealth;
+    public float MaxHealth => maxHealth;
 
     void Awake()
     {
@@ -58,6 +60,9 @@ public class SurvivalSystem : MonoBehaviour
         DontDestroyOnLoad(transform.root.gameObject);
 
         InitializeStats();
+
+        if (playerController != null)
+            SetHealthStats(playerController.GetMaxHealth(), playerController.GetCurrentHealth());
     }
 
     void OnEnable()
@@ -214,8 +219,20 @@ public class SurvivalSystem : MonoBehaviour
         }
     }
 
-    public void UseStamina(float amount) => currentStamina -= amount;
-    public void Heal(float amount) => currentHealth += amount;
+    public void SetHealthStats(float newMaxHealth, float newCurrentHealth)
+    {
+        maxHealth = Mathf.Max(1f, newMaxHealth);
+        currentHealth = Mathf.Clamp(newCurrentHealth, 0f, maxHealth);
+
+        if (healthSlider)
+        {
+            healthSlider.maxValue = maxHealth;
+            healthSlider.value = currentHealth;
+        }
+    }
+
+    public void UseStamina(float amount) => currentStamina = Mathf.Clamp(currentStamina - amount, 0f, maxStamina);
+    public void Heal(float amount) => currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth);
     public void Eat(float amount) => currentHunger += amount;
     public void Drink(float amount) => currentThirst += amount;
 }

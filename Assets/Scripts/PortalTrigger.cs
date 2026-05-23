@@ -10,6 +10,7 @@
 // ─────────────────────────────────────────────────────────────
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PortalTrigger : MonoBehaviour
 {
@@ -47,6 +48,15 @@ public class PortalTrigger : MonoBehaviour
             Debug.LogWarning("PortalTrigger: No target scene name set on " + gameObject.name);
             return;
         }
+
+        // Save the player's current position so returning to this scene
+        // spawns them back at this portal instead of the default spawn point.
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player != null && PortalSpawnManager.Instance != null)
+            PortalSpawnManager.Instance.SetReturnPosition(
+                SceneManager.GetActiveScene().name,
+                player.transform.position
+            );
 
         hasTriggered   = true;
         Time.timeScale = 1f;

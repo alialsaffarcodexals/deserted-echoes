@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 1185938592692506302}
   - component: {fileID: 5801764700036345973}
   - component: {fileID: 5384204051974374937}
+  - component: {fileID: 3921748506127834613}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -235,6 +236,35 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 64
-  maxHealth: 1000000
+  maxHealth: 100
+  level: 1
+  experience: 0
+  experiencePerLevel: 100
+  levelAnimatorControllers:
+  - {fileID: 9100000, guid: f10d876f8ecba4a06bb33caeb686b6fb, type: 2}
+  - {fileID: 9100000, guid: e52fbe5f6a35a45f29d6c957c67d9768, type: 2}
+  - {fileID: 9100000, guid: a2d6578ebbc4348acaf22c442f7535f1, type: 2}
+  - {fileID: 9100000, guid: 3acca5c2d305e4111aedf95e61406004, type: 2}
+  - {fileID: 9100000, guid: e87fc0c46cde0489dabdd5fd37a8830e, type: 2}
+  - {fileID: 9100000, guid: 773282a7df5964897a085be5009c1606, type: 2}
+  - {fileID: 9100000, guid: 2e0b676ffb93d414da681f4a7809da1c, type: 2}
+  - {fileID: 9100000, guid: 09d6550339b544d57b41406a989291a1, type: 2}
+  - {fileID: 9100000, guid: d6c4fb38f0ddf44b195486ef2619524d, type: 2}
+  attackDamagePerLevel: 5
+  maxHealthPerLevel: 10
   rb: {fileID: 707312415223104937}
   animator: {fileID: 5801764700036345973}
+--- !u!114 &3921748506127834613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6087543943947231160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c7a2f1e9b8d4056ae12c3d7f8e091b2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSFX
+  weaponSwingClip: {fileID: 8300000, guid: a18d187ebfd26394d8923871167cb4ee, type: 3}
+  playerHurtClip: {fileID: 8300000, guid: 14b607de7e16df945989dc2d9f5b516c, type: 3}

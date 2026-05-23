@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 [System.Serializable]
 public class SaveData
 {
@@ -20,6 +22,9 @@ public class SaveData
     // Scene Info
     public string lastSceneName;
     public long saveTimestamp;
+
+    // Dialogue
+    public List<string> seenDialogueKeys;
     
     public SaveData()
     {
@@ -34,7 +39,8 @@ public class SaveData
         attackSpeed = 0.5f;
         coins = 0;
         killedEnemies = 0;
-        lastSceneName = "Level1";
+        lastSceneName = "Open-World";
         saveTimestamp = System.DateTime.Now.Ticks;
+        seenDialogueKeys = new List<string>();
     }
 }

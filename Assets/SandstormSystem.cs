@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 public class SandstormSystem : MonoBehaviour
 {
-    
     public ParticleSystem sandstorm;
     public Image sandstormOverlay;
 
@@ -13,7 +12,7 @@ public class SandstormSystem : MonoBehaviour
     // how fast the overlay fades in and out
     public float fadeSpeed = 1f;
 
-    // how dark the overlay gets at its strongest (0 = invisible, 1 = fully opaque) still testing values around 0.1 since the particles themselves are already pretty strong visually
+    // how dark the overlay gets at its strongest (0 = invisible, 1 = fully opaque)
     public float maxOverlayAlpha = 0.1f;
 
     // daytime starts at 0.3 and 1 in game minute is 0.1 (since a day is 10 mins)
@@ -44,8 +43,8 @@ public class SandstormSystem : MonoBehaviour
         if (DayNightCycle.Instance.JustStartedNewDay())
             stormHappenedToday = false;
 
-        // trigger the storm 1 in game minute into day 1
-        if (currentDay == 1 && !stormHappenedToday && timeOfDay >= stormTriggerTime)
+        // trigger the storm on every even day (day 2, 4, 6 etc)
+        if (currentDay % 2 == 0 && !stormHappenedToday && timeOfDay >= stormTriggerTime)
         {
             stormHappenedToday = true;
             StartStorm();
@@ -60,10 +59,17 @@ public class SandstormSystem : MonoBehaviour
         }
 
         // slowly fade the overlay out
+        // once its fully gone we stop the particle system completely
         if (fadingOut)
         {
             float a = sandstormOverlay.color.a - Time.deltaTime * fadeSpeed;
-            if (a <= 0f) { a = 0f; fadingOut = false; stormIsActive = false; }
+            if (a <= 0f)
+            {
+                a = 0f;
+                fadingOut = false;
+                stormIsActive = false;
+                sandstorm.Stop(); // fully stop once overlay is gone
+            }
             SetOverlayAlpha(a);
         }
 
@@ -88,7 +94,10 @@ public class SandstormSystem : MonoBehaviour
     {
         fadingIn = false;
         fadingOut = true;
-        sandstorm.Stop();
+
+        // stop new particles spawning but let existing ones fadessssssssssssssss away naturally
+        var emission = sandstorm.emission;
+        emission.rateOverTime = 0f;
     }
 
     // helper to change the overlay transparency

@@ -31,6 +31,11 @@ public class PauseMenuUI : MonoBehaviour
     {
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
+            if (MapController.Instance != null && MapController.Instance.IsMapOpen)
+            {
+                return;
+            }
+
             if (pausePanel != null && pausePanel.activeSelf)
                 OnResume();
             else
@@ -86,7 +91,10 @@ public class PauseMenuUI : MonoBehaviour
         Time.timeScale = 1f;
 
         if (GameManager.Instance != null)
+        {
             GameManager.Instance.ResumeGame();
+            GameManager.Instance.SaveGameState();
+        }
 
         SceneLoader.LoadScene("main-menu");
     }

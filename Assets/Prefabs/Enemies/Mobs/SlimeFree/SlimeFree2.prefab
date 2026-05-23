@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5105611548323344733}
   - component: {fileID: 3933890876481378866}
   - component: {fileID: 4984800690490829616}
+  - component: {fileID: 2492119122212009238}
   m_Layer: 6
   m_Name: SlimeFree2
   m_TagString: Enemy
@@ -222,6 +223,21 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 7289988856866448990}
   animator: {fileID: 3933890876481378866}
+--- !u!114 &2492119122212009238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554443455189850147}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: 650c87cba2c7305429aa9d757ca85443, type: 3}
+  hurtClip: {fileID: 8300000, guid: f70df2d7c4c9cc345a811aee15ca8a6e, type: 3}

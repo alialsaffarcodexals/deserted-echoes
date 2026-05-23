@@ -18,6 +18,12 @@ public class HouseFootsteps : MonoBehaviour
     {
         footstepSource.loop = true;
         footstepSource.clip = woodSound; 
+
+        // Route to SFX group in mixer
+        if (footstepSource != null && SettingsManager.Instance != null)
+        {
+            footstepSource.outputAudioMixerGroup = SettingsManager.Instance.SFXGroup;
+        }
     }
 
     void Update()

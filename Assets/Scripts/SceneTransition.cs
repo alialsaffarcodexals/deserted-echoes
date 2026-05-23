@@ -90,6 +90,12 @@ public class SceneTransition : MonoBehaviour
         audioSource            = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
 
+        // Route to SFX group in mixer
+        if (SettingsManager.Instance != null)
+        {
+            audioSource.outputAudioMixerGroup = SettingsManager.Instance.SFXGroup;
+        }
+
         if (teleportSound == null)
             teleportSound = Resources.Load<AudioClip>("Audio/teleport_whoosh");
     }
@@ -127,9 +133,23 @@ public class SceneTransition : MonoBehaviour
         while (op.progress < 0.9f)
             yield return null;
 
-        // Activate scene
+        // Silence listener before the scene activates — nothing audible while volumes settle.
+        AudioListener.volume = 0f;
+        if (SettingsManager.Instance != null)
+            SettingsManager.Instance.ApplyMixerSettings();
+
+        // Activate scene — Awake/Start run and PlayOnAwake sources start,
+        // but the listener is muted so nothing is heard.
         op.allowSceneActivation = true;
         yield return null;
+
+        // Force-apply all saved volumes now that scene objects exist.
+        // Done while listener is still muted so there is no audible pop.
+        if (SettingsManager.Instance != null)
+            SettingsManager.Instance.ApplyAllSettings();
+
+        yield return null;
+        AudioListener.volume = 1f;
 
         // Fade back in from black
         yield return StartCoroutine(Fade(1f, 0f, fadeInDuration));

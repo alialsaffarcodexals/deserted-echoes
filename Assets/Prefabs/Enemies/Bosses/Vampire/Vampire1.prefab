@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7835569244103242329}
   - component: {fileID: 6168218605504308964}
   - component: {fileID: 2194068491603009798}
+  - component: {fileID: 5183919150167956206}
   m_Layer: 6
   m_Name: Vampire1
   m_TagString: Enemy
@@ -222,6 +223,21 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 3355343973646038637}
   animator: {fileID: 6168218605504308964}
+--- !u!114 &5183919150167956206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7909114617204567970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 0}
+  hurtClip: {fileID: 0}

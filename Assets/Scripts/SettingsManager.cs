@@ -8,6 +8,7 @@
 //              PlayerPrefs volumes and fullscreen settings when a scene loads.
 // ─────────────────────────────────────────────────────────────
 
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
@@ -19,9 +20,14 @@ public class SettingsManager : MonoBehaviour
 
     [Header("Audio Mixer")]
     [SerializeField] private AudioMixer audioMixer;
+    [SerializeField] private AudioMixerGroup musicGroup;
+    [SerializeField] private AudioMixerGroup sfxGroup;
+
+    public AudioMixerGroup MusicGroup => musicGroup;
+    public AudioMixerGroup SFXGroup => sfxGroup;
 
     // ── PlayerPrefs Keys ─────────────────────────────────────
-    public const string KEY_MASTER  = "MasterVolume";
+public const string KEY_MASTER  = "MasterVolume";
     public const string KEY_MUSIC   = "MusicVolume";
     public const string KEY_SFX     = "SFXVolume";
     public const string KEY_FULLSCR = "Fullscreen";
@@ -63,26 +69,49 @@ public class SettingsManager : MonoBehaviour
 
     private void Start()
     {
-        // Apply settings immediately on startup
-        ApplyAllSettings();
+        StartCoroutine(ApplySettingsNextFrame());
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"SettingsManager: Scene '{scene.name}' loaded. Re-applying settings to maintain consistency.");
+        StartCoroutine(ApplySettingsNextFrame());
+    }
+
+    // Waits one frame so the audio engine has fully initialized all PlayOnAwake
+    // sources before we change their volume — calling ApplyAllSettings() during
+    // sceneLoaded itself is too early and gets overridden by the audio frame.
+    private IEnumerator ApplySettingsNextFrame()
+    {
+        yield return null;
         ApplyAllSettings();
     }
 
     // ── Resolve references ───────────────────────────────────
     public void ResolveMixer()
     {
-        if (audioMixer != null) return;
-        foreach (var m in Resources.FindObjectsOfTypeAll<AudioMixer>())
+        if (audioMixer == null)
         {
-            if (m.name == "MainAudioMixer")
+            foreach (var m in Resources.FindObjectsOfTypeAll<AudioMixer>())
             {
-                audioMixer = m;
-                break;
+                if (m.name == "MainAudioMixer")
+                {
+                    audioMixer = m;
+                    break;
+                }
+            }
+        }
+
+        if (audioMixer != null)
+        {
+            if (musicGroup == null)
+            {
+                AudioMixerGroup[] groups = audioMixer.FindMatchingGroups("Music");
+                if (groups.Length > 0) musicGroup = groups[0];
+            }
+            if (sfxGroup == null)
+            {
+                AudioMixerGroup[] groups = audioMixer.FindMatchingGroups("SFX");
+                if (groups.Length > 0) sfxGroup = groups[0];
             }
         }
     }
@@ -94,10 +123,10 @@ public class SettingsManager : MonoBehaviour
     {
         ResolveMixer();
 
-        // Load volumes (defaults to 0.75f)
-        float master  = PlayerPrefs.GetFloat(KEY_MASTER,  0.75f);
-        float music   = PlayerPrefs.GetFloat(KEY_MUSIC,   0.75f);
-        float sfx     = PlayerPrefs.GetFloat(KEY_SFX,     0.75f);
+        // Load volumes (defaults to 0.2f = 20%)
+        float master  = PlayerPrefs.GetFloat(KEY_MASTER,  0.2f);
+        float music   = PlayerPrefs.GetFloat(KEY_MUSIC,   0.2f);
+        float sfx     = PlayerPrefs.GetFloat(KEY_SFX,     0.2f);
         int   fullscr = PlayerPrefs.GetInt(KEY_FULLSCR,   Screen.fullScreen ? 1 : 0);
 
         // 1. Apply to Audio Mixer
@@ -105,34 +134,36 @@ public class SettingsManager : MonoBehaviour
         ApplyVolume(PARAM_MUSIC,  music);
         ApplyVolume(PARAM_SFX,    sfx);
 
-        // 2. Apply directly to scene-specific direct audio sources for fallback/scaling
-        // Find main music source in scene
-        GameObject musicGO = GameObject.Find("negev_desert_music");
-        if (musicGO != null)
+        // 2. Route and apply music volume to all AudioSources in the scene
+        foreach (AudioSource src in FindObjectsOfType<AudioSource>())
         {
-            AudioSource musicSrc = musicGO.GetComponent<AudioSource>();
-            if (musicSrc != null)
+            // Auto-route to Mixer Group if not set
+            if (src.outputAudioMixerGroup == null)
             {
-                musicSrc.volume = music * master;
+                // Heuristic: Loop + 2D = Music, everything else = SFX
+                if (src.loop && src.spatialBlend == 0f)
+                    src.outputAudioMixerGroup = musicGroup;
+                else
+                    src.outputAudioMixerGroup = sfxGroup;
+            }
+
+            // Fallback: apply volume directly on music sources
+            if (src.outputAudioMixerGroup == musicGroup)
+            {
+                src.volume = music * master;
             }
         }
 
-        // Find footstep sounds component in scene
         FootstepSounds footstep = Object.FindAnyObjectByType<FootstepSounds>();
         if (footstep != null)
-        {
             footstep.SetVolume(sfx * master);
-        }
 
-        // Find parent audio source on active Settings panel if present
         SettingsPanelUI settingsPanel = Object.FindAnyObjectByType<SettingsPanelUI>();
         if (settingsPanel != null)
         {
             AudioSource uiAS = settingsPanel.GetComponentInParent<AudioSource>();
             if (uiAS != null)
-            {
-                uiAS.volume = sfx * master;
-            }
+                uiAS.volume = music * master;
         }
 
         // 3. Apply Fullscreen display setting
@@ -147,6 +178,19 @@ public class SettingsManager : MonoBehaviour
         // Clamp to avoid log(0) — minimum slider value maps to -80 dB (silence)
         float dB = value > 0.0001f ? Mathf.Log10(value) * 20f : -80f;
         audioMixer.SetFloat(parameter, dB);
+    }
+
+    /// <summary>Applies only the AudioMixer parameters from saved settings.
+    /// Call this before a scene activates so audio starts at the correct level.</summary>
+    public void ApplyMixerSettings()
+    {
+        ResolveMixer();
+        float master = PlayerPrefs.GetFloat(KEY_MASTER, 0.2f);
+        float music  = PlayerPrefs.GetFloat(KEY_MUSIC,  0.2f);
+        float sfx    = PlayerPrefs.GetFloat(KEY_SFX,    0.2f);
+        ApplyVolume(PARAM_MASTER, master);
+        ApplyVolume(PARAM_MUSIC,  music);
+        ApplyVolume(PARAM_SFX,    sfx);
     }
 
     // ── Public Setters ───────────────────────────────────────
