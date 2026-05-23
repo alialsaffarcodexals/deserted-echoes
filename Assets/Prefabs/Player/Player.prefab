@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 1185938592692506302}
   - component: {fileID: 5801764700036345973}
   - component: {fileID: 5384204051974374937}
+  - component: {fileID: 3921748506127834613}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -253,3 +254,17 @@ MonoBehaviour:
   maxHealthPerLevel: 10
   rb: {fileID: 707312415223104937}
   animator: {fileID: 5801764700036345973}
+--- !u!114 &3921748506127834613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6087543943947231160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c7a2f1e9b8d4056ae12c3d7f8e091b2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSFX
+  weaponSwingClip: {fileID: 8300000, guid: a18d187ebfd26394d8923871167cb4ee, type: 3}
+  playerHurtClip: {fileID: 8300000, guid: 14b607de7e16df945989dc2d9f5b516c, type: 3}

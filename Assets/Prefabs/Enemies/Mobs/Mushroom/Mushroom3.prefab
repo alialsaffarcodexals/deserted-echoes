@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2189656566419865270}
   - component: {fileID: 781770766939102264}
   - component: {fileID: 6637264839065416463}
+  - component: {fileID: 7667539702329619063}
   m_Layer: 6
   m_Name: Mushroom3
   m_TagString: Enemy
@@ -222,6 +223,21 @@ MonoBehaviour:
   maxHealth: 50
   deathDestroyDelay: 1.2
   damageDistanceToPlayer: 1
+  scoreValue: 100
   attackAnimationMode: 0
   rb: {fileID: 7560384306784718320}
   animator: {fileID: 781770766939102264}
+--- !u!114 &7667539702329619063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8624267384270019088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
+  attackClip: {fileID: 8300000, guid: c867dd4407deb3f4fb8a28257032ea08, type: 3}
+  hurtClip: {fileID: 8300000, guid: 258da5ab0aa07e047b8fdb8188038544, type: 3}

@@ -77,6 +77,9 @@ public abstract class EnemyControllerBase : MonoBehaviour
     private int currentHealth;
     private bool isDead;
     private bool isAttacking;
+
+    public event System.Action OnAttackPerformed;
+    public event System.Action OnHitReceived;
     private float nextAttackTime;
     private float currentTargetDistance;
     private float currentPlayerBodyDistance;
@@ -214,6 +217,7 @@ public abstract class EnemyControllerBase : MonoBehaviour
         if (isDead)
             return;
 
+        OnHitReceived?.Invoke();
         currentHealth -= damage;
 
         if (currentHealth <= 0)
@@ -324,6 +328,7 @@ public abstract class EnemyControllerBase : MonoBehaviour
             return;
 
         isAttacking = true;
+        OnAttackPerformed?.Invoke();
         // cooldown prevents next attack; animation duration controls visual attack length
         nextAttackTime = Time.time + resolvedAttackCooldown;
 

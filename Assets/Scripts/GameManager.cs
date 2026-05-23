@@ -29,6 +29,8 @@ public class GameManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
+        EnsureSaveManagerExists();
+
         GameDifficultySettings.Load();
 
         if (difficultyApplier == null)
@@ -98,12 +100,6 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        if (SaveManager.Instance == null)
-        {
-            GameObject saveManagerObj = new GameObject("SaveManager");
-            saveManagerObj.AddComponent<SaveManager>();
-        }
-
         SaveManager.Instance.LoadGame();
         ApplySavedData();
     }
@@ -121,12 +117,22 @@ public class GameManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         Debug.Log("Scene loaded: " + scene.name);
-        SaveManager.Instance.UpdateSceneName(scene.name);
+
+        if (SaveManager.Instance == null)
+        {
+            Debug.LogWarning("OnSceneLoaded: SaveManager.Instance is null, skipping.");
+            return;
+        }
+
         ApplySavedData();
+        SaveManager.Instance.UpdateSceneName(scene.name);
     }
 
     private void ApplySavedData()
     {
+        if (SaveManager.Instance == null || SaveManager.Instance.CurrentSaveData == null)
+            return;
+
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject == null)
             return;
