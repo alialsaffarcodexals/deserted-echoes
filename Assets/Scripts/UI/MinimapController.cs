@@ -4,15 +4,23 @@ using UnityEngine.UI;
 public class MinimapController : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private RectTransform mapContent; // The large map image
-    [SerializeField] private RectTransform playerMarker; // Stationary in center of mask
+    [SerializeField] private RectTransform mapContent;
+    [SerializeField] private RectTransform playerMarker;
 
     [Header("Level Configuration")]
     [SerializeField] private Vector2 worldMin = new Vector2(-51f, -54f);
     [SerializeField] private Vector2 worldSize = new Vector2(88f, 63f);
 
+    [Header("Discovery Settings")]
+    [SerializeField] private int discoveryResolution = 128;
+    [SerializeField] private float revealWidth = 5f;
+    [SerializeField] private float revealHeight = 5f;
+    [SerializeField] private Vector2 fogRevealOffset = Vector2.zero;
+
     private Transform playerTransform;
     private RawImage fogOverlay;
+    private Texture2D discoveryTexture;
+    private Color32[] discoveryPixels;
 
     public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
     {
@@ -28,7 +36,22 @@ public class MinimapController : MonoBehaviour
     private void Start()
     {
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
+        InitializeDiscoveryTexture();
         CreateFogOverlay();
+    }
+
+    private void InitializeDiscoveryTexture()
+    {
+        discoveryTexture = new Texture2D(discoveryResolution, discoveryResolution, TextureFormat.RGBA32, false);
+        discoveryTexture.filterMode = FilterMode.Bilinear;
+        discoveryTexture.wrapMode = TextureWrapMode.Clamp;
+
+        discoveryPixels = new Color32[discoveryResolution * discoveryResolution];
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            discoveryPixels[i] = new Color32(0, 0, 0, 255);
+
+        discoveryTexture.SetPixels32(discoveryPixels);
+        discoveryTexture.Apply();
     }
 
     private void CreateFogOverlay()
@@ -46,13 +69,7 @@ public class MinimapController : MonoBehaviour
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
 
-        SyncFogTexture();
-    }
-
-    private void SyncFogTexture()
-    {
-        if (fogOverlay == null || MapController.Instance == null) return;
-        fogOverlay.texture = MapController.Instance.DiscoveryTexture;
+        fogOverlay.texture = discoveryTexture;
     }
 
     private void Update()
@@ -63,10 +80,62 @@ public class MinimapController : MonoBehaviour
             if (playerTransform == null) return;
         }
 
-        if (fogOverlay != null && fogOverlay.texture == null)
-            SyncFogTexture();
-
+        UpdateDiscovery();
         UpdateMapPosition();
+    }
+
+    private void UpdateDiscovery()
+    {
+        if (discoveryTexture == null || discoveryPixels == null) return;
+
+        Vector2 worldPos = playerTransform.position;
+        float normX = (worldPos.x - worldMin.x) / worldSize.x;
+        float normY = (worldPos.y - worldMin.y) / worldSize.y;
+
+        if (normX < 0 || normX > 1 || normY < 0 || normY > 1) return;
+
+        Vector2 mapSize = mapContent != null ? mapContent.rect.size : new Vector2(1, 1);
+        float offsetNormX = mapSize.x > 0 ? fogRevealOffset.x / mapSize.x : 0f;
+        float offsetNormY = mapSize.y > 0 ? fogRevealOffset.y / mapSize.y : 0f;
+
+        int centerX = (int)((normX + offsetNormX) * discoveryResolution);
+        int centerY = (int)((normY + offsetNormY) * discoveryResolution);
+        int radiusX = Mathf.Max(2, (int)((revealWidth  / worldSize.x) * discoveryResolution));
+        int radiusY = Mathf.Max(2, (int)((revealHeight / worldSize.y) * discoveryResolution));
+
+        bool changed = false;
+        for (int y = centerY - radiusY; y <= centerY + radiusY; y++)
+        {
+            for (int x = centerX - radiusX; x <= centerX + radiusX; x++)
+            {
+                if (x < 0 || x >= discoveryResolution || y < 0 || y >= discoveryResolution) continue;
+
+                float dx = (x - centerX) / (float)radiusX;
+                float dy = (y - centerY) / (float)radiusY;
+                float ellipseDist = Mathf.Sqrt(dx * dx + dy * dy);
+
+                if (ellipseDist <= 1f)
+                {
+                    int index = y * discoveryResolution + x;
+                    if (discoveryPixels[index].a > 0)
+                    {
+                        byte newAlpha = (byte)Mathf.Min(discoveryPixels[index].a, (byte)(ellipseDist * 150f));
+                        if (ellipseDist < 0.5f) newAlpha = 0;
+                        if (discoveryPixels[index].a != newAlpha)
+                        {
+                            discoveryPixels[index].a = newAlpha;
+                            changed = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (changed)
+        {
+            discoveryTexture.SetPixels32(discoveryPixels);
+            discoveryTexture.Apply();
+        }
     }
 
     private void UpdateMapPosition()
@@ -74,29 +143,16 @@ public class MinimapController : MonoBehaviour
         if (mapContent == null) return;
 
         Vector2 worldPos = playerTransform.position;
-
-        // Calculate normalized position (0 to 1)
         float normX = (worldPos.x - worldMin.x) / worldSize.x;
         float normY = (worldPos.y - worldMin.y) / worldSize.y;
 
-        // The mapContent should be shifted so that the player's position is at the center (0,0 of the parent mask)
-        // mapContent size should be significantly larger than the mask for scrolling effect.
         Vector2 mapSize = mapContent.rect.size;
-
-        // The center of the map image represents the center of the world bounds (conceptually)
-        // But our worldMin/worldSize define the boundaries.
-        // AnchoredPosition (0,0) of mapContent is its pivot. 
-        // If pivot is (0.5, 0.5), then at norm (0.5, 0.5), anchoredPosition should be (0,0).
-        
         float uiX = -(normX - 0.5f) * mapSize.x;
         float uiY = -(normY - 0.5f) * mapSize.y;
 
         mapContent.anchoredPosition = new Vector2(uiX, uiY);
 
-        // Update player marker rotation if desired
         if (playerMarker != null)
-        {
             playerMarker.localRotation = Quaternion.Euler(0, 0, -playerTransform.eulerAngles.z);
-        }
     }
 }
