@@ -81,6 +81,13 @@ public class GameOverUI : MonoBehaviour
     public void OnRetry()
     {
         ResumeTime();
+
+        // Wipe the death state from the save so the player respawns
+        // at the level's authored spawn point with full HP, and so
+        // ApplySavedData() on scene reload doesn't restore HP=0.
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.ResetForRetry();
+
         SceneLoader.ReloadCurrentScene();
     }
 
