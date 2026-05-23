@@ -1,8 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class SurvivalSystem : MonoBehaviour
 {
+    public static SurvivalSystem Instance { get; private set; }
+
     [Header("UI Sliders")]
     public Slider healthSlider;
     public Slider staminaSlider;
@@ -16,11 +19,11 @@ public class SurvivalSystem : MonoBehaviour
     public float maxThirst = 100f;
 
     [Header("Depletion Rates (Per Second)")]
-    public float hungerDepletionRate = 0.5f;
-    public float thirstDepletionRate = 0.8f;
+    public float hungerDepletionRate = 1.5f;
+    public float thirstDepletionRate = 2.0f;
     public float staminaDepletionRate = 5f;
     public float staminaRunDepletionRate = 15f;
-    public float staminaRegenRate = 2.5f;
+    public float staminaRegenRate = 4.0f;
 
     [Header("Health Settings")]
     public float starvationDamage = 1f;
@@ -44,13 +47,39 @@ public class SurvivalSystem : MonoBehaviour
     public float CurrentHealth => currentHealth;
     public float MaxHealth => maxHealth;
 
-    void Start()
+    void Awake()
     {
-        playerController = FindObjectOfType<PlayerController>();
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
+        DontDestroyOnLoad(transform.root.gameObject);
+
         InitializeStats();
 
         if (playerController != null)
             SetHealthStats(playerController.GetMaxHealth(), playerController.GetCurrentHealth());
+    }
+
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        playerController = Object.FindAnyObjectByType<PlayerController>();
+
+        FindUIRefrecesInNewScene();
     }
 
     void Update()
@@ -77,19 +106,45 @@ public class SurvivalSystem : MonoBehaviour
         if (thirstSlider) thirstSlider.maxValue = maxThirst;
     }
 
+    private void FindUIRefrecesInNewScene()
+    {
+        GameObject healthObj = GameObject.FindWithTag("HealthSlider");
+        if (healthObj) healthSlider = healthObj.GetComponent<Slider>();
+
+        GameObject staminaObj = GameObject.FindWithTag("StaminaSlider");
+        if (staminaObj) staminaSlider = staminaObj.GetComponent<Slider>();
+
+        GameObject hungerObj = GameObject.FindWithTag("HungerSlider");
+        if (hungerObj) hungerSlider = hungerObj.GetComponent<Slider>();
+
+        GameObject thirstObj = GameObject.FindWithTag("ThirstSlider");
+        if (thirstObj) thirstSlider = thirstObj.GetComponent<Slider>();
+
+        SetupSliderMaxValues();
+    }
+
+    private void SetupSliderMaxValues()
+    {
+        if (healthSlider) healthSlider.maxValue = maxHealth;
+        if (staminaSlider) staminaSlider.maxValue = maxStamina;
+        if (hungerSlider) hungerSlider.maxValue = maxHunger;
+        if (thirstSlider) thirstSlider.maxValue = maxThirst;
+    }
+
     private void HandleDepletion()
     {
-        currentHunger -= hungerDepletionRate * Time.deltaTime;
-        currentThirst -= thirstDepletionRate * Time.deltaTime;
 
         if (isSprinting && currentStamina > 0)
         {
+            currentHunger -= hungerDepletionRate * Time.deltaTime;
+            currentThirst -= thirstDepletionRate * Time.deltaTime;
             currentStamina -= staminaRunDepletionRate * Time.deltaTime;
 
             if (currentStamina <= 0)
             {
                 currentStamina = 0;
                 isExhausted    = true;
+                isSprinting = false;
                 exhaustionTimer = exhaustionCooldown;
             }
         }
@@ -99,6 +154,7 @@ public class SurvivalSystem : MonoBehaviour
     {
         if (isExhausted)
         {
+            maxHealth = 100f;
             exhaustionTimer -= Time.deltaTime;
             if (exhaustionTimer <= 0f)
                 isExhausted = false;
