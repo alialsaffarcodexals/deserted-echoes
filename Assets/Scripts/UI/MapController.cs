@@ -156,8 +156,11 @@ public class MapController : MonoBehaviour
 
         if (normX < 0 || normX > 1 || normY < 0 || normY > 1) return;
 
-        int centerX = (int)(normX * discoveryResolution);
-        int centerY = (int)(normY * discoveryResolution);
+        Vector2 mapSize = mapImage != null ? mapImage.rect.size : new Vector2(1, 1);
+        float offsetNormX = mapSize.x > 0 ? markerOffset.x / mapSize.x : 0f;
+        float offsetNormY = mapSize.y > 0 ? markerOffset.y / mapSize.y : 0f;
+        int centerX = (int)((normX + offsetNormX) * discoveryResolution);
+        int centerY = (int)((normY + offsetNormY) * discoveryResolution);
         int radiusPx = (int)((revealRadius / worldSize.x) * discoveryResolution);
         if (radiusPx < 2) radiusPx = 2;
 
