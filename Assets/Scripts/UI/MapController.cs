@@ -12,7 +12,7 @@ public class MapController : MonoBehaviour
     [SerializeField] private GameObject mapPanel;
     [SerializeField] private RectTransform playerMarker;
     [SerializeField] private RectTransform mapImage;
-    [SerializeField] private RawImage fogImage;
+    [SerializeField] private RawImage fogImage; 
 
     [Header("Level Configuration")]
     [SerializeField] private Vector2 worldMin = new Vector2(-51f, -54f);
@@ -28,7 +28,9 @@ public class MapController : MonoBehaviour
 
     [Header("Discovery Settings")]
     [SerializeField] private int discoveryResolution = 128;
-    [SerializeField] private float revealRadius = 5f;
+    [SerializeField] private float revealWidth = 5f;
+    [SerializeField] private float revealHeight = 5f;
+    [SerializeField] private Vector2 fogRevealOffset = Vector2.zero;
 
     private float currentZoom = 1.0f;
     private bool isMapOpen = false;
@@ -159,30 +161,30 @@ public class MapController : MonoBehaviour
         if (normX < 0 || normX > 1 || normY < 0 || normY > 1) return;
 
         Vector2 mapSize = mapImage != null ? mapImage.rect.size : new Vector2(1, 1);
-        float offsetNormX = mapSize.x > 0 ? markerOffset.x / mapSize.x : 0f;
-        float offsetNormY = mapSize.y > 0 ? markerOffset.y / mapSize.y : 0f;
+        float offsetNormX = mapSize.x > 0 ? (markerOffset.x + fogRevealOffset.x) / mapSize.x : 0f;
+        float offsetNormY = mapSize.y > 0 ? (markerOffset.y + fogRevealOffset.y) / mapSize.y : 0f;
         int centerX = (int)((normX + offsetNormX) * discoveryResolution);
         int centerY = (int)((normY + offsetNormY) * discoveryResolution);
-        int radiusPx = (int)((revealRadius / worldSize.x) * discoveryResolution);
-        if (radiusPx < 2) radiusPx = 2;
+        int radiusX = Mathf.Max(2, (int)((revealWidth  / worldSize.x) * discoveryResolution));
+        int radiusY = Mathf.Max(2, (int)((revealHeight / worldSize.y) * discoveryResolution));
 
         bool changed = false;
-        for (int y = centerY - radiusPx; y <= centerY + radiusPx; y++)
+        for (int y = centerY - radiusY; y <= centerY + radiusY; y++)
         {
-            for (int x = centerX - radiusPx; x <= centerX + radiusPx; x++)
+            for (int x = centerX - radiusX; x <= centerX + radiusX; x++)
             {
                 if (x >= 0 && x < discoveryResolution && y >= 0 && y < discoveryResolution)
                 {
-                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(centerX, centerY));
-                    if (dist <= radiusPx)
+                    float dx = (x - centerX) / (float)radiusX;
+                    float dy = (y - centerY) / (float)radiusY;
+                    float ellipseDist = Mathf.Sqrt(dx * dx + dy * dy);
+                    if (ellipseDist <= 1f)
                     {
                         int index = y * discoveryResolution + x;
                         if (discoveryPixels[index].a > 0)
                         {
-                            // Fade out based on distance for smoother edges
-                            byte newAlpha = (byte)Mathf.Min(discoveryPixels[index].a, (byte)((dist / radiusPx) * 150));
-                            if (dist < radiusPx * 0.5f) newAlpha = 0;
-                            
+                            byte newAlpha = (byte)Mathf.Min(discoveryPixels[index].a, (byte)(ellipseDist * 150f));
+                            if (ellipseDist < 0.5f) newAlpha = 0;
                             if (discoveryPixels[index].a != newAlpha)
                             {
                                 discoveryPixels[index].a = newAlpha;
