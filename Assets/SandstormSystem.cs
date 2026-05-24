@@ -25,7 +25,13 @@ public class SandstormSystem : MonoBehaviour
     bool fadingOut = false;
     float stormTimer = 0f;
     bool stormHappenedToday = false;
-
+    public bool StormIsActive => stormIsActive;
+    public static SandstormSystem Instance { get; private set; }
+    void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+    }
     void Start()
     {
         // make sure particles arent playing at the start
