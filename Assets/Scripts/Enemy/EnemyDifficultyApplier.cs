@@ -86,6 +86,8 @@ public class EnemyDifficultyApplier : MonoBehaviour
         EnemyControllerBase[] enemies = FindObjectsByType<EnemyControllerBase>(FindObjectsSortMode.None);
         int variantIndex = GameDifficultySettings.VariantIndex;
 
+        Debug.Log($"[EnemyDifficultyApplier] Difficulty={GameDifficultySettings.Current} (VariantIndex={variantIndex}). Found {enemies.Length} enemies in scene '{sceneName}'.");
+
         foreach (EnemyControllerBase enemy in enemies)
         {
             if (!TryGetEnemyKey(enemy, out string enemyKey, out int currentVariant))
@@ -96,8 +98,17 @@ public class EnemyDifficultyApplier : MonoBehaviour
             {
                 if (TryGetPrefab(enemyKey, variantIndex, out GameObject prefab))
                 {
+                    Debug.Log($"[EnemyDifficultyApplier]   Swapping '{enemy.gameObject.name}' (was variant {currentVariant}) → prefab '{prefab.name}' (variant {variantIndex}).");
                     enemyObject = ReplaceEnemy(enemy, prefab);
                 }
+                else
+                {
+                    Debug.LogWarning($"[EnemyDifficultyApplier]   No prefab registered for key '{enemyKey}' variant {variantIndex}. Leaving '{enemy.gameObject.name}' as-is.");
+                }
+            }
+            else
+            {
+                Debug.Log($"[EnemyDifficultyApplier]   '{enemy.gameObject.name}' already variant {currentVariant}, no swap needed.");
             }
 
             SetSortingOrder(enemyObject, 6);
