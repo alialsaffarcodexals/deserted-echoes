@@ -88,6 +88,12 @@ public class GameOverUI : MonoBehaviour
         if (SaveManager.Instance != null)
             SaveManager.Instance.ResetForRetry();
 
+        // Immediately reset SurvivalSystem's internal health so IsDead
+        // becomes false and the health bar slider shows full before
+        // (and after) the scene reloads.
+        if (SurvivalSystem.Instance != null)
+            SurvivalSystem.Instance.RestoreFullHealth();
+
         SceneLoader.ReloadCurrentScene();
     }
 

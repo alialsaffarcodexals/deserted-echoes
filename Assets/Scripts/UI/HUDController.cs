@@ -22,6 +22,14 @@ public class HUDController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI livesText;
 
+    private void Start()
+    {
+        // Push this scene's slider references directly into SurvivalSystem.
+        // This is the authoritative wiring point — no tag search needed.
+        if (SurvivalSystem.Instance != null)
+            SurvivalSystem.Instance.RegisterSliders(healthBar, staminaBar, null, null);
+    }
+
     private void Update()
     {
         // Pull live data from GameManager each frame
@@ -29,6 +37,20 @@ public class HUDController : MonoBehaviour
         {
             UpdateScore(GameManager.Instance.playerScore);
             UpdateLives(GameManager.Instance.playerLives);
+        }
+
+        // Drive the health and stamina bars from SurvivalSystem.
+        // UpdateHealth/UpdateStamina were never called automatically,
+        // so the bars stayed frozen at their inspector default (full).
+        if (SurvivalSystem.Instance != null)
+        {
+            float maxHp = SurvivalSystem.Instance.MaxHealth;
+            if (maxHp > 0f)
+                UpdateHealth(SurvivalSystem.Instance.CurrentHealth / maxHp);
+
+            float maxSt = SurvivalSystem.Instance.maxStamina;
+            if (maxSt > 0f)
+                UpdateStamina(SurvivalSystem.Instance.CurrentStamina / maxSt);
         }
     }
 

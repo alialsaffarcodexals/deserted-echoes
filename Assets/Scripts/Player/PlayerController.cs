@@ -342,10 +342,32 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("IsAttacking", false);
     }
 
+    /// <summary>
+    /// Called by SurvivalSystem.OnSceneLoaded to re-wire the reference every
+    /// time a scene loads, so DontDestroyOnLoad players always route damage
+    /// through SurvivalSystem regardless of whether Start() re-ran.
+    /// </summary>
+    public void BindSurvivalSystem(SurvivalSystem system)
+    {
+        survivalSystem = system;
+        SyncSurvivalHealth();
+    }
+
     public void TakeDamage(int damage)
     {
         if (isDead)
             return;
+
+        // Re-acquire SurvivalSystem if lost (e.g. DontDestroyOnLoad player
+        // whose Start() never re-fires after a scene reload via Retry).
+        if (survivalSystem == null)
+        {
+            survivalSystem = Object.FindAnyObjectByType<SurvivalSystem>();
+            if (survivalSystem != null)
+                Debug.Log("[PlayerController] TakeDamage: re-acquired SurvivalSystem.");
+            else
+                Debug.LogWarning("[PlayerController] TakeDamage: SurvivalSystem still null — damage won't update health bar.");
+        }
 
         OnHitReceived?.Invoke();
 
