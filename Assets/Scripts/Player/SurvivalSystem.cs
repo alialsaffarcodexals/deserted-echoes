@@ -133,17 +133,21 @@ public class SurvivalSystem : MonoBehaviour
 
     private void HandleDepletion()
     {
+        float hungerMod = TemperatureSystem.Instance?.GetHungerModifier() ?? 1f;
+        float thirstMod = TemperatureSystem.Instance?.GetThirstModifier() ?? 1f;
+        float staminaMod = TemperatureSystem.Instance?.GetStaminaModifier() ?? 1f;
+
+        currentHunger -= hungerDepletionRate * hungerMod * Time.deltaTime;
+        currentThirst -= thirstDepletionRate * thirstMod * Time.deltaTime;
 
         if (isSprinting && currentStamina > 0)
         {
-            currentHunger -= hungerDepletionRate * Time.deltaTime;
-            currentThirst -= thirstDepletionRate * Time.deltaTime;
-            currentStamina -= staminaRunDepletionRate * Time.deltaTime;
+            currentStamina -= staminaRunDepletionRate * staminaMod * Time.deltaTime;
 
             if (currentStamina <= 0)
             {
                 currentStamina = 0;
-                isExhausted    = true;
+                isExhausted = true;
                 isSprinting = false;
                 exhaustionTimer = exhaustionCooldown;
             }
