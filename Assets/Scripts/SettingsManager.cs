@@ -147,12 +147,23 @@ public const string KEY_MASTER  = "MasterVolume";
                     src.outputAudioMixerGroup = sfxGroup;
             }
 
-            // Fallback: If for some reason the mixer isn't working or we want extra control
-            // Music sources get the music * master multiplier
+            // Fallback: apply volume directly on music sources
             if (src.outputAudioMixerGroup == musicGroup)
             {
                 src.volume = music * master;
             }
+        }
+
+        FootstepSounds footstep = Object.FindAnyObjectByType<FootstepSounds>();
+        if (footstep != null)
+            footstep.SetVolume(sfx * master);
+
+        SettingsPanelUI settingsPanel = Object.FindAnyObjectByType<SettingsPanelUI>();
+        if (settingsPanel != null)
+        {
+            AudioSource uiAS = settingsPanel.GetComponentInParent<AudioSource>();
+            if (uiAS != null)
+                uiAS.volume = music * master;
         }
 
         // 3. Apply Fullscreen display setting
