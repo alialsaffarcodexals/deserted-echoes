@@ -152,6 +152,29 @@ public class SaveManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Prepares the save data for a retry after the player dies:
+    /// restores HP to max and clears the saved position / scene so
+    /// the level reloads from its authored spawn point instead of
+    /// the death location.
+    /// </summary>
+    public void ResetForRetry()
+    {
+        if (CurrentSaveData == null)
+            CurrentSaveData = new SaveData();
+
+        // Restore HP so the player isn't loaded back in dead.
+        if (CurrentSaveData.maxHealth <= 0)
+            CurrentSaveData.maxHealth = 100;
+        CurrentSaveData.currentHealth = CurrentSaveData.maxHealth;
+
+        // Clear saved position; PlayerController.LoadFromSave only
+        // applies the position when lastSceneName == current scene.
+        CurrentSaveData.lastSceneName = string.Empty;
+        CurrentSaveData.playerPositionX = 0f;
+        CurrentSaveData.playerPositionY = 0f;
+    }
+
+    /// <summary>
     /// Deletes the save file (for new game+).
     /// </summary>
     public void DeleteSave()

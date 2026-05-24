@@ -574,9 +574,18 @@ public abstract class EnemyControllerBase : MonoBehaviour
 
     private void ResolveDifficultyStats()
     {
-        easyProfile = SanitizeProfile(easyProfile, 0.85f, 0.75f, 1f, 1.2f);
+        // SINGLE SOURCE OF TRUTH:
+        // The per-variant prefab (Foo1 = Easy, Foo2 = Normal, Foo3 = Hard) is
+        // the authoritative source for walk/run speed, attackDamage, attackCooldown
+        // and maxHealth. Designers set those numbers directly on each variant prefab.
+        //
+        // Multipliers default to 1.0 so the Inspector value == the in-game value.
+        // Leave the profile fields available in case we want to stack a global
+        // tweak later, but do NOT re-introduce non-1 defaults — it brings back
+        // the "prefab value disagrees with what the player feels" bug.
+        easyProfile = SanitizeProfile(easyProfile, 1f, 1f, 1f, 1f);
         normalProfile = SanitizeProfile(normalProfile, 1f, 1f, 1f, 1f);
-        hardProfile = SanitizeProfile(hardProfile, 1.2f, 1.25f, 1.35f, 0.8f);
+        hardProfile = SanitizeProfile(hardProfile, 1f, 1f, 1f, 1f);
 
         DifficultyProfile profile = GetProfileForDifficulty(difficulty);
 
