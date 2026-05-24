@@ -102,6 +102,9 @@ public class TemperatureSystem : MonoBehaviour
         thirstModifier = 1f;
         staminaModifier = 1f;
 
+        // torch campfire and oasis all keep you safe so skip any penalties
+        if (inNeutralZone || torchOn || nearCampfire) return;
+
         if (CurrentTemperature < comfortMin)
         {
             // too cold - hunger and stamina drain faster
