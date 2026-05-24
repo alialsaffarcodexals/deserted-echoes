@@ -4,43 +4,44 @@ public class TemperatureSystem : MonoBehaviour
 {
     public static TemperatureSystem Instance { get; private set; }
 
-    // the range of temperatures in the game
-    public float minTemp = -10f;  // coldest it can get at night time
-    public float maxTemp = 45f;   // hottest it can get during the day time
+    // coldest and hottest the world can get
+    public float minTemp = -10f;
+    public float maxTemp = 45f;
 
-    // anything between these two values is comfortable
+    // the sweet spot where the player isnt affected by anything
     public float comfortMin = 15f;
     public float comfortMax = 30f;
 
-    // how much hotter the sandstorm makes it
+    // storms make it way hotter
     public float sandstormHeatBonus = 15f;
 
-    // how much each item affects the temperature
+    // how warm each item makes you feel
     public float torchWarmth = 8f;
-    public float campfireWarmth = 15f;
+    public float campfireWarmth = 30f;
     public float waterCoolAmount = 10f;
 
-    // how much faster stats drain when too cold or too hot
+    // how much faster things drain when youre too cold
     public float coldHungerMultiplier = 2f;
     public float coldStaminaMultiplier = 1.5f;
+
+    // how much faster things drain when youre too hot
     public float hotThirstMultiplier = 2.5f;
     public float hotStaminaMultiplier = 1.5f;
 
-    // below or above these the player starts losing health
+    // if you hit these temps your health starts dropping
     public float criticalColdTemp = 0f;
     public float criticalHotTemp = 40f;
     public float extremeDamageRate = 2f;
 
-    // the current temperature the player feels
     public float CurrentTemperature { get; private set; }
 
-    // keeping track of everything that affects temperature
+    // stuff that changes the temperature
     bool inNeutralZone = false;
     bool torchOn = false;
     bool nearCampfire = false;
     float waterTimeLeft = 0f;
 
-    // these get read by the survival system to adjust stat drain rates
+    // these get read by the survival system
     float hungerModifier = 1f;
     float thirstModifier = 1f;
     float staminaModifier = 1f;
@@ -56,14 +57,14 @@ public class TemperatureSystem : MonoBehaviour
         CalculateTemperature();
         ApplyEffects();
 
-        // count down how long the water cooling lasts
+        // water cooling doesnt last forever
         if (waterTimeLeft > 0f)
             waterTimeLeft -= Time.deltaTime;
     }
 
     void CalculateTemperature()
     {
-        // oasis zone keeps you at a comfortable temperature no matter what
+        // oasis keeps you comfortable no matter what time it is
         if (inNeutralZone)
         {
             float neutralTarget = (comfortMin + comfortMax) / 2f;
@@ -75,21 +76,21 @@ public class TemperatureSystem : MonoBehaviour
 
         float t = DayNightCycle.Instance.timeOfDay;
 
-        // temperature peaks at noon and drops at night using a sine curve
+        // gets hot at noon and cold at night
         float normalised = Mathf.Sin(Mathf.Clamp01((t - 0.3f) / 0.4f) * Mathf.PI);
         float baseTemp = Mathf.Lerp(minTemp, maxTemp, normalised);
 
-        // sandstorm adds extra heat instantly since its a weather event
+        // sandstorms spike the heat instantly
         if (SandstormSystem.Instance != null && SandstormSystem.Instance.StormIsActive)
             baseTemp += sandstormHeatBonus;
 
-        // torch campfire and water are targets we lerp towards gradually
+        // items gradually push the temperature towards a better spot
         float targetTemp = baseTemp;
         if (torchOn) targetTemp += torchWarmth;
         if (nearCampfire) targetTemp += campfireWarmth;
         if (waterTimeLeft > 0f) targetTemp -= waterCoolAmount;
 
-        // gradually move current temperature towards the target
+        // slowly move towards the target so it doesnt feel instant
         CurrentTemperature = Mathf.Lerp(CurrentTemperature, targetTemp, Time.deltaTime * 0.3f);
     }
 
@@ -97,49 +98,47 @@ public class TemperatureSystem : MonoBehaviour
     {
         if (SurvivalSystem.Instance == null) return;
 
-        // reset to normal
+        // start fresh every frame
         hungerModifier = 1f;
         thirstModifier = 1f;
         staminaModifier = 1f;
 
+        // torch campfire and oasis all keep you safe so skip any penalties
+        if (inNeutralZone || torchOn || nearCampfire) return;
+
         if (CurrentTemperature < comfortMin)
         {
-            // too cold - hunger and stamina drain faster
+            // freezing - body burns more calories and energy trying to stay warm
             hungerModifier = coldHungerMultiplier;
             staminaModifier = coldStaminaMultiplier;
 
-            // critically cold - start losing health
+            // dangerously cold - health starts dropping
             if (CurrentTemperature <= criticalColdTemp)
                 SurvivalSystem.Instance.TakeDamage(extremeDamageRate * Time.deltaTime);
         }
         else if (CurrentTemperature > comfortMax)
         {
-            // too hot - thirst and stamina drain faster
+            // overheating - sweating like crazy and exhausted
             thirstModifier = hotThirstMultiplier;
             staminaModifier = hotStaminaMultiplier;
 
-            // critically hot - start losing health
+            // dangerously hot - health starts dropping
             if (CurrentTemperature >= criticalHotTemp)
                 SurvivalSystem.Instance.TakeDamage(extremeDamageRate * Time.deltaTime);
         }
     }
 
-    // these get called by the survival system to modify stat drain rates
     public float GetHungerModifier() => hungerModifier;
     public float GetThirstModifier() => thirstModifier;
     public float GetStaminaModifier() => staminaModifier;
 
-    // called by the oasis trigger zone
     public void EnterNeutralZone() => inNeutralZone = true;
     public void ExitNeutralZone() => inNeutralZone = false;
 
-    // called by the torch script when toggled
     public void SetTorchState(bool state) => torchOn = state;
 
-    // called by the campfire trigger zone
     public void EnterCampfire() => nearCampfire = true;
     public void ExitCampfire() => nearCampfire = false;
 
-    // called when the player drinks water - cools them for 3 in game minutes
     public void DrinkWater() => waterTimeLeft = 180f;
 }
