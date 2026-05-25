@@ -7,6 +7,12 @@ public class MinimapController : MonoBehaviour
     [SerializeField] private RectTransform mapContent;
     [SerializeField] private RectTransform playerMarker;
 
+    [Header("Zoom Settings")]
+    [SerializeField] [Range(0.5f, 4f)] private float zoomLevel = 1f;
+
+    [Header("Marker Settings")]
+    [SerializeField] private float markerSize = 10f;
+
     [Header("Level Configuration")]
     [SerializeField] private Vector2 worldMin = new Vector2(-51f, -54f);
     [SerializeField] private Vector2 worldSize = new Vector2(88f, 63f);
@@ -150,9 +156,13 @@ public class MinimapController : MonoBehaviour
         float uiX = -(normX - 0.5f) * mapSize.x;
         float uiY = -(normY - 0.5f) * mapSize.y;
 
-        mapContent.anchoredPosition = new Vector2(uiX, uiY);
+        mapContent.localScale = new Vector3(zoomLevel, zoomLevel, 1f);
+        mapContent.anchoredPosition = new Vector2(uiX, uiY) * zoomLevel;
 
         if (playerMarker != null)
+        {
+            playerMarker.sizeDelta = new Vector2(markerSize, markerSize);
             playerMarker.localRotation = Quaternion.Euler(0, 0, -playerTransform.eulerAngles.z);
+        }
     }
 }
