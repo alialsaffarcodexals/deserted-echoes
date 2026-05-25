@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 using System.IO;
 using System.Collections.Generic;
 
@@ -23,6 +22,7 @@ public class SaveManager : MonoBehaviour
         CurrentSaveData = new SaveData();
         CurrentSaveData.lastSceneName = startingSceneName;
         CurrentSaveData.sceneFogData = new List<SceneFogData>();
+        FogStore.Clear(); // fresh journey starts with full fog
         SaveGame();
         Debug.Log("New game save created at: " + GetSavePath());
     }
@@ -63,6 +63,7 @@ public class SaveManager : MonoBehaviour
             string json = File.ReadAllText(path);
             CurrentSaveData = JsonUtility.FromJson<SaveData>(json);
             NormalizeSaveData();
+            FogStore.ImportFrom(CurrentSaveData.sceneFogData); // seed in-memory fog from disk
             Debug.Log("Game loaded successfully from: " + path);
         }
         catch (System.Exception e)
@@ -91,6 +92,7 @@ public class SaveManager : MonoBehaviour
                 Directory.CreateDirectory(directory);
 
             CaptureActivePlayerData();
+            CurrentSaveData.sceneFogData = FogStore.ExportTo(); // persist current fog discovery to disk
             CurrentSaveData.saveTimestamp = System.DateTime.Now.Ticks;
             string json = JsonUtility.ToJson(CurrentSaveData, true);
             File.WriteAllText(path, json);
@@ -218,29 +220,6 @@ public class SaveManager : MonoBehaviour
         PlayerController playerController = playerObject.GetComponent<PlayerController>();
         if (playerController != null)
             playerController.SavePlayerData();
-    }
-
-    public byte[] GetFogAlphas(string sceneName)
-    {
-        if (CurrentSaveData?.sceneFogData == null) return null;
-        SceneFogData entry = CurrentSaveData.sceneFogData.Find(d => d.sceneName == sceneName);
-        if (entry == null || string.IsNullOrEmpty(entry.fogBase64)) return null;
-        return Convert.FromBase64String(entry.fogBase64);
-    }
-
-    public void SetFogAlphas(string sceneName, byte[] alphas)
-    {
-        if (CurrentSaveData == null) return;
-        if (CurrentSaveData.sceneFogData == null)
-            CurrentSaveData.sceneFogData = new List<SceneFogData>();
-        SceneFogData entry = CurrentSaveData.sceneFogData.Find(d => d.sceneName == sceneName);
-        if (entry == null)
-        {
-            entry = new SceneFogData { sceneName = sceneName };
-            CurrentSaveData.sceneFogData.Add(entry);
-        }
-        entry.fogBase64 = Convert.ToBase64String(alphas);
-        SaveGame();
     }
 
     private void NormalizeSaveData()

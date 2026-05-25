@@ -29,6 +29,9 @@ public class MinimapController : MonoBehaviour
     private Texture2D discoveryTexture;
     private Color32[] discoveryPixels;
     private string cachedSceneName;
+    private bool fogDirty;
+    private float lastFogFlushTime;
+    private const float FogFlushInterval = 0.5f;
 
     public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
     {
@@ -67,9 +70,8 @@ public class MinimapController : MonoBehaviour
 
     private void LoadFogState()
     {
-        if (SaveManager.Instance == null || discoveryPixels == null) return;
-        string scene = cachedSceneName;
-        byte[] alphas = SaveManager.Instance.GetFogAlphas(scene);
+        if (discoveryPixels == null) return;
+        byte[] alphas = FogStore.Get(cachedSceneName);
         if (alphas == null || alphas.Length != discoveryPixels.Length) return;
         for (int i = 0; i < discoveryPixels.Length; i++)
             discoveryPixels[i].a = alphas[i];
@@ -77,20 +79,16 @@ public class MinimapController : MonoBehaviour
 
     private void SaveFogState()
     {
-        if (SaveManager.Instance == null || discoveryPixels == null) return;
-        string scene = cachedSceneName;
+        if (discoveryPixels == null) return;
         byte[] alphas = new byte[discoveryPixels.Length];
         for (int i = 0; i < discoveryPixels.Length; i++)
             alphas[i] = discoveryPixels[i].a;
-        SaveManager.Instance.SetFogAlphas(scene, alphas);
+        FogStore.Set(cachedSceneName, alphas);
+        fogDirty = false;
+        lastFogFlushTime = Time.unscaledTime;
     }
 
-    private void OnApplicationQuit()
-    {
-        SaveFogState();
-    }
-
-    private void OnDestroy()
+    private void OnDisable()
     {
         SaveFogState();
     }
@@ -123,6 +121,9 @@ public class MinimapController : MonoBehaviour
 
         UpdateDiscovery();
         UpdateMapPosition();
+
+        if (fogDirty && Time.unscaledTime - lastFogFlushTime >= FogFlushInterval)
+            SaveFogState();
     }
 
     private void UpdateDiscovery()
@@ -176,6 +177,7 @@ public class MinimapController : MonoBehaviour
         {
             discoveryTexture.SetPixels32(discoveryPixels);
             discoveryTexture.Apply();
+            fogDirty = true;
         }
     }
 

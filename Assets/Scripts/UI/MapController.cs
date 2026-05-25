@@ -48,6 +48,9 @@ public class MapController : MonoBehaviour
     private Texture2D discoveryTexture;
     private Color32[] discoveryPixels;
     private string cachedSceneName;
+    private bool fogDirty;
+    private float lastFogFlushTime;
+    private const float FogFlushInterval = 0.5f;
 
     public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
     {
@@ -101,8 +104,8 @@ public class MapController : MonoBehaviour
 
     private void LoadFogState()
     {
-        if (SaveManager.Instance == null || discoveryPixels == null) return;
-        byte[] alphas = SaveManager.Instance.GetFogAlphas(cachedSceneName);
+        if (discoveryPixels == null) return;
+        byte[] alphas = FogStore.Get(cachedSceneName);
         if (alphas == null || alphas.Length != discoveryPixels.Length) return;
         for (int i = 0; i < discoveryPixels.Length; i++)
             discoveryPixels[i].a = alphas[i];
@@ -110,19 +113,16 @@ public class MapController : MonoBehaviour
 
     private void SaveFogState()
     {
-        if (Instance != this || SaveManager.Instance == null || discoveryPixels == null) return;
+        if (discoveryPixels == null) return;
         byte[] alphas = new byte[discoveryPixels.Length];
         for (int i = 0; i < discoveryPixels.Length; i++)
             alphas[i] = discoveryPixels[i].a;
-        SaveManager.Instance.SetFogAlphas(cachedSceneName, alphas);
+        FogStore.Set(cachedSceneName, alphas);
+        fogDirty = false;
+        lastFogFlushTime = Time.unscaledTime;
     }
 
-    private void OnApplicationQuit()
-    {
-        SaveFogState();
-    }
-
-    private void OnDestroy()
+    private void OnDisable()
     {
         SaveFogState();
     }
@@ -159,6 +159,11 @@ public class MapController : MonoBehaviour
 
         // Always update discovery even if map is closed
         UpdateDiscovery();
+
+        // Periodically persist revealed fog so a scene reload (e.g. death
+        // -> retry) keeps it, without writing on every changed frame.
+        if (fogDirty && Time.unscaledTime - lastFogFlushTime >= FogFlushInterval)
+            SaveFogState();
 
         if (isMapOpen)
         {
@@ -282,6 +287,7 @@ public class MapController : MonoBehaviour
         {
             discoveryTexture.SetPixels32(discoveryPixels);
             discoveryTexture.Apply();
+            fogDirty = true;
         }
     }
 
