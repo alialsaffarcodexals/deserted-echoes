@@ -22,10 +22,11 @@ public class LevelFootsteps : MonoBehaviour
     void Update()
     {
         Keyboard keyboard = Keyboard.current;
+        bool mapOpen = MapController.Instance != null && MapController.Instance.IsMapOpen;
 
-        // check if any movement key is held 
+        // check if any movement key is held
         bool isMoving = false;
-        if (keyboard != null)
+        if (!mapOpen && keyboard != null)
         {
             if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed ||
                 keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed ||
