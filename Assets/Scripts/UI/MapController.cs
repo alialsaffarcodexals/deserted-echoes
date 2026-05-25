@@ -26,6 +26,9 @@ public class MapController : MonoBehaviour
     [SerializeField] private float maxZoom = 4.0f;
     [SerializeField] private float zoomSpeed = 0.2f;
 
+    [Header("Panning Settings")]
+    [SerializeField] private float panningSpeed = 500f;
+
     [Header("Discovery Settings")]
     [SerializeField] private int discoveryResolution = 128;
     [SerializeField] private float revealWidth = 5f;
@@ -33,6 +36,7 @@ public class MapController : MonoBehaviour
     [SerializeField] private Vector2 fogRevealOffset = Vector2.zero;
 
     private float currentZoom = 1.0f;
+    private Vector2 currentPan = Vector2.zero;
     private bool isMapOpen = false;
     private Transform playerTransform;
     private Texture2D discoveryTexture;
@@ -123,9 +127,51 @@ public class MapController : MonoBehaviour
 
         if (isMapOpen)
         {
+            HandlePanning();
             HandleZoom();
             UpdatePlayerMarker();
         }
+    }
+
+    private void HandlePanning()
+    {
+        Vector2 move = Vector2.zero;
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.upArrowKey.isPressed) move.y += 1;
+            if (Keyboard.current.downArrowKey.isPressed) move.y -= 1;
+            if (Keyboard.current.leftArrowKey.isPressed) move.x -= 1;
+            if (Keyboard.current.rightArrowKey.isPressed) move.x += 1;
+        }
+        else
+        {
+            if (Input.GetKey(KeyCode.UpArrow)) move.y += 1;
+            if (Input.GetKey(KeyCode.DownArrow)) move.y -= 1;
+            if (Input.GetKey(KeyCode.LeftArrow)) move.x -= 1;
+            if (Input.GetKey(KeyCode.RightArrow)) move.x += 1;
+        }
+
+        if (move != Vector2.zero)
+        {
+            // Pan the map in the opposite direction of the arrow key to move the "view" in that direction
+            currentPan -= move.normalized * panningSpeed * Time.unscaledDeltaTime;
+            ClampPan();
+        }
+    }
+
+    private void ClampPan()
+    {
+        if (mapImage == null || mapPanel == null) return;
+
+        RectTransform panelRect = mapPanel.GetComponent<RectTransform>();
+        Vector2 panelSize = panelRect.rect.size;
+        Vector2 mapVisualSize = mapImage.rect.size * currentZoom;
+
+        float maxPanX = Mathf.Max(0, (mapVisualSize.x - panelSize.x) / 2f);
+        float maxPanY = Mathf.Max(0, (mapVisualSize.y - panelSize.y) / 2f);
+
+        currentPan.x = Mathf.Clamp(currentPan.x, -maxPanX, maxPanX);
+        currentPan.y = Mathf.Clamp(currentPan.y, -maxPanY, maxPanY);
     }
 
     private void HandleZoom()
@@ -147,6 +193,7 @@ public class MapController : MonoBehaviour
             {
                 mapImage.localScale = new Vector3(currentZoom, currentZoom, 1f);
             }
+            ClampPan(); // Ensure pan stays within bounds after zoom
         }
     }
 
@@ -213,12 +260,29 @@ public class MapController : MonoBehaviour
         if (isMapOpen)
         {
             Time.timeScale = 0f;
+            CenterOnPlayer();
             UpdatePlayerMarker();
         }
         else
         {
             Time.timeScale = 1f;
         }
+    }
+
+    private void CenterOnPlayer()
+    {
+        if (playerTransform == null || mapImage == null) return;
+
+        Vector2 worldPos = playerTransform.position;
+        float normX = (worldPos.x - worldMin.x) / worldSize.x;
+        float normY = (worldPos.y - worldMin.y) / worldSize.y;
+
+        Vector2 mapSize = mapImage.rect.size;
+        float uiX = (normX - 0.5f) * mapSize.x; 
+        float uiY = (normY - 0.5f) * mapSize.y;
+
+        currentPan = -new Vector2(uiX + markerOffset.x, uiY + markerOffset.y) * currentZoom;
+        ClampPan();
     }
 
     private void UpdatePlayerMarker()
@@ -233,8 +297,8 @@ public class MapController : MonoBehaviour
         float uiX = (normX - 0.5f) * mapSize.x; 
         float uiY = (normY - 0.5f) * mapSize.y;
 
-        mapImage.anchoredPosition = mapImageOffset;
-        playerMarker.anchoredPosition = new Vector2(uiX + markerOffset.x - mapImageOffset.x, uiY + markerOffset.y - mapImageOffset.y);
+        mapImage.anchoredPosition = currentPan + mapImageOffset;
+        playerMarker.anchoredPosition = new Vector2(uiX + markerOffset.x, uiY + markerOffset.y);
         playerMarker.sizeDelta = new Vector2(markerSize, markerSize);
         playerMarker.localRotation = Quaternion.Euler(0, 0, playerTransform.eulerAngles.z);
     }
