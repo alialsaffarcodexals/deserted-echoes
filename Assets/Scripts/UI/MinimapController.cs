@@ -28,6 +28,7 @@ public class MinimapController : MonoBehaviour
     private RawImage fogOverlay;
     private Texture2D discoveryTexture;
     private Color32[] discoveryPixels;
+    private string cachedSceneName;
 
     public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
     {
@@ -42,6 +43,7 @@ public class MinimapController : MonoBehaviour
 
     private void Start()
     {
+        cachedSceneName = SceneManager.GetActiveScene().name;
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
         InitializeDiscoveryTexture();
         CreateFogOverlay();
@@ -66,7 +68,7 @@ public class MinimapController : MonoBehaviour
     private void LoadFogState()
     {
         if (SaveManager.Instance == null || discoveryPixels == null) return;
-        string scene = SceneManager.GetActiveScene().name;
+        string scene = cachedSceneName;
         byte[] alphas = SaveManager.Instance.GetFogAlphas(scene);
         if (alphas == null || alphas.Length != discoveryPixels.Length) return;
         for (int i = 0; i < discoveryPixels.Length; i++)
@@ -76,7 +78,7 @@ public class MinimapController : MonoBehaviour
     private void SaveFogState()
     {
         if (SaveManager.Instance == null || discoveryPixels == null) return;
-        string scene = SceneManager.GetActiveScene().name;
+        string scene = cachedSceneName;
         byte[] alphas = new byte[discoveryPixels.Length];
         for (int i = 0; i < discoveryPixels.Length; i++)
             alphas[i] = discoveryPixels[i].a;

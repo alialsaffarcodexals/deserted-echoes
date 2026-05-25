@@ -47,6 +47,7 @@ public class MapController : MonoBehaviour
     private Transform playerTransform;
     private Texture2D discoveryTexture;
     private Color32[] discoveryPixels;
+    private string cachedSceneName;
 
     public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
     {
@@ -69,9 +70,10 @@ public class MapController : MonoBehaviour
             return;
         }
         Instance = this;
+        cachedSceneName = SceneManager.GetActiveScene().name;
 
         if (mapPanel != null) mapPanel.SetActive(false);
-        
+
         InitializeDiscoveryTexture();
     }
 
@@ -100,8 +102,7 @@ public class MapController : MonoBehaviour
     private void LoadFogState()
     {
         if (SaveManager.Instance == null || discoveryPixels == null) return;
-        string scene = SceneManager.GetActiveScene().name;
-        byte[] alphas = SaveManager.Instance.GetFogAlphas(scene);
+        byte[] alphas = SaveManager.Instance.GetFogAlphas(cachedSceneName);
         if (alphas == null || alphas.Length != discoveryPixels.Length) return;
         for (int i = 0; i < discoveryPixels.Length; i++)
             discoveryPixels[i].a = alphas[i];
@@ -110,11 +111,10 @@ public class MapController : MonoBehaviour
     private void SaveFogState()
     {
         if (Instance != this || SaveManager.Instance == null || discoveryPixels == null) return;
-        string scene = SceneManager.GetActiveScene().name;
         byte[] alphas = new byte[discoveryPixels.Length];
         for (int i = 0; i < discoveryPixels.Length; i++)
             alphas[i] = discoveryPixels[i].a;
-        SaveManager.Instance.SetFogAlphas(scene, alphas);
+        SaveManager.Instance.SetFogAlphas(cachedSceneName, alphas);
     }
 
     private void OnApplicationQuit()
