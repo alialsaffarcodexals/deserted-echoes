@@ -182,14 +182,16 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
+        bool mapOpen = MapController.Instance != null && MapController.Instance.IsMapOpen;
+
+        if (keyboard.aKey.isPressed || (!mapOpen && keyboard.leftArrowKey.isPressed))
             moveX = -1f;
-        else if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed)
+        else if (keyboard.dKey.isPressed || (!mapOpen && keyboard.rightArrowKey.isPressed))
             moveX = 1f;
 
-        if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
+        if (keyboard.sKey.isPressed || (!mapOpen && keyboard.downArrowKey.isPressed))
             moveY = -1f;
-        else if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed)
+        else if (keyboard.wKey.isPressed || (!mapOpen && keyboard.upArrowKey.isPressed))
             moveY = 1f;
 
         Vector2 inputMovement = new Vector2(moveX, moveY);
