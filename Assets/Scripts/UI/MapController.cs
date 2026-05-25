@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -25,6 +25,10 @@ public class MapController : MonoBehaviour
     [SerializeField] private float minZoom = 0.5f;
     [SerializeField] private float maxZoom = 4.0f;
     [SerializeField] private float zoomSpeed = 0.2f;
+
+    [Header("Map Open Settings")]
+    [SerializeField] private float startZoom = 1f;
+    [SerializeField] private Vector2 startPosition = Vector2.zero;
 
     [Header("Panning Settings")]
     [SerializeField] private float panningSpeed = 500f;
@@ -260,7 +264,18 @@ public class MapController : MonoBehaviour
         if (isMapOpen)
         {
             Time.timeScale = 0f;
-            CenterOnPlayer();
+            currentZoom = Mathf.Clamp(startZoom, minZoom, maxZoom);
+            if (mapImage != null)
+                mapImage.localScale = new Vector3(currentZoom, currentZoom, 1f);
+            if (startPosition != Vector2.zero)
+            {
+                currentPan = startPosition;
+                ClampPan();
+            }
+            else
+            {
+                CenterOnPlayer();
+            }
             UpdatePlayerMarker();
         }
         else
@@ -303,3 +318,4 @@ public class MapController : MonoBehaviour
         playerMarker.localRotation = Quaternion.Euler(0, 0, playerTransform.eulerAngles.z);
     }
 }
+
