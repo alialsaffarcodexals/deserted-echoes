@@ -21,6 +21,8 @@ public class SaveManager : MonoBehaviour
     {
         CurrentSaveData = new SaveData();
         CurrentSaveData.lastSceneName = startingSceneName;
+        CurrentSaveData.sceneFogData = new List<SceneFogData>();
+        FogStore.Clear(); // fresh journey starts with full fog
         SaveGame();
         Debug.Log("New game save created at: " + GetSavePath());
     }
@@ -61,6 +63,7 @@ public class SaveManager : MonoBehaviour
             string json = File.ReadAllText(path);
             CurrentSaveData = JsonUtility.FromJson<SaveData>(json);
             NormalizeSaveData();
+            FogStore.ImportFrom(CurrentSaveData.sceneFogData); // seed in-memory fog from disk
             Debug.Log("Game loaded successfully from: " + path);
         }
         catch (System.Exception e)
@@ -89,6 +92,7 @@ public class SaveManager : MonoBehaviour
                 Directory.CreateDirectory(directory);
 
             CaptureActivePlayerData();
+            CurrentSaveData.sceneFogData = FogStore.ExportTo(); // persist current fog discovery to disk
             CurrentSaveData.saveTimestamp = System.DateTime.Now.Ticks;
             string json = JsonUtility.ToJson(CurrentSaveData, true);
             File.WriteAllText(path, json);
@@ -225,6 +229,9 @@ public class SaveManager : MonoBehaviour
 
         if (CurrentSaveData.seenDialogueKeys == null)
             CurrentSaveData.seenDialogueKeys = new List<string>();
+
+        if (CurrentSaveData.sceneFogData == null)
+            CurrentSaveData.sceneFogData = new List<SceneFogData>();
     }
 
     private string GetSavePath()

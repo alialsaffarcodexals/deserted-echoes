@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class MinimapController : MonoBehaviour
 {
@@ -27,6 +28,10 @@ public class MinimapController : MonoBehaviour
     private RawImage fogOverlay;
     private Texture2D discoveryTexture;
     private Color32[] discoveryPixels;
+    private string cachedSceneName;
+    private bool fogDirty;
+    private float lastFogFlushTime;
+    private const float FogFlushInterval = 0.5f;
 
     public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
     {
@@ -41,6 +46,7 @@ public class MinimapController : MonoBehaviour
 
     private void Start()
     {
+        cachedSceneName = SceneManager.GetActiveScene().name;
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
         InitializeDiscoveryTexture();
         CreateFogOverlay();
@@ -56,8 +62,35 @@ public class MinimapController : MonoBehaviour
         for (int i = 0; i < discoveryPixels.Length; i++)
             discoveryPixels[i] = new Color32(0, 0, 0, 255);
 
+        LoadFogState();
+
         discoveryTexture.SetPixels32(discoveryPixels);
         discoveryTexture.Apply();
+    }
+
+    private void LoadFogState()
+    {
+        if (discoveryPixels == null) return;
+        byte[] alphas = FogStore.Get(cachedSceneName);
+        if (alphas == null || alphas.Length != discoveryPixels.Length) return;
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            discoveryPixels[i].a = alphas[i];
+    }
+
+    private void SaveFogState()
+    {
+        if (discoveryPixels == null) return;
+        byte[] alphas = new byte[discoveryPixels.Length];
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            alphas[i] = discoveryPixels[i].a;
+        FogStore.Set(cachedSceneName, alphas);
+        fogDirty = false;
+        lastFogFlushTime = Time.unscaledTime;
+    }
+
+    private void OnDisable()
+    {
+        SaveFogState();
     }
 
     private void CreateFogOverlay()
@@ -88,6 +121,9 @@ public class MinimapController : MonoBehaviour
 
         UpdateDiscovery();
         UpdateMapPosition();
+
+        if (fogDirty && Time.unscaledTime - lastFogFlushTime >= FogFlushInterval)
+            SaveFogState();
     }
 
     private void UpdateDiscovery()
@@ -141,6 +177,7 @@ public class MinimapController : MonoBehaviour
         {
             discoveryTexture.SetPixels32(discoveryPixels);
             discoveryTexture.Apply();
+            fogDirty = true;
         }
     }
 
