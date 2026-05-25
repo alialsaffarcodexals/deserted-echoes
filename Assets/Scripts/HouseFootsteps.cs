@@ -30,9 +30,11 @@ public class HouseFootsteps : MonoBehaviour
     {
         Keyboard keyboard = Keyboard.current;
 
+        bool mapOpen = MapController.Instance != null && MapController.Instance.IsMapOpen;
+
         // check if any movement key is held (same keys as PlayerController)
         bool isMoving = false;
-        if (keyboard != null)
+        if (!mapOpen && keyboard != null)
         {
             if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed ||
                 keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed ||
