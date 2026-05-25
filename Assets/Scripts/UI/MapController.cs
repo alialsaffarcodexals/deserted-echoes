@@ -42,6 +42,7 @@ public class MapController : MonoBehaviour
     private float currentZoom = 1.0f;
     private Vector2 currentPan = Vector2.zero;
     private bool isMapOpen = false;
+    private bool hasBeenOpened = false;
     private Transform playerTransform;
     private Texture2D discoveryTexture;
     private Color32[] discoveryPixels;
@@ -264,17 +265,21 @@ public class MapController : MonoBehaviour
         if (isMapOpen)
         {
             Time.timeScale = 0f;
-            currentZoom = Mathf.Clamp(startZoom, minZoom, maxZoom);
-            if (mapImage != null)
-                mapImage.localScale = new Vector3(currentZoom, currentZoom, 1f);
-            if (startPosition != Vector2.zero)
+            if (!hasBeenOpened)
             {
-                currentPan = startPosition;
-                ClampPan();
-            }
-            else
-            {
-                CenterOnPlayer();
+                currentZoom = Mathf.Clamp(startZoom, minZoom, maxZoom);
+                if (mapImage != null)
+                    mapImage.localScale = new Vector3(currentZoom, currentZoom, 1f);
+                if (startPosition != Vector2.zero)
+                {
+                    currentPan = startPosition;
+                    ClampPan();
+                }
+                else
+                {
+                    CenterOnPlayer();
+                }
+                hasBeenOpened = true;
             }
             UpdatePlayerMarker();
         }
@@ -318,4 +323,5 @@ public class MapController : MonoBehaviour
         playerMarker.localRotation = Quaternion.Euler(0, 0, playerTransform.eulerAngles.z);
     }
 }
+
 
