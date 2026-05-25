@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class MapController : MonoBehaviour
 {
@@ -81,20 +82,49 @@ public class MapController : MonoBehaviour
             discoveryTexture = new Texture2D(discoveryResolution, discoveryResolution, TextureFormat.RGBA32, false);
             discoveryTexture.filterMode = FilterMode.Bilinear;
             discoveryTexture.wrapMode = TextureWrapMode.Clamp;
-            
+
             discoveryPixels = new Color32[discoveryResolution * discoveryResolution];
             for (int i = 0; i < discoveryPixels.Length; i++)
-            {
-                discoveryPixels[i] = new Color32(0, 0, 0, 255); // Fully black/hidden
-            }
+                discoveryPixels[i] = new Color32(0, 0, 0, 255);
+
+            LoadFogState();
+
             discoveryTexture.SetPixels32(discoveryPixels);
             discoveryTexture.Apply();
         }
 
         if (fogImage != null)
-        {
             fogImage.texture = discoveryTexture;
-        }
+    }
+
+    private void LoadFogState()
+    {
+        if (SaveManager.Instance == null || discoveryPixels == null) return;
+        string scene = SceneManager.GetActiveScene().name;
+        byte[] alphas = SaveManager.Instance.GetFogAlphas(scene);
+        if (alphas == null || alphas.Length != discoveryPixels.Length) return;
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            discoveryPixels[i].a = alphas[i];
+    }
+
+    private void SaveFogState()
+    {
+        if (Instance != this || SaveManager.Instance == null || discoveryPixels == null) return;
+        string scene = SceneManager.GetActiveScene().name;
+        byte[] alphas = new byte[discoveryPixels.Length];
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            alphas[i] = discoveryPixels[i].a;
+        SaveManager.Instance.SetFogAlphas(scene, alphas);
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveFogState();
+    }
+
+    private void OnDestroy()
+    {
+        SaveFogState();
     }
 
     private void Start()

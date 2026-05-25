@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.IO;
 using System.Collections.Generic;
 
@@ -21,6 +22,7 @@ public class SaveManager : MonoBehaviour
     {
         CurrentSaveData = new SaveData();
         CurrentSaveData.lastSceneName = startingSceneName;
+        CurrentSaveData.sceneFogData = new List<SceneFogData>();
         SaveGame();
         Debug.Log("New game save created at: " + GetSavePath());
     }
@@ -218,6 +220,29 @@ public class SaveManager : MonoBehaviour
             playerController.SavePlayerData();
     }
 
+    public byte[] GetFogAlphas(string sceneName)
+    {
+        if (CurrentSaveData?.sceneFogData == null) return null;
+        SceneFogData entry = CurrentSaveData.sceneFogData.Find(d => d.sceneName == sceneName);
+        if (entry == null || string.IsNullOrEmpty(entry.fogBase64)) return null;
+        return Convert.FromBase64String(entry.fogBase64);
+    }
+
+    public void SetFogAlphas(string sceneName, byte[] alphas)
+    {
+        if (CurrentSaveData == null) return;
+        if (CurrentSaveData.sceneFogData == null)
+            CurrentSaveData.sceneFogData = new List<SceneFogData>();
+        SceneFogData entry = CurrentSaveData.sceneFogData.Find(d => d.sceneName == sceneName);
+        if (entry == null)
+        {
+            entry = new SceneFogData { sceneName = sceneName };
+            CurrentSaveData.sceneFogData.Add(entry);
+        }
+        entry.fogBase64 = Convert.ToBase64String(alphas);
+        SaveGame();
+    }
+
     private void NormalizeSaveData()
     {
         if (CurrentSaveData == null)
@@ -225,6 +250,9 @@ public class SaveManager : MonoBehaviour
 
         if (CurrentSaveData.seenDialogueKeys == null)
             CurrentSaveData.seenDialogueKeys = new List<string>();
+
+        if (CurrentSaveData.sceneFogData == null)
+            CurrentSaveData.sceneFogData = new List<SceneFogData>();
     }
 
     private string GetSavePath()

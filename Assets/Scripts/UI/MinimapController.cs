@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class MinimapController : MonoBehaviour
 {
@@ -56,8 +57,40 @@ public class MinimapController : MonoBehaviour
         for (int i = 0; i < discoveryPixels.Length; i++)
             discoveryPixels[i] = new Color32(0, 0, 0, 255);
 
+        LoadFogState();
+
         discoveryTexture.SetPixels32(discoveryPixels);
         discoveryTexture.Apply();
+    }
+
+    private void LoadFogState()
+    {
+        if (SaveManager.Instance == null || discoveryPixels == null) return;
+        string scene = SceneManager.GetActiveScene().name;
+        byte[] alphas = SaveManager.Instance.GetFogAlphas(scene);
+        if (alphas == null || alphas.Length != discoveryPixels.Length) return;
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            discoveryPixels[i].a = alphas[i];
+    }
+
+    private void SaveFogState()
+    {
+        if (SaveManager.Instance == null || discoveryPixels == null) return;
+        string scene = SceneManager.GetActiveScene().name;
+        byte[] alphas = new byte[discoveryPixels.Length];
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            alphas[i] = discoveryPixels[i].a;
+        SaveManager.Instance.SetFogAlphas(scene, alphas);
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveFogState();
+    }
+
+    private void OnDestroy()
+    {
+        SaveFogState();
     }
 
     private void CreateFogOverlay()
