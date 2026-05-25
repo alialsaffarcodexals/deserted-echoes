@@ -17,6 +17,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float attackCooldown = 0.5f;
     [SerializeField] private LayerMask enemyLayer;
 
+    [Header("Combat - Difficulty Damage")]
+    [Tooltip("Player base attack damage when the game difficulty is Easy.")]
+    [SerializeField] private int attackDamageEasy = 25;
+    [Tooltip("Player base attack damage when the game difficulty is Normal.")]
+    [SerializeField] private int attackDamageNormal = 20;
+    [Tooltip("Player base attack damage when the game difficulty is Hard.")]
+    [SerializeField] private int attackDamageHard = 10;
+
     [Header("Health")]
     [SerializeField] private int maxHealth = 100;
     
@@ -53,6 +61,10 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        // Pick the player's base attack damage based on the chosen difficulty.
+        // Easy = 25, Normal = 20, Hard = 10 (Inspector-tunable).
+        GameDifficultySettings.Load();
+        attackDamage = GetAttackDamageForDifficulty(GameDifficultySettings.Current);
         baseAttackDamage = attackDamage;
         currentHealth = maxHealth;
 
@@ -170,14 +182,16 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
+        bool mapOpen = MapController.Instance != null && MapController.Instance.IsMapOpen;
+
+        if (keyboard.aKey.isPressed || (!mapOpen && keyboard.leftArrowKey.isPressed))
             moveX = -1f;
-        else if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed)
+        else if (keyboard.dKey.isPressed || (!mapOpen && keyboard.rightArrowKey.isPressed))
             moveX = 1f;
 
-        if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
+        if (keyboard.sKey.isPressed || (!mapOpen && keyboard.downArrowKey.isPressed))
             moveY = -1f;
-        else if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed)
+        else if (keyboard.wKey.isPressed || (!mapOpen && keyboard.upArrowKey.isPressed))
             moveY = 1f;
 
         Vector2 inputMovement = new Vector2(moveX, moveY);
@@ -330,10 +344,32 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("IsAttacking", false);
     }
 
+    /// <summary>
+    /// Called by SurvivalSystem.OnSceneLoaded to re-wire the reference every
+    /// time a scene loads, so DontDestroyOnLoad players always route damage
+    /// through SurvivalSystem regardless of whether Start() re-ran.
+    /// </summary>
+    public void BindSurvivalSystem(SurvivalSystem system)
+    {
+        survivalSystem = system;
+        SyncSurvivalHealth();
+    }
+
     public void TakeDamage(int damage)
     {
         if (isDead)
             return;
+
+        // Re-acquire SurvivalSystem if lost (e.g. DontDestroyOnLoad player
+        // whose Start() never re-fires after a scene reload via Retry).
+        if (survivalSystem == null)
+        {
+            survivalSystem = Object.FindAnyObjectByType<SurvivalSystem>();
+            if (survivalSystem != null)
+                Debug.Log("[PlayerController] TakeDamage: re-acquired SurvivalSystem.");
+            else
+                Debug.LogWarning("[PlayerController] TakeDamage: SurvivalSystem still null — damage won't update health bar.");
+        }
 
         OnHitReceived?.Invoke();
 
@@ -499,6 +535,17 @@ public class PlayerController : MonoBehaviour
         level = Mathf.Max(1, level);
         attackDamage = baseAttackDamage + ((level - 1) * attackDamagePerLevel);
         ApplyAnimationForLevel();
+    }
+
+    private int GetAttackDamageForDifficulty(GameDifficulty difficulty)
+    {
+        switch (difficulty)
+        {
+            case GameDifficulty.Easy:   return Mathf.Max(1, attackDamageEasy);
+            case GameDifficulty.Hard:   return Mathf.Max(1, attackDamageHard);
+            case GameDifficulty.Normal:
+            default:                    return Mathf.Max(1, attackDamageNormal);
+        }
     }
 
     private void SyncSurvivalHealth()

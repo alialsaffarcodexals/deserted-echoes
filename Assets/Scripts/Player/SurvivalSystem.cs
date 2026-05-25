@@ -46,6 +46,7 @@ public class SurvivalSystem : MonoBehaviour
     public bool CanSprint => currentStamina > 0 && !isExhausted && !IsDead;
     public float CurrentHealth => currentHealth;
     public float MaxHealth => maxHealth;
+    public float CurrentStamina => currentStamina;
 
     void Awake()
     {
@@ -79,7 +80,28 @@ public class SurvivalSystem : MonoBehaviour
     {
         playerController = Object.FindAnyObjectByType<PlayerController>();
 
+        // Push this SurvivalSystem back into the PlayerController so that a
+        // DontDestroyOnLoad player (whose Start() never re-fires on reload)
+        // always has a valid survivalSystem reference after scene transitions.
+        if (playerController != null)
+            playerController.BindSurvivalSystem(this);
+
+        // Hide the HUD in non-gameplay scenes (main menu, etc.).
+        bool isGameplayScene = scene.name != "main-menu";
+        SetHUDVisible(isGameplayScene);
+
+        if (!isGameplayScene)
+            return;
+
         FindUIRefrecesInNewScene();
+
+        Debug.Log($"[SurvivalSystem] Scene '{scene.name}' loaded. " +
+                  $"healthSlider={(healthSlider != null ? healthSlider.gameObject.name : "NULL")}, " +
+                  $"currentHealth={currentHealth}");
+
+        // Push current values onto freshly-found slider refs immediately
+        // so the bar reflects reality on the very first frame.
+        UpdateUI();
     }
 
     void Update()
@@ -108,17 +130,35 @@ public class SurvivalSystem : MonoBehaviour
 
     private void FindUIRefrecesInNewScene()
     {
-        GameObject healthObj = GameObject.FindWithTag("HealthSlider");
-        if (healthObj) healthSlider = healthObj.GetComponent<Slider>();
+        // Only search by tag when the current reference is null or has been
+        // destroyed (scene-specific slider from a previous load).  If the
+        // reference is still valid — e.g. an Inspector-assigned slider on
+        // the DontDestroyOnLoad canvas — keep it so we don't accidentally
+        // start driving a scene-specific slider while the visible
+        // DontDestroyOnLoad one sits frozen at full health.
+        if (!healthSlider)
+        {
+            GameObject healthObj = GameObject.FindWithTag("HealthSlider");
+            if (healthObj) healthSlider = healthObj.GetComponent<Slider>();
+        }
 
-        GameObject staminaObj = GameObject.FindWithTag("StaminaSlider");
-        if (staminaObj) staminaSlider = staminaObj.GetComponent<Slider>();
+        if (!staminaSlider)
+        {
+            GameObject staminaObj = GameObject.FindWithTag("StaminaSlider");
+            if (staminaObj) staminaSlider = staminaObj.GetComponent<Slider>();
+        }
 
-        GameObject hungerObj = GameObject.FindWithTag("HungerSlider");
-        if (hungerObj) hungerSlider = hungerObj.GetComponent<Slider>();
+        if (!hungerSlider)
+        {
+            GameObject hungerObj = GameObject.FindWithTag("HungerSlider");
+            if (hungerObj) hungerSlider = hungerObj.GetComponent<Slider>();
+        }
 
-        GameObject thirstObj = GameObject.FindWithTag("ThirstSlider");
-        if (thirstObj) thirstSlider = thirstObj.GetComponent<Slider>();
+        if (!thirstSlider)
+        {
+            GameObject thirstObj = GameObject.FindWithTag("ThirstSlider");
+            if (thirstObj) thirstSlider = thirstObj.GetComponent<Slider>();
+        }
 
         SetupSliderMaxValues();
     }
@@ -184,9 +224,51 @@ public class SurvivalSystem : MonoBehaviour
 
     public void SetSprinting(bool state) => isSprinting = state;
 
+    /// <summary>
+    /// Called by scene HUD objects (e.g. HUDController.Start) to hand their
+    /// slider references directly to SurvivalSystem.  This is more reliable
+    /// than tag-searching because it runs after the scene is fully set up.
+    /// Pass null for any slider you don't want to change.
+    /// </summary>
+    public void RegisterSliders(Slider health, Slider stamina, Slider hunger, Slider thirst)
+    {
+        if (health  != null) { healthSlider  = health;  healthSlider.maxValue  = maxHealth; }
+        if (stamina != null) { staminaSlider = stamina; staminaSlider.maxValue = maxStamina; }
+        if (hunger  != null) { hungerSlider  = hunger;  hungerSlider.maxValue  = maxHunger; }
+        if (thirst  != null) { thirstSlider  = thirst;  thirstSlider.maxValue  = maxThirst; }
+        UpdateUI();
+        string sliderName = healthSlider != null ? healthSlider.gameObject.name : "NULL";
+        Debug.Log($"[SurvivalSystem] RegisterSliders called. healthSlider={sliderName}, currentHealth={currentHealth}");
+    }
+
+    /// <summary>
+    /// Immediately restores health to max and refreshes the HUD.
+    /// Call this before reloading the scene on retry so the bar
+    /// doesn't stay stuck at the dead (0 HP) visual.
+    /// </summary>
+    public void RestoreFullHealth()
+    {
+        currentHealth = maxHealth;
+        UpdateUI();
+    }
+
+    private void SetHUDVisible(bool visible)
+    {
+        // Toggle every Canvas in the root hierarchy so the HUD
+        // disappears in non-gameplay scenes without disabling the
+        // MonoBehaviours that need to keep running.
+        Canvas[] canvases = transform.root.GetComponentsInChildren<Canvas>(true);
+        foreach (Canvas c in canvases)
+            c.enabled = visible;
+    }
+
     void UpdateUI()
     {
-        if (healthSlider) healthSlider.value = currentHealth;
+        if (healthSlider)
+            healthSlider.value = currentHealth;
+        else
+            Debug.LogWarning("[SurvivalSystem] UpdateUI: healthSlider is NULL — bar cannot update!");
+
         if (staminaSlider) staminaSlider.value = currentStamina;
         if (hungerSlider) hungerSlider.value = currentHunger;
         if (thirstSlider) thirstSlider.value = currentThirst;
@@ -216,10 +298,17 @@ public class SurvivalSystem : MonoBehaviour
     {
         if (IsDead) return;
         currentHealth -= amount;
+        Debug.Log($"[SurvivalSystem] TakeDamage({amount}) → currentHealth={currentHealth}, " +
+                  $"healthSlider={(healthSlider != null ? healthSlider.gameObject.name : "NULL")}");
         if (currentHealth <= 0)
         {
             currentHealth = 0;
+            UpdateUI();   // show 0 HP before OnDeath; Update() won't run after IsDead=true
             OnDeath();
+        }
+        else
+        {
+            UpdateUI();   // reflect damage immediately, don't wait for next Update() frame
         }
     }
 
