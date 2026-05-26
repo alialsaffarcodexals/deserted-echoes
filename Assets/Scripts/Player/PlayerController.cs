@@ -97,7 +97,7 @@ public class PlayerController : MonoBehaviour
             currentHealth = maxHealth;
 
         survivalSystem = FindObjectOfType<SurvivalSystem>();
-        SyncSurvivalHealth();
+        ReconcileHealthOnSceneLoad();
 
         if (animator == null)
             return;
@@ -352,7 +352,7 @@ public class PlayerController : MonoBehaviour
     public void BindSurvivalSystem(SurvivalSystem system)
     {
         survivalSystem = system;
-        SyncSurvivalHealth();
+        ReconcileHealthOnSceneLoad();
     }
 
     public void TakeDamage(int damage)
@@ -552,6 +552,30 @@ public class PlayerController : MonoBehaviour
     {
         if (survivalSystem != null)
             survivalSystem.SetHealthStats(maxHealth, currentHealth);
+    }
+
+    /// <summary>
+    /// Reconciles health with the persistent SurvivalSystem when a scene loads.
+    /// The SurvivalSystem is DontDestroyOnLoad and carries the player's real
+    /// health across teleports, so a freshly-spawned player must adopt its
+    /// values instead of overwriting them with this scene's default full health.
+    /// When the player was just restored from a save file the save is
+    /// authoritative, so we push those values into the SurvivalSystem instead.
+    /// </summary>
+    private void ReconcileHealthOnSceneLoad()
+    {
+        if (survivalSystem == null)
+            return;
+
+        if (hasLoadedSave)
+        {
+            survivalSystem.SetHealthStats(maxHealth, currentHealth);
+        }
+        else
+        {
+            maxHealth = Mathf.Max(1, Mathf.RoundToInt(survivalSystem.MaxHealth));
+            currentHealth = Mathf.Clamp(Mathf.RoundToInt(survivalSystem.CurrentHealth), 0, maxHealth);
+        }
     }
 
     private void ApplyAnimationForLevel()
