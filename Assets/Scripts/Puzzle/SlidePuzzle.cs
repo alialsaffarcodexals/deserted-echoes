@@ -177,9 +177,6 @@ public class SlidePuzzle : MonoBehaviour
         }
         piece.Rect.anchoredPosition = destination;
         busy = false;
-
-        if (IsSolved())
-            OnSolved();
     }
 
     private bool IsSolved()
@@ -193,41 +190,24 @@ public class SlidePuzzle : MonoBehaviour
         return true;
     }
 
+    // Hooked to the "Solve" button. Reveals the win state only when the picture
+    // is correctly assembled; otherwise plays the error cue so the player retries.
+    public void CheckSolution()
+    {
+        if (busy || solved) return;
+
+        if (IsSolved())
+            OnSolved();
+        else
+            PlayClip(invalidClip);
+    }
+
     private void OnSolved()
     {
         solved = true;
+        PlayClip(solvedClip);
         if (puzzleSolvedObject != null) puzzleSolvedObject.SetActive(true);
-
-        // Played detached so the cue isn't cut off when the board is hidden.
-        if (solvedClip != null)
-        {
-            Vector3 at = Camera.main != null ? Camera.main.transform.position : Vector3.zero;
-            AudioSource.PlayClipAtPoint(solvedClip, at);
-        }
-
         if (puzzleUnsolvedObject != null) puzzleUnsolvedObject.SetActive(false);
-    }
-
-    // Snaps every tile to its home cell. Handy for a "Solve"/skip button.
-    public void SolveImmediately()
-    {
-        if (grid == null) BuildGrid();
-
-        for (int i = 0; i < grid.Length; i++) grid[i] = null;
-
-        for (int i = 0; i < tiles.Count && i < CellCount; i++)
-        {
-            if (tiles[i] == null) continue;
-            SlidePuzzlePiece piece = tiles[i].GetComponent<SlidePuzzlePiece>();
-            if (piece == null) continue;
-
-            piece.CurrentIndex = piece.HomeIndex;
-            grid[piece.HomeIndex] = piece;
-            piece.Rect.anchoredPosition = CellPosition(piece.HomeIndex);
-        }
-
-        emptyIndex = CellCount - 1;
-        OnSolved();
     }
 
     private void PlayClip(AudioClip clip)
