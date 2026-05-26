@@ -56,6 +56,9 @@ public abstract class EnemyControllerBase : MonoBehaviour
     [Header("Score")]
     [SerializeField] private int scoreValue = 100;
 
+    [Tooltip("How much experience this structural base enemy awards on death.")]
+    [SerializeField] private float expReward = 50f;
+
     [Header("Animation")]
     [SerializeField] private AttackAnimationMode attackAnimationMode = AttackAnimationMode.Single;
 
@@ -408,6 +411,11 @@ public abstract class EnemyControllerBase : MonoBehaviour
 
         PlayerStats stats = UnityEngine.Object.FindAnyObjectByType<PlayerStats>();
         if (stats != null) stats.AddScore(scoreValue);
+
+        if (SurvivalSystem.Instance != null)
+        {
+            SurvivalSystem.Instance.AddExperience(expReward);
+        }
 
         if (animator != null)
         {

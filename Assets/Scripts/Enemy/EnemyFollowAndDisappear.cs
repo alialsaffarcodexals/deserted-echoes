@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
 public class EnemyFollowAndDisappear : MonoBehaviour
@@ -11,6 +11,12 @@ public class EnemyFollowAndDisappear : MonoBehaviour
 
     [Header("Combat")]
     [SerializeField] string attackHitboxTag = "AttackHitbox";
+
+    // ─────────────────────────────────────────────────────────────
+    // NEW EXP CONFIGURATION
+    // ─────────────────────────────────────────────────────────────
+    [Header("Progression Rewards")]
+    [SerializeField] private float expReward = 20f;
 
     Transform player;
     PlayerController playerController;
@@ -61,12 +67,23 @@ public class EnemyFollowAndDisappear : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag(attackHitboxTag))
+        {
+            AwardExperience();
             Destroy(gameObject);
+        }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.collider.CompareTag(attackHitboxTag))
             Destroy(gameObject);
+    }
+
+    private void AwardExperience()
+    {
+        if (SurvivalSystem.Instance != null)
+        {
+            SurvivalSystem.Instance.AddExperience(expReward);
+        }
     }
 }
