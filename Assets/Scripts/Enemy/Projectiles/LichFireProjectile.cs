@@ -30,17 +30,10 @@ public class LichFireProjectile : ProjectileBase
 
     protected override void HandleCollision(Collider2D collision)
     {
-        // Check if hit player
-        if (collision.CompareTag("Player"))
-        {
-            DamagePlayer();
-            DestroyProjectile();
-        }
-        // Check if hit enemy or wall
-        else if (collision.CompareTag("Enemy") || !collision.CompareTag("Player"))
-        {
-            // Hit something else, destroy
-            DestroyProjectile();
-        }
+        if (!collision.CompareTag("Player"))
+            return;
+
+        DamagePlayer();
+        DestroyProjectile();
     }
 }
