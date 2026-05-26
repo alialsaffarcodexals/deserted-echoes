@@ -196,8 +196,15 @@ public class SlidePuzzle : MonoBehaviour
     private void OnSolved()
     {
         solved = true;
-        PlayClip(solvedClip);
         if (puzzleSolvedObject != null) puzzleSolvedObject.SetActive(true);
+
+        // Played detached so the cue isn't cut off when the board is hidden.
+        if (solvedClip != null)
+        {
+            Vector3 at = Camera.main != null ? Camera.main.transform.position : Vector3.zero;
+            AudioSource.PlayClipAtPoint(solvedClip, at);
+        }
+
         if (puzzleUnsolvedObject != null) puzzleUnsolvedObject.SetActive(false);
     }
 
