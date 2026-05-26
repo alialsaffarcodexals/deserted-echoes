@@ -5,13 +5,15 @@
 // Sprint: 3 | Created: May 1, 2026
 // Description: Controls the Settings sub-panel inside the Pause Menu.
 //              Handles Master / Music / SFX volume sliders and
-//              Fullscreen toggle. Settings are saved via PlayerPrefs
-//              and restored automatically on startup.
+//              Fullscreen toggle. Sliders preview audio in real time;
+//              settings are only committed on Apply. Close reverts to
+//              last saved state. Main Menu button exits to main-menu scene.
 // ─────────────────────────────────────────────────────────────
 
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 
 public class SettingsPanelUI : MonoBehaviour
 {
@@ -36,17 +38,13 @@ public class SettingsPanelUI : MonoBehaviour
     [Header("UI Sound Effects")]
     [SerializeField] private AudioClip panelOpenClip;
     [SerializeField] private AudioClip toggleClip;
+    [SerializeField] private AudioClip buttonClickClip;
 
     // ─────────────────────────────────────────────────────────
 
     private void OnEnable()
     {
         LoadSettingsIntoUI();
-        PlayOpenSound();
-    }
-
-    private void PlayOpenSound()
-    {
         PlaySound(panelOpenClip);
     }
 
@@ -61,85 +59,92 @@ public class SettingsPanelUI : MonoBehaviour
 
     private void LoadSettingsIntoUI()
     {
-        // Apply settings through SettingsManager to ensure everything is synchronized
-        if (SettingsManager.Instance != null)
-        {
-            SettingsManager.Instance.ApplyAllSettings();
-        }
-
-        // Fetch current values from PlayerPrefs using standard keys
         float master  = PlayerPrefs.GetFloat(SettingsManager.KEY_MASTER,  0.2f);
         float music   = PlayerPrefs.GetFloat(SettingsManager.KEY_MUSIC,   0.2f);
         float sfx     = PlayerPrefs.GetFloat(SettingsManager.KEY_SFX,     0.2f);
         int   fullscr = PlayerPrefs.GetInt(SettingsManager.KEY_FULLSCR,   Screen.fullScreen ? 1 : 0);
 
-        // Update UI components silently without triggering their onValueChanged callbacks
         if (masterVolumeSlider != null)  masterVolumeSlider.SetValueWithoutNotify(master);
         if (musicVolumeSlider  != null)  musicVolumeSlider.SetValueWithoutNotify(music);
         if (sfxVolumeSlider    != null)  sfxVolumeSlider.SetValueWithoutNotify(sfx);
         if (fullscreenToggle   != null)  fullscreenToggle.SetIsOnWithoutNotify(fullscr == 1);
     }
 
-    // ── Slider Callbacks (wire to OnValueChanged in Inspector) ──
+    // ── Slider Callbacks — preview only, no PlayerPrefs writes ──
 
     /// <summary>Called by MasterVolumeSlider OnValueChanged.</summary>
     public void OnMasterVolumeChanged(float value)
     {
-        if (SettingsManager.Instance != null)
-        {
-            SettingsManager.Instance.SetMasterVolume(value);
-        }
-        else
-        {
-            PlayerPrefs.SetFloat(SettingsManager.KEY_MASTER, value);
-            PlayerPrefs.Save();
-        }
+        ApplyVolume("MasterVolume", value);
     }
 
     /// <summary>Called by MusicVolumeSlider OnValueChanged.</summary>
     public void OnMusicVolumeChanged(float value)
     {
-        if (SettingsManager.Instance != null)
-        {
-            SettingsManager.Instance.SetMusicVolume(value);
-        }
-        else
-        {
-            PlayerPrefs.SetFloat(SettingsManager.KEY_MUSIC, value);
-            PlayerPrefs.Save();
-        }
+        ApplyVolume("MusicVolume", value);
     }
 
     /// <summary>Called by SFXVolumeSlider OnValueChanged.</summary>
     public void OnSFXVolumeChanged(float value)
     {
-        if (SettingsManager.Instance != null)
-        {
-            SettingsManager.Instance.SetSFXVolume(value);
-        }
-        else
-        {
-            PlayerPrefs.SetFloat(SettingsManager.KEY_SFX, value);
-            PlayerPrefs.Save();
-        }
+        ApplyVolume("SFXVolume", value);
     }
 
-    // ── Toggle Callback (wire to OnValueChanged in Inspector) ──
+    // ── Toggle Callback — preview only ──────────────────────
 
     /// <summary>Called by FullscreenToggle OnValueChanged.</summary>
     public void OnFullscreenToggleChanged(bool isOn)
     {
         PlaySound(toggleClip);
+        Screen.fullScreen = isOn;
+    }
+
+    // ── Button Callbacks ─────────────────────────────────────
+
+    /// <summary>Saves all current slider/toggle values and hides the panel.</summary>
+    public void OnApply()
+    {
+        PlaySound(buttonClickClip);
+
+        float master  = masterVolumeSlider  != null ? masterVolumeSlider.value  : PlayerPrefs.GetFloat(SettingsManager.KEY_MASTER, 0.2f);
+        float music   = musicVolumeSlider   != null ? musicVolumeSlider.value   : PlayerPrefs.GetFloat(SettingsManager.KEY_MUSIC,  0.2f);
+        float sfx     = sfxVolumeSlider     != null ? sfxVolumeSlider.value     : PlayerPrefs.GetFloat(SettingsManager.KEY_SFX,    0.2f);
+        bool  fullscr = fullscreenToggle    != null ? fullscreenToggle.isOn     : Screen.fullScreen;
+
         if (SettingsManager.Instance != null)
         {
-            SettingsManager.Instance.SetFullscreen(isOn);
+            SettingsManager.Instance.SetMasterVolume(master);
+            SettingsManager.Instance.SetMusicVolume(music);
+            SettingsManager.Instance.SetSFXVolume(sfx);
+            SettingsManager.Instance.SetFullscreen(fullscr);
         }
         else
         {
-            Screen.fullScreen = isOn;
-            PlayerPrefs.SetInt(SettingsManager.KEY_FULLSCR, isOn ? 1 : 0);
+            PlayerPrefs.SetFloat(SettingsManager.KEY_MASTER, master);
+            PlayerPrefs.SetFloat(SettingsManager.KEY_MUSIC,  music);
+            PlayerPrefs.SetFloat(SettingsManager.KEY_SFX,    sfx);
+            PlayerPrefs.SetInt(SettingsManager.KEY_FULLSCR,  fullscr ? 1 : 0);
             PlayerPrefs.Save();
         }
+
+        gameObject.SetActive(false);
+    }
+
+    /// <summary>Reverts the AudioMixer to last saved state and hides the panel.</summary>
+    public void OnClose()
+    {
+        if (SettingsManager.Instance != null)
+            SettingsManager.Instance.ApplyAllSettings();
+
+        gameObject.SetActive(false);
+    }
+
+    /// <summary>Returns to the main menu, resetting timescale first.</summary>
+    public void OnMainMenu()
+    {
+        PlaySound(buttonClickClip);
+        Time.timeScale = 1f;
+        SceneLoader.LoadScene("main-menu");
     }
 
     // ── Private Helpers ──────────────────────────────────────
@@ -149,7 +154,6 @@ public class SettingsPanelUI : MonoBehaviour
     {
         if (audioMixer == null) return;
 
-        // Clamp to avoid log(0) — minimum slider value maps to -80 dB (silence)
         float dB = value > 0.0001f ? Mathf.Log10(value) * 20f : -80f;
         audioMixer.SetFloat(parameter, dB);
     }

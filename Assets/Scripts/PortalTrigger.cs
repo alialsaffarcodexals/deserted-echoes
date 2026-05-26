@@ -58,6 +58,27 @@ public class PortalTrigger : MonoBehaviour
                 player.transform.position
             );
 
+        // Heading to Open-World: present the destination choice BEFORE teleporting.
+        // The player picks here; the actual load happens only after a selection.
+        if (targetSceneName == "Open-World" && PortalSpawnManager.Instance != null)
+        {
+            TeleportSelectionUI ui = PortalSpawnManager.FindTeleportSelectionUI();
+            if (ui != null)
+            {
+                hasTriggered = true; // block re-trigger while the panel is open
+                ui.gameObject.SetActive(true);
+                ui.Show(
+                    useCentral =>
+                    {
+                        PortalSpawnManager.Instance.SetOpenWorldSpawnChoice(useCentral);
+                        Time.timeScale = 1f;
+                        SceneLoader.LoadScene("Open-World");
+                    },
+                    () => hasTriggered = false); // closed without choosing — allow retry
+                return;
+            }
+        }
+
         hasTriggered   = true;
         Time.timeScale = 1f;
         SceneLoader.LoadScene(targetSceneName);

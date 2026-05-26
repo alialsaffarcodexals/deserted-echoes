@@ -1,11 +1,18 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class MinimapController : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private RectTransform mapContent;
     [SerializeField] private RectTransform playerMarker;
+
+    [Header("Zoom Settings")]
+    [SerializeField] [Range(0.5f, 4f)] private float zoomLevel = 1f;
+
+    [Header("Marker Settings")]
+    [SerializeField] private float markerSize = 10f;
 
     [Header("Level Configuration")]
     [SerializeField] private Vector2 worldMin = new Vector2(-51f, -54f);
@@ -21,6 +28,10 @@ public class MinimapController : MonoBehaviour
     private RawImage fogOverlay;
     private Texture2D discoveryTexture;
     private Color32[] discoveryPixels;
+    private string cachedSceneName;
+    private bool fogDirty;
+    private float lastFogFlushTime;
+    private const float FogFlushInterval = 0.5f;
 
     public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
     {
@@ -35,6 +46,7 @@ public class MinimapController : MonoBehaviour
 
     private void Start()
     {
+        cachedSceneName = SceneManager.GetActiveScene().name;
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
         InitializeDiscoveryTexture();
         CreateFogOverlay();
@@ -50,8 +62,35 @@ public class MinimapController : MonoBehaviour
         for (int i = 0; i < discoveryPixels.Length; i++)
             discoveryPixels[i] = new Color32(0, 0, 0, 255);
 
+        LoadFogState();
+
         discoveryTexture.SetPixels32(discoveryPixels);
         discoveryTexture.Apply();
+    }
+
+    private void LoadFogState()
+    {
+        if (discoveryPixels == null) return;
+        byte[] alphas = FogStore.Get(cachedSceneName);
+        if (alphas == null || alphas.Length != discoveryPixels.Length) return;
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            discoveryPixels[i].a = alphas[i];
+    }
+
+    private void SaveFogState()
+    {
+        if (discoveryPixels == null) return;
+        byte[] alphas = new byte[discoveryPixels.Length];
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            alphas[i] = discoveryPixels[i].a;
+        FogStore.Set(cachedSceneName, alphas);
+        fogDirty = false;
+        lastFogFlushTime = Time.unscaledTime;
+    }
+
+    private void OnDisable()
+    {
+        SaveFogState();
     }
 
     private void CreateFogOverlay()
@@ -82,6 +121,9 @@ public class MinimapController : MonoBehaviour
 
         UpdateDiscovery();
         UpdateMapPosition();
+
+        if (fogDirty && Time.unscaledTime - lastFogFlushTime >= FogFlushInterval)
+            SaveFogState();
     }
 
     private void UpdateDiscovery()
@@ -135,6 +177,7 @@ public class MinimapController : MonoBehaviour
         {
             discoveryTexture.SetPixels32(discoveryPixels);
             discoveryTexture.Apply();
+            fogDirty = true;
         }
     }
 
@@ -150,9 +193,13 @@ public class MinimapController : MonoBehaviour
         float uiX = -(normX - 0.5f) * mapSize.x;
         float uiY = -(normY - 0.5f) * mapSize.y;
 
-        mapContent.anchoredPosition = new Vector2(uiX, uiY);
+        mapContent.localScale = new Vector3(zoomLevel, zoomLevel, 1f);
+        mapContent.anchoredPosition = new Vector2(uiX, uiY) * zoomLevel;
 
         if (playerMarker != null)
+        {
+            playerMarker.sizeDelta = new Vector2(markerSize, markerSize);
             playerMarker.localRotation = Quaternion.Euler(0, 0, -playerTransform.eulerAngles.z);
+        }
     }
 }

@@ -51,6 +51,7 @@ public class TorchLight : MonoBehaviour
     // the inventory system will call this when the player picks up the torch
     public void EnableTorch()
     {
+        Debug.Log("Torch enabled, TemperatureSystem: " + TemperatureSystem.Instance);
         TemperatureSystem.Instance?.SetTorchState(true);
         torchIsOn = true;
         if (torchLight != null)
