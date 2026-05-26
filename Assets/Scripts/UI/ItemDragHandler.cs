@@ -1,63 +1,81 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    Transform originalParent;
-    CanvasGroup canvasGroup;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private Transform originalParent;
+    private CanvasGroup canvasGroup;
+    private RectTransform rectTransform;
+
     void Start()
     {
         canvasGroup = GetComponent<CanvasGroup>();
-        
+        rectTransform = GetComponent<RectTransform>();
     }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
-        originalParent = transform.parent; //Save original parent
-        transform.SetParent(transform.root); //Move to root to avoid being masked
-        canvasGroup.blocksRaycasts = false; //Allow raycasts to pass through while dragging
-        canvasGroup.alpha = 0.6f; //Make the item semi-transparent while dragging
+        originalParent = transform.parent; // Save original parent
+        transform.SetParent(transform.root); // Move to root to avoid being masked
+        canvasGroup.blocksRaycasts = false; // Allow raycasts to pass through while dragging
+        canvasGroup.alpha = 0.6f; // Make the item semi-transparent while dragging
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        transform.position = eventData.position; //Follow the mouse
+        transform.position = eventData.position; // Follow the mouse
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        canvasGroup.blocksRaycasts = true; // enable raycasts
-        canvasGroup.alpha = 1f; //Reset transparency
+        canvasGroup.blocksRaycasts = true;
+        canvasGroup.alpha = 1f;
 
-        Slot dropSlot = eventData.pointerEnter?.GetComponent<Slot>(); //Check if we dropped on a slot
-        Slot originalSlot = originalParent.GetComponent<Slot>(); //Get the original slot
-
-        if(dropSlot != null)
+        Slot dropSlot = null;
+        if (eventData.pointerEnter != null)
         {
-            if(dropSlot.currentItem != null)
+            dropSlot = eventData.pointerEnter.GetComponentInParent<Slot>();
+        }
+
+        Slot originalSlot = originalParent.GetComponent<Slot>();
+
+        if (dropSlot != null)
+        {
+            if (dropSlot.currentItem != null && dropSlot.currentItem != gameObject)
             {
-                //Slot is occupied, swap items
-                dropSlot.currentItem.transform.SetParent(originalSlot.transform); //Move existing item back to original slot
-                originalSlot.currentItem = dropSlot.currentItem; //Update original slot reference
-                dropSlot.currentItem.GetComponent<RectTransform>().anchoredPosition = Vector2.zero; //Reset position
+                GameObject itemInDropSlot = dropSlot.currentItem;
+
+                itemInDropSlot.transform.SetParent(originalSlot.transform);
+                originalSlot.currentItem = itemInDropSlot;
+
+                RectTransform swappedRect = itemInDropSlot.GetComponent<RectTransform>();
+                if (swappedRect != null) swappedRect.anchoredPosition = Vector2.zero;
             }
             else
             {
-                //Slot is empty, just move the item
-                originalSlot.currentItem = null; //Clear original slot reference
+                originalSlot.currentItem = null;
             }
 
-            //Move dragged item to new slot
             transform.SetParent(dropSlot.transform);
-            dropSlot.currentItem = gameObject; //Update new slot referenc
+            dropSlot.currentItem = gameObject;
+
+            GetComponent<RectTransform>().localScale = Vector3.one;
         }
         else
         {
-            //Not dropped on a slot, return to original position
             transform.SetParent(originalParent);
+            GetComponent<RectTransform>().localScale = Vector3.one;
         }
 
-        GetComponent<RectTransform>().anchoredPosition = Vector2.zero; //Reset position
+        rectTransform.anchoredPosition = Vector2.zero;
+
+        if (originalSlot != null) originalSlot.UpdateSlotVisual();
+        if (dropSlot != null) dropSlot.UpdateSlotVisual();
+
+        HotBarController hotbar = FindFirstObjectByType<HotBarController>();
+        if (hotbar != null)
+        {
+            hotbar.RefreshActiveSlotItem();
+        }
     }
-    
 }

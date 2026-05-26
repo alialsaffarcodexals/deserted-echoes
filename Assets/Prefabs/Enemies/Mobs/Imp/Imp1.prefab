@@ -213,24 +213,27 @@ MonoBehaviour:
     attackCooldownMultiplier: 0
   walkSpeed: 1.5
   runSpeed: 3
-  detectionRange: 6
-  runRange: 3
-  attackRange: 1.5
-  chaseStopDistance: 1
+  detectionRange: 10
+  runRange: 6
+  attackRange: 5
+  chaseStopDistance: 4.5
   fallbackTargetOffset: {x: 0, y: -0.3}
   attackDamage: 10
   attackCooldown: 2
   attackAnimationDuration: 0.5
   maxHealth: 50
   deathDestroyDelay: 1.2
-  damageDistanceToPlayer: 1
+  damageDistanceToPlayer: 5
   scoreValue: 100
+  expReward: 50
   attackAnimationMode: 0
   rb: {fileID: 1159117550198756953}
   animator: {fileID: 616313293825895610}
   impFireProjectilePrefab: {fileID: 1104005832880348426, guid: e2f78e29557f24e32b731f63dd34022b, type: 3}
   throwPoint: {fileID: 7841533927310818624}
   projectileSpeed: 6
+  projectileSpawnOffset: 0.8
+  projectileThrowDelay: 0.25
 --- !u!114 &3113606010578905104
 MonoBehaviour:
   m_ObjectHideFlags: 0
