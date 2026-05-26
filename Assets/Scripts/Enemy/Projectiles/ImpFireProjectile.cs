@@ -38,17 +38,16 @@ public class ImpFireProjectile : ProjectileBase
         if (hasHit)
             return;
 
+        if (!collision.CompareTag("Player"))
+            return;
+
         hasHit = true;
 
         // Stop moving
         if (rb != null)
             rb.linearVelocity = Vector2.zero;
 
-        // Check if hit player
-        if (collision.CompareTag("Player"))
-        {
-            DamagePlayer();
-        }
+        DamagePlayer();
 
         // Play hit animation
         if (animator != null)
@@ -59,4 +58,5 @@ public class ImpFireProjectile : ProjectileBase
 
         hitAnimationStartTime = Time.time;
     }
+
 }

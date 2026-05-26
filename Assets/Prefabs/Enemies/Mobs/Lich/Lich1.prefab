@@ -259,24 +259,27 @@ MonoBehaviour:
     attackCooldownMultiplier: 0
   walkSpeed: 1.5
   runSpeed: 3
-  detectionRange: 6
-  runRange: 3
-  attackRange: 1.5
-  chaseStopDistance: 1
+  detectionRange: 10
+  runRange: 6
+  attackRange: 5
+  chaseStopDistance: 4.5
   fallbackTargetOffset: {x: 0, y: -0.3}
   attackDamage: 10
   attackCooldown: 2
   attackAnimationDuration: 0.5
   maxHealth: 50
   deathDestroyDelay: 1.2
-  damageDistanceToPlayer: 1
+  damageDistanceToPlayer: 5
   scoreValue: 100
+  expReward: 50
   attackAnimationMode: 0
   rb: {fileID: 431972276023111799}
   animator: {fileID: 2849701718438416147}
   lichFireProjectilePrefab: {fileID: 1309040597552750176, guid: a880d846fde9a4e71b3aa313cb4db98a, type: 3}
   throwPoint: {fileID: 2432343798899017302}
   projectileSpeed: 8
+  projectileSpawnOffset: 0.8
+  projectileThrowDelay: 0.25
 --- !u!114 &5820348932613220683
 MonoBehaviour:
   m_ObjectHideFlags: 0

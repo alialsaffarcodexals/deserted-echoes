@@ -41,12 +41,29 @@ public abstract class ProjectileBase : MonoBehaviour
 
     public void SetDirection(Vector2 direction)
     {
+        if (direction.sqrMagnitude <= 0.0001f)
+            return;
+
         moveDirection = direction.normalized;
+    }
+
+    public void Launch(Vector2 direction, float speed)
+    {
+        SetDirection(direction);
+        moveSpeed = Mathf.Max(0f, speed);
+
+        if (rb != null)
+            rb.linearVelocity = moveDirection * moveSpeed;
     }
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
         HandleCollision(collision);
+    }
+
+    protected virtual void OnCollisionEnter2D(Collision2D collision)
+    {
+        HandleCollision(collision.collider);
     }
 
     protected abstract void HandleCollision(Collider2D collision);

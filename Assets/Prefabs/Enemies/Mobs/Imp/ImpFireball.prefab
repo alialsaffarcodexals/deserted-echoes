@@ -83,7 +83,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 6
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -1063065011, guid: 198b1dda534241e0beb850cd1959efd3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -125,7 +125,7 @@ CircleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -189,8 +189,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1104005832880348426}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d3e8f2a1c5b904ad6e8a3f2c1b4e9d0, type: 3}
+  m_Script: {fileID: 11500000, guid: b193ca25b4dba4a1482f13fff4aaa640, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatSFX
-  attackClip: {fileID: 0}
-  hurtClip: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::ImpFireProjectile
+  moveSpeed: 6
+  damage: 5
+  destroyDelay: 5
