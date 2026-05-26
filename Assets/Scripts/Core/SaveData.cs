@@ -25,7 +25,10 @@ public class SaveData
 
     // Dialogue
     public List<string> seenDialogueKeys;
-    
+
+    // Fog of war discovery state — persists across scene reloads; cleared on New Game
+    public List<SceneFogData> sceneFogData;
+
     public SaveData()
     {
         // Default values
@@ -42,5 +45,6 @@ public class SaveData
         lastSceneName = "Open-World";
         saveTimestamp = System.DateTime.Now.Ticks;
         seenDialogueKeys = new List<string>();
+        sceneFogData = new List<SceneFogData>();
     }
 }

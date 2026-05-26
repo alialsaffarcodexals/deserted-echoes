@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class MapController : MonoBehaviour
 {
@@ -46,6 +47,10 @@ public class MapController : MonoBehaviour
     private Transform playerTransform;
     private Texture2D discoveryTexture;
     private Color32[] discoveryPixels;
+    private string cachedSceneName;
+    private bool fogDirty;
+    private float lastFogFlushTime;
+    private const float FogFlushInterval = 0.5f;
 
     public void Configure(Vector2 min, Vector2 size, Sprite mapSprite)
     {
@@ -68,9 +73,10 @@ public class MapController : MonoBehaviour
             return;
         }
         Instance = this;
+        cachedSceneName = SceneManager.GetActiveScene().name;
 
         if (mapPanel != null) mapPanel.SetActive(false);
-        
+
         InitializeDiscoveryTexture();
     }
 
@@ -81,20 +87,44 @@ public class MapController : MonoBehaviour
             discoveryTexture = new Texture2D(discoveryResolution, discoveryResolution, TextureFormat.RGBA32, false);
             discoveryTexture.filterMode = FilterMode.Bilinear;
             discoveryTexture.wrapMode = TextureWrapMode.Clamp;
-            
+
             discoveryPixels = new Color32[discoveryResolution * discoveryResolution];
             for (int i = 0; i < discoveryPixels.Length; i++)
-            {
-                discoveryPixels[i] = new Color32(0, 0, 0, 255); // Fully black/hidden
-            }
+                discoveryPixels[i] = new Color32(0, 0, 0, 255);
+
+            LoadFogState();
+
             discoveryTexture.SetPixels32(discoveryPixels);
             discoveryTexture.Apply();
         }
 
         if (fogImage != null)
-        {
             fogImage.texture = discoveryTexture;
-        }
+    }
+
+    private void LoadFogState()
+    {
+        if (discoveryPixels == null) return;
+        byte[] alphas = FogStore.Get(cachedSceneName);
+        if (alphas == null || alphas.Length != discoveryPixels.Length) return;
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            discoveryPixels[i].a = alphas[i];
+    }
+
+    private void SaveFogState()
+    {
+        if (discoveryPixels == null) return;
+        byte[] alphas = new byte[discoveryPixels.Length];
+        for (int i = 0; i < discoveryPixels.Length; i++)
+            alphas[i] = discoveryPixels[i].a;
+        FogStore.Set(cachedSceneName, alphas);
+        fogDirty = false;
+        lastFogFlushTime = Time.unscaledTime;
+    }
+
+    private void OnDisable()
+    {
+        SaveFogState();
     }
 
     private void Start()
@@ -129,6 +159,11 @@ public class MapController : MonoBehaviour
 
         // Always update discovery even if map is closed
         UpdateDiscovery();
+
+        // Periodically persist revealed fog so a scene reload (e.g. death
+        // -> retry) keeps it, without writing on every changed frame.
+        if (fogDirty && Time.unscaledTime - lastFogFlushTime >= FogFlushInterval)
+            SaveFogState();
 
         if (isMapOpen)
         {
@@ -252,6 +287,7 @@ public class MapController : MonoBehaviour
         {
             discoveryTexture.SetPixels32(discoveryPixels);
             discoveryTexture.Apply();
+            fogDirty = true;
         }
     }
 

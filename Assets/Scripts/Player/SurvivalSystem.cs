@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
@@ -11,12 +11,24 @@ public class SurvivalSystem : MonoBehaviour
     public Slider staminaSlider;
     public Slider hungerSlider;
     public Slider thirstSlider;
+    public Slider expSlider; // Assign your experience UI slider here or via Tag
 
     [Header("Max Values")]
     public float maxHealth = 100f;
     public float maxStamina = 100f;
     public float maxHunger = 100f;
     public float maxThirst = 100f;
+
+    [Header("Experience & Leveling")]
+    [SerializeField] private int baseExpPerLevel = 100; // EXP requirement scaling base factor
+    private int currentLevel = 1;
+    private float currentExp = 0f;
+    private float expNeededForNextLevel;
+
+    // Public getters to allow external UI scripts or combat systems to access progression metrics
+    public int CurrentLevel => currentLevel;
+    public float CurrentExp => currentExp;
+    public float ExpNeededForNextLevel => expNeededForNextLevel;
 
     [Header("Depletion Rates (Per Second)")]
     public float hungerDepletionRate = 1.5f;
@@ -57,13 +69,15 @@ public class SurvivalSystem : MonoBehaviour
         }
 
         Instance = this;
-
         DontDestroyOnLoad(transform.root.gameObject);
 
         InitializeStats();
 
         if (playerController != null)
             SetHealthStats(playerController.GetMaxHealth(), playerController.GetCurrentHealth());
+
+        CalculateNextLevelThreshold();
+        UpdateUI();
     }
 
     void OnEnable()
@@ -80,13 +94,9 @@ public class SurvivalSystem : MonoBehaviour
     {
         playerController = Object.FindAnyObjectByType<PlayerController>();
 
-        // Push this SurvivalSystem back into the PlayerController so that a
-        // DontDestroyOnLoad player (whose Start() never re-fires on reload)
-        // always has a valid survivalSystem reference after scene transitions.
         if (playerController != null)
             playerController.BindSurvivalSystem(this);
 
-        // Hide the HUD in non-gameplay scenes (main menu, etc.).
         bool isGameplayScene = scene.name != "main-menu";
         SetHUDVisible(isGameplayScene);
 
@@ -117,15 +127,15 @@ public class SurvivalSystem : MonoBehaviour
 
     private void InitializeStats()
     {
+        currentLevel = 1;
+        currentExp = 0f;
+
         currentHealth = maxHealth;
         currentStamina = maxStamina;
         currentHunger = maxHunger;
         currentThirst = maxThirst;
 
-        if (healthSlider) healthSlider.maxValue = maxHealth;
-        if (staminaSlider) staminaSlider.maxValue = maxStamina;
-        if (hungerSlider) hungerSlider.maxValue = maxHunger;
-        if (thirstSlider) thirstSlider.maxValue = maxThirst;
+        SetupSliderMaxValues();
     }
 
     private void FindUIRefrecesInNewScene()
@@ -160,6 +170,9 @@ public class SurvivalSystem : MonoBehaviour
             if (thirstObj) thirstSlider = thirstObj.GetComponent<Slider>();
         }
 
+        GameObject expObj = GameObject.FindWithTag("EXPSlider");
+        if (expObj) expSlider = expObj.GetComponent<Slider>();
+
         SetupSliderMaxValues();
     }
 
@@ -169,6 +182,7 @@ public class SurvivalSystem : MonoBehaviour
         if (staminaSlider) staminaSlider.maxValue = maxStamina;
         if (hungerSlider) hungerSlider.maxValue = maxHunger;
         if (thirstSlider) thirstSlider.maxValue = maxThirst;
+        if (expSlider) expSlider.maxValue = expNeededForNextLevel;
     }
 
     private void HandleDepletion()
@@ -222,6 +236,66 @@ public class SurvivalSystem : MonoBehaviour
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // EXP AND LEVEL SYSTEM METHODS
+    // ─────────────────────────────────────────────────────────────
+
+    public void AddExperience(float amount)
+    {
+        if (IsDead) return;
+
+        currentExp += amount;
+        Debug.Log($"+{amount} EXP gained. Progress: {currentExp}/{expNeededForNextLevel}");
+
+        while (currentExp >= expNeededForNextLevel)
+        {
+            LevelUp();
+        }
+    }
+
+    private void LevelUp()
+    {
+        // Deduct the requirement cost to leave your remaining overflow remainder
+        currentExp -= expNeededForNextLevel;
+        currentLevel++;
+
+        // Explicitly force the slider to zero first to break any internal UI scaling anchors
+        if (expSlider != null)
+        {
+            expSlider.value = 0f;
+            expSlider.maxValue = expNeededForNextLevel;
+            expSlider.value = currentExp;
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(expSlider.GetComponent<RectTransform>());
+        }
+
+        // Recalculate the next level's milestone targets 
+        CalculateNextLevelThreshold();
+
+        // Restore core vitals on level up
+        currentHealth = maxHealth;
+        currentStamina = maxStamina;
+
+        Debug.Log($"Level Up! You are now Level {currentLevel}! Next level needs: {expNeededForNextLevel} EXP");
+    }
+
+    private void CalculateNextLevelThreshold()
+    {
+        // Update the internal programmatic logic bound
+        expNeededForNextLevel = currentLevel * baseExpPerLevel;
+
+        // Update the visual UI slider boundary constraints instantly
+        if (expSlider != null)
+        {
+            expSlider.minValue = 0f; // Ensure baseline floor anchor is hardcoded to 0
+            expSlider.maxValue = expNeededForNextLevel;
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // UTILITIES & STAT MUTATORS
+    // ─────────────────────────────────────────────────────────────
+
     public void SetSprinting(bool state) => isSprinting = state;
 
     /// <summary>
@@ -272,6 +346,7 @@ public class SurvivalSystem : MonoBehaviour
         if (staminaSlider) staminaSlider.value = currentStamina;
         if (hungerSlider) hungerSlider.value = currentHunger;
         if (thirstSlider) thirstSlider.value = currentThirst;
+        if (expSlider) expSlider.value = currentExp;
     }
 
     void ClampAllStats()
