@@ -3,56 +3,87 @@ using UnityEngine.InputSystem;
 
 public class InventoryController : MonoBehaviour
 {
+    [Header("Panels & Prefabs")]
     public GameObject inventoryPanel;
     public GameObject slotPrefab;
-    public int slotCount;
+    [Tooltip("Controls exactly how many slots are generated inside the main inventory panel.")]
+    public int inventorySlotCount = 16;
     public GameObject[] itemPrefabs;
+
+    private Slot[] staticHotbarSlots;
 
     void Start()
     {
-        if (inventoryPanel == null)
+        if (inventoryPanel == null || slotPrefab == null)
         {
-            Debug.LogError("InventoryController: Inventory Panel is not assigned in the Inspector!");
+            Debug.LogError("InventoryController: Missing references in the Inspector!");
             return;
         }
 
-        if (slotPrefab == null)
+        inventoryPanel.SetActive(false); // Hide inventory panel at start
+
+        // 1. Fetch the slots dynamically created by the HotBarController
+        HotBarController hotbar = FindFirstObjectByType<HotBarController>();
+        int hotbarCount = 0;
+        if (hotbar != null)
         {
-            Debug.LogError("InventoryController: Slot Prefab is not assigned in the Inspector!");
-            return;
+            staticHotbarSlots = hotbar.GetGeneratedHotbarSlots();
+            hotbarCount = staticHotbarSlots.Length;
         }
 
-        inventoryPanel.SetActive(false); // Hide the inventory panel at the start
+        // Keep track of our current position in the itemPrefabs array globally
+        int globalItemIndex = 0;
 
-        for (int i = 0; i < slotCount; i++)
+        // 2. PHASE 1: Populate existing Hotbar Slots with starting items
+        if (staticHotbarSlots != null)
         {
-            // Instantiate the slot as a child of the panel
-            GameObject newSlotObj = Instantiate(slotPrefab, inventoryPanel.transform);
+            for (int i = 0; i < hotbarCount; i++)
+            {
+                if (globalItemIndex < itemPrefabs.Length && itemPrefabs[globalItemIndex] != null)
+                {
+                    SpawnItemInSlot(itemPrefabs[globalItemIndex], staticHotbarSlots[i]);
+                }
+                globalItemIndex++;
+            }
+        }
 
-            // Try to get the Slot component
+        // 3. PHASE 2: Generate Inventory Panel Slots and populate remaining items
+        for (int i = 0; i < inventorySlotCount; i++)
+        {
+            GameObject newSlotObj = Instantiate(slotPrefab, inventoryPanel.transform, false);
             Slot slot = newSlotObj.GetComponent<Slot>();
 
-            if (slot == null)
+            if (slot != null)
             {
-                Debug.LogError($"InventoryController: The Slot Prefab is missing the 'Slot' script component at index {i}!");
-                continue;
-            }
+                // Numbers inventory slots locally from 1 to inventorySlotCount
+                slot.InitializeSlotNumber(i + 1);
 
-            // 3. Fill slot with item if one exists in the array
-            if (i < itemPrefabs.Length && itemPrefabs[i] != null)
-            {
-                GameObject item = Instantiate(itemPrefabs[i], newSlotObj.transform);
-
-                // Ensure the item is centered in the slot
-                RectTransform itemRect = item.GetComponent<RectTransform>();
-                if (itemRect != null)
+                // If there are still items left in your array, spawn them here
+                if (globalItemIndex < itemPrefabs.Length && itemPrefabs[globalItemIndex] != null)
                 {
-                    itemRect.anchoredPosition = Vector2.zero;
+                    SpawnItemInSlot(itemPrefabs[globalItemIndex], slot);
                 }
-
-                slot.currentItem = item;
             }
+            globalItemIndex++;
         }
+    }
+
+    // Helper method to handle UI scaling transformations safely
+    private void SpawnItemInSlot(GameObject itemPrefab, Slot targetSlot)
+    {
+        GameObject item = Instantiate(itemPrefab, targetSlot.transform, false);
+
+        RectTransform itemRect = item.GetComponent<RectTransform>();
+        if (itemRect != null)
+        {
+            itemRect.anchorMin = Vector2.zero;
+            itemRect.anchorMax = Vector2.one;
+            itemRect.sizeDelta = Vector2.zero;
+            itemRect.anchoredPosition = Vector2.zero;
+            itemRect.localScale = Vector3.one;
+        }
+
+        targetSlot.currentItem = item;
     }
 
     void Update()
