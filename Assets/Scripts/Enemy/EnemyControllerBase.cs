@@ -32,6 +32,10 @@ public abstract class EnemyControllerBase : MonoBehaviour
     [SerializeField] private DifficultyProfile normalProfile;
     [SerializeField] private DifficultyProfile hardProfile;
 
+    [Header("Boss Settings")]
+    [Tooltip("Check this on boss prefabs so they use boss HP/damage values instead of mob values.")]
+    [SerializeField] private bool isBoss = false;
+
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 1.5f;
     [SerializeField] private float runSpeed = 3f;
@@ -584,26 +588,30 @@ public abstract class EnemyControllerBase : MonoBehaviour
 
     private void ResolveDifficultyStats()
     {
-        // SINGLE SOURCE OF TRUTH:
-        // The per-variant prefab (Foo1 = Easy, Foo2 = Normal, Foo3 = Hard) is
-        // the authoritative source for walk/run speed, attackDamage, attackCooldown
-        // and maxHealth. Designers set those numbers directly on each variant prefab.
-        //
-        // Multipliers default to 1.0 so the Inspector value == the in-game value.
-        // Leave the profile fields available in case we want to stack a global
-        // tweak later, but do NOT re-introduce non-1 defaults — it brings back
-        // the "prefab value disagrees with what the player feels" bug.
-        easyProfile = SanitizeProfile(easyProfile, 1f, 1f, 1f, 1f);
-        normalProfile = SanitizeProfile(normalProfile, 1f, 1f, 1f, 1f);
-        hardProfile = SanitizeProfile(hardProfile, 1f, 1f, 1f, 1f);
+        // Speed and cooldown are still taken from the prefab Inspector values.
+        resolvedWalkSpeed = walkSpeed;
+        resolvedRunSpeed = runSpeed;
+        resolvedAttackCooldown = Mathf.Max(0.1f, attackCooldown);
 
-        DifficultyProfile profile = GetProfileForDifficulty(difficulty);
-
-        resolvedWalkSpeed = walkSpeed * profile.moveSpeedMultiplier;
-        resolvedRunSpeed = runSpeed * profile.moveSpeedMultiplier;
-        resolvedAttackDamage = Mathf.Max(1, Mathf.RoundToInt(attackDamage * profile.damageMultiplier));
-        resolvedAttackCooldown = Mathf.Max(0.1f, attackCooldown * profile.attackCooldownMultiplier);
-        resolvedMaxHealth = Mathf.Max(1, Mathf.RoundToInt(maxHealth * profile.healthMultiplier));
+        // HP and damage are driven by the global difficulty setting so that
+        // every enemy type — regardless of which variant prefab is active —
+        // always matches the design spec exactly.
+        GameDifficultySettings.Load();
+        switch (GameDifficultySettings.Current)
+        {
+            case GameDifficulty.Easy:
+                resolvedMaxHealth    = isBoss ? 75  : 50;
+                resolvedAttackDamage = isBoss ? 10  : 5;
+                break;
+            case GameDifficulty.Hard:
+                resolvedMaxHealth    = isBoss ? 300 : 150;
+                resolvedAttackDamage = isBoss ? 50  : 20;
+                break;
+            default: // Normal
+                resolvedMaxHealth    = isBoss ? 200 : 100;
+                resolvedAttackDamage = isBoss ? 20  : 10;
+                break;
+        }
     }
 
     private DifficultyProfile SanitizeProfile(DifficultyProfile profile, float defaultSpeed, float defaultDamage, float defaultHealth, float defaultCooldown)
