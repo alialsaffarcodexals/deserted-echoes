@@ -124,6 +124,7 @@ public class SurvivalSystem : MonoBehaviour
         HandleRegeneration();
         HandleEnvironmentalDamage();
         ClampAllStats();
+        SyncPlayerControllerLevel();
         UpdateUI();
     }
 
@@ -260,6 +261,9 @@ public class SurvivalSystem : MonoBehaviour
         {
             LevelUp();
         }
+
+        SyncPlayerControllerProgress();
+        SaveManager.Instance?.SaveGame();
     }
 
     private void LevelUp()
@@ -285,7 +289,46 @@ public class SurvivalSystem : MonoBehaviour
         currentHealth = maxHealth;
         currentStamina = maxStamina;
 
+        SyncPlayerControllerProgress();
+
         Debug.Log($"Level Up! You are now Level {currentLevel}! Next level needs: {expNeededForNextLevel} EXP");
+    }
+
+    private void SyncPlayerControllerLevel()
+    {
+        if (playerController == null)
+            playerController = Object.FindAnyObjectByType<PlayerController>();
+
+        if (playerController != null && currentLevel > playerController.GetLevel())
+            playerController.SyncLevelFromSurvivalSystem(currentLevel, currentExp);
+    }
+
+    private void SyncPlayerControllerProgress()
+    {
+        if (playerController == null)
+            playerController = Object.FindAnyObjectByType<PlayerController>();
+
+        if (playerController != null)
+            playerController.SyncLevelFromSurvivalSystem(currentLevel, currentExp);
+    }
+
+    public void LoadProgressFromSave(SaveData saveData)
+    {
+        if (saveData == null)
+            return;
+
+        currentLevel = Mathf.Max(1, saveData.level);
+        currentExp = Mathf.Max(0f, saveData.experience);
+        CalculateNextLevelThreshold();
+
+        while (currentExp >= expNeededForNextLevel)
+        {
+            currentExp -= expNeededForNextLevel;
+            currentLevel++;
+            CalculateNextLevelThreshold();
+        }
+
+        UpdateUI();
     }
 
     private void CalculateNextLevelThreshold()
