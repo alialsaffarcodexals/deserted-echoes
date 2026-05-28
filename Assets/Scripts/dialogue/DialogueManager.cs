@@ -8,6 +8,7 @@ using TMPro;
 public class DialogueManager : MonoBehaviour
 {
     public static DialogueManager Instance { get; private set; }
+    public event System.Action<Conversation> ConversationEnded;
 
     [Header("UI References")]
     [SerializeField] private GameObject dialogueRoot;
@@ -184,6 +185,8 @@ public class DialogueManager : MonoBehaviour
 
     private void EndConversation()
     {
+        Conversation endedConversation = current;
+
         // save that the player has seen this convo (only if it has a key)
         if (!string.IsNullOrEmpty(current.firstVisitKey))
         {
@@ -202,6 +205,7 @@ public class DialogueManager : MonoBehaviour
         musicSource.Stop();
         ResumeOtherMusic();
         Time.timeScale = 1f;
+        ConversationEnded?.Invoke(endedConversation);
     }
 
     // helper to make the playerprefs key consistent
