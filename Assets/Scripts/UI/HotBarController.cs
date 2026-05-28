@@ -187,12 +187,28 @@ public class HotBarController : MonoBehaviour
             return;
         }
 
+        // Re-find player if lost (e.g. scene reload).
+        if (playerController == null)
+        {
+            GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+            if (playerObject != null)
+                playerController = playerObject.GetComponent<PlayerController>();
+        }
+
+        if (playerController == null)
+        {
+            Debug.LogWarning("HotbarController: PlayerController not found, cannot use item.");
+            return;
+        }
+
         usableItem.Use(playerController.gameObject);
 
         Destroy(selectedSlot.currentItem);
-
         selectedSlot.currentItem = null;
         selectedSlot.UpdateSlotVisual();
+
+        // Persist the updated inventory so it survives scene transitions.
+        InventoryController.Current?.SaveToStore();
 
         Debug.Log("HotbarController: Item used.");
     }
