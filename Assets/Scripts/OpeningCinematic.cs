@@ -94,8 +94,16 @@ public class OpeningCinematic : MonoBehaviour
         _audio.Init();
     }
 
+    private const string SeenKey = "OpeningCinematicSeen";
+
     private void Start()
     {
+        if (PlayerPrefs.GetInt(SeenKey, 0) == 1)
+        {
+            SceneLoader.LoadScene(NextScene);
+            return;
+        }
+
         StartCoroutine(RunTimeline());
     }
 
@@ -104,6 +112,8 @@ public class OpeningCinematic : MonoBehaviour
         if (_endActive && !_leaving && Input.anyKeyDown)
         {
             _leaving = true;
+            PlayerPrefs.SetInt(SeenKey, 1);
+            PlayerPrefs.Save();
             SceneLoader.LoadScene(NextScene);
         }
     }

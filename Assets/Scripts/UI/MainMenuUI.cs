@@ -9,6 +9,7 @@
 // ─────────────────────────────────────────────────────────────
 
 using UnityEngine;
+using UnityEngine.Video;
 
 public class MainMenuUI : MonoBehaviour
 {
@@ -24,6 +25,9 @@ public class MainMenuUI : MonoBehaviour
     [Header("Scene")]
     [SerializeField] private string firstLevelScene = "Open-World";
 
+    [Header("Credits Video")]
+    [SerializeField] private VideoClip creditsVideoClip;
+
     [Header("UI Sound Effects")]
     [SerializeField] private AudioSource uiAudio;
     [SerializeField] private AudioClip buttonClickClip;
@@ -36,6 +40,15 @@ public class MainMenuUI : MonoBehaviour
         ResolvePanelReferences();
         CloseAllPanels();
         ShowButtonList();
+    }
+
+    private void Update()
+    {
+        if (instructionsPanel != null && instructionsPanel.activeSelf)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.M))
+                OnClosePanel();
+        }
     }
 
     // ── Button Callbacks (wire these in Inspector OnClick) ───
@@ -100,11 +113,12 @@ public class MainMenuUI : MonoBehaviour
         OpenPanel(instructionsPanel, "InstructionsPanel");
     }
 
-    /// <summary>Credits button → shows credits panel.</summary>
+    /// <summary>Credits button → plays the credits video fullscreen.</summary>
     public void OnCredits()
     {
         PlaySound(panelOpenClip);
-        OpenPanel(creditsPanel, "CreditsPanel");
+        HideButtonList();
+        CreditsVideoPlayer.Play(creditsVideoClip, ShowButtonList);
     }
 
     /// <summary>Settings button → shows settings panel.</summary>
