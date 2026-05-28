@@ -106,6 +106,8 @@ public class ChestInteractable : MonoBehaviour
 
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
+            Debug.Log("E pressed on chest");
+
             if (chestUIController == null) return;
 
             if (isChestOpen)
@@ -118,7 +120,9 @@ public class ChestInteractable : MonoBehaviour
                 chestUIController.OpenChest(this);
                 isChestOpen = true;
             }
+            
         }
+
     }
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -130,8 +134,10 @@ public class ChestInteractable : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerNearby = false;
+        if (!other.CompareTag("Player"))
+            return;
+
+        playerNearby = false;
 
         if (chestUIController != null)
         {
@@ -139,7 +145,6 @@ public class ChestInteractable : MonoBehaviour
         }
 
         isChestOpen = false;
-
     }
 
     private void SaveChestData()
