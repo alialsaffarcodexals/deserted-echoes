@@ -3,7 +3,8 @@ using UnityEngine.SceneManagement;
 
 public static class LevelEnemyWinConditionInstaller
 {
-    private const string TargetSceneName = "Open-World";
+    private const string OpenWorldSceneName = "Open-World";
+    private const string FriendsSceneName = "Friends";
     private const float LoadDelay = 1.5f;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -29,11 +30,16 @@ public static class LevelEnemyWinConditionInstaller
 
         GameObject winCondition = new GameObject("LevelEnemyWinCondition");
         SceneManager.MoveGameObjectToScene(winCondition, scene);
-        winCondition.AddComponent<LevelEnemyWinCondition>().Configure(TargetSceneName, LoadDelay);
+        winCondition.AddComponent<LevelEnemyWinCondition>().Configure(GetTargetSceneName(scene.name), LoadDelay);
     }
 
     private static bool ShouldTrackScene(string sceneName)
     {
         return sceneName == "level-11" || sceneName == "level-12";
+    }
+
+    private static string GetTargetSceneName(string sceneName)
+    {
+        return sceneName == "level-12" ? FriendsSceneName : OpenWorldSceneName;
     }
 }
