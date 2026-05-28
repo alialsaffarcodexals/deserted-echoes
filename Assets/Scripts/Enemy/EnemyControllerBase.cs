@@ -63,6 +63,15 @@ public abstract class EnemyControllerBase : MonoBehaviour
     [Tooltip("How much experience this structural base enemy awards on death.")]
     [SerializeField] private float expReward = 50f;
 
+    // changes here done for enemy item drops. 
+
+    [Header("Item Drops")]
+    [SerializeField] private GameObject[] itemDropPrefabs;
+    [SerializeField] private int numberOfDrops = 1;
+    [SerializeField] private float dropRadius = 0.5f;
+
+    // -------
+
     [Header("Animation")]
     [SerializeField] private AttackAnimationMode attackAnimationMode = AttackAnimationMode.Single;
 
@@ -441,8 +450,39 @@ public abstract class EnemyControllerBase : MonoBehaviour
         if (rb != null)
             rb.linearVelocity = Vector2.zero;
 
+        // added the method
+
+        DropItems();
+
+        //---
+
         Destroy(gameObject, deathDestroyDelay);
     }
+
+    // changes here also 
+
+    private void DropItems()
+    {
+        if (itemDropPrefabs == null || itemDropPrefabs.Length == 0)
+            return;
+
+        for (int i = 0; i < numberOfDrops; i++)
+        {
+            GameObject itemPrefab = itemDropPrefabs[UnityEngine.Random.Range(0, itemDropPrefabs.Length)];
+
+            if (itemPrefab == null)
+                continue;
+
+            Vector2 randomOffset = UnityEngine.Random.insideUnitCircle * dropRadius;
+            Vector3 dropPosition = transform.position + new Vector3(randomOffset.x, randomOffset.y, 0f);
+
+            Instantiate(itemPrefab, dropPosition, Quaternion.identity);
+        }
+    }
+
+
+    //-----
+
 
     private void InterruptCurrentAction()
     {
