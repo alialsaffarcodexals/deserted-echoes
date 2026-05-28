@@ -35,6 +35,8 @@ public abstract class EnemyControllerBase : MonoBehaviour
     [Header("Boss Settings")]
     [Tooltip("Check this on boss prefabs so they use boss HP/damage values instead of mob values.")]
     [SerializeField] private bool isBoss = false;
+    [Tooltip("Check this on the final boss (Beholder) for higher HP on Easy and Normal.")]
+    [SerializeField] private bool isFinalBoss = false;
 
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 1.5f;
@@ -640,15 +642,15 @@ public abstract class EnemyControllerBase : MonoBehaviour
         switch (GameDifficultySettings.Current)
         {
             case GameDifficulty.Easy:
-                resolvedMaxHealth    = isBoss ? 75  : 50;
+                resolvedMaxHealth    = isFinalBoss ? 250 : (isBoss ? 75  : 50);
                 resolvedAttackDamage = isBoss ? 10  : 5;
                 break;
             case GameDifficulty.Hard:
-                resolvedMaxHealth    = isBoss ? 300 : 150;
+                resolvedMaxHealth    = isFinalBoss ? 600 : (isBoss ? 300 : 150);
                 resolvedAttackDamage = isBoss ? 50  : 20;
                 break;
             default: // Normal
-                resolvedMaxHealth    = isBoss ? 200 : 100;
+                resolvedMaxHealth    = isFinalBoss ? 500 : (isBoss ? 200 : 100);
                 resolvedAttackDamage = isBoss ? 20  : 10;
                 break;
         }
