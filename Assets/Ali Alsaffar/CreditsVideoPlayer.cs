@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,15 +11,13 @@ public class CreditsVideoPlayer : MonoBehaviour
     private RawImage    _screen;
     private TextMeshProUGUI _hud;
     private RenderTexture   _rt;
-    private Action    _onClose;
-    private VideoClip _clip;
-    private bool      _isPaused;
+    private Action _onClose;
+    private bool   _isPaused;
 
-    public static void Play(VideoClip clip, Action onClose)
+    public static void Play(Action onClose)
     {
         var go   = new GameObject("CreditsVideoOverlay");
         var comp = go.AddComponent<CreditsVideoPlayer>();
-        comp._clip    = clip;
         comp._onClose = onClose;
     }
 
@@ -34,41 +33,44 @@ public class CreditsVideoPlayer : MonoBehaviour
 
     // ── UI Construction ──────────────────────────────────────
 
+    private static T GetOrAdd<T>(GameObject go) where T : Component
+    {
+        T comp = go.GetComponent<T>();
+        return comp != null ? comp : go.AddComponent<T>();
+    }
+
     private void BuildUI()
     {
-        var canvas = gameObject.AddComponent<Canvas>();
+        var canvas = GetOrAdd<Canvas>(gameObject);
         canvas.renderMode   = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 999;
-        gameObject.AddComponent<CanvasScaler>();
-        gameObject.AddComponent<GraphicRaycaster>();
+        GetOrAdd<CanvasScaler>(gameObject);
+        GetOrAdd<GraphicRaycaster>(gameObject);
 
-        // Black background so nothing shows through while buffering
-        var bg     = new GameObject("Background");
+        var bg    = new GameObject("Background");
         bg.transform.SetParent(transform, false);
-        var bgImg  = bg.AddComponent<RawImage>();
+        var bgImg = bg.AddComponent<RawImage>();
         bgImg.color = Color.black;
         Stretch(bgImg.rectTransform);
 
-        // Video surface
         var screenGo = new GameObject("VideoScreen");
         screenGo.transform.SetParent(transform, false);
         _screen = screenGo.AddComponent<RawImage>();
         Stretch(_screen.rectTransform);
 
-        // Instructions — top-left corner, white
-        var hudGo  = new GameObject("HUD");
+        var hudGo = new GameObject("HUD");
         hudGo.transform.SetParent(transform, false);
-        _hud            = hudGo.AddComponent<TextMeshProUGUI>();
-        _hud.text       = "[Space]  Pause / Resume\n[R]       Replay\n[Esc]    Exit";
-        _hud.fontSize   = 20;
-        _hud.color      = new Color(1f, 1f, 1f, 0.90f);
-        _hud.alignment  = TextAlignmentOptions.TopLeft;
-        var hudRect     = hudGo.GetComponent<RectTransform>();
-        hudRect.anchorMin      = new Vector2(0f, 1f);
-        hudRect.anchorMax      = new Vector2(0f, 1f);
-        hudRect.pivot          = new Vector2(0f, 1f);
+        _hud           = hudGo.AddComponent<TextMeshProUGUI>();
+        _hud.text      = "[Space]  Pause / Resume\n[R]       Replay\n[Esc]    Exit";
+        _hud.fontSize  = 20;
+        _hud.color     = new Color(1f, 1f, 1f, 0.90f);
+        _hud.alignment = TextAlignmentOptions.TopLeft;
+        var hudRect    = hudGo.GetComponent<RectTransform>();
+        hudRect.anchorMin        = new Vector2(0f, 1f);
+        hudRect.anchorMax        = new Vector2(0f, 1f);
+        hudRect.pivot            = new Vector2(0f, 1f);
         hudRect.anchoredPosition = new Vector2(24f, -24f);
-        hudRect.sizeDelta      = new Vector2(320f, 110f);
+        hudRect.sizeDelta        = new Vector2(320f, 110f);
     }
 
     private static void Stretch(RectTransform rt)
@@ -82,36 +84,34 @@ public class CreditsVideoPlayer : MonoBehaviour
 
     private void BuildVideoPlayer()
     {
-        _rt            = new RenderTexture(1920, 1080, 0);
+        _rt             = new RenderTexture(1920, 1080, 0);
         _screen.texture = _rt;
 
-        _vp                  = gameObject.AddComponent<VideoPlayer>();
-        _vp.renderMode       = VideoRenderMode.RenderTexture;
-        _vp.targetTexture    = _rt;
-        _vp.audioOutputMode  = VideoAudioOutputMode.AudioSource;
-        _vp.playOnAwake      = false;
-        _vp.isLooping        = false;
-        _vp.skipOnDrop       = true;
+        _vp = gameObject.AddComponent<VideoPlayer>();
+        _vp.renderMode      = VideoRenderMode.RenderTexture;
+        _vp.targetTexture   = _rt;
+        _vp.audioOutputMode = VideoAudioOutputMode.AudioSource;
+        _vp.playOnAwake     = false;
+        _vp.isLooping       = false;
+        _vp.skipOnDrop      = true;
 
         var audio = gameObject.AddComponent<AudioSource>();
         _vp.SetTargetAudioSource(0, audio);
 
-        if (_clip == null)
-            _clip = Resources.Load<VideoClip>("CreditsVideo");
-
-        if (_clip == null)
+        string path = Path.Combine(Application.streamingAssetsPath, "CreditsVideo.mp4");
+        if (!File.Exists(path))
         {
-            Debug.LogError("CreditsVideoPlayer: no VideoClip assigned and " +
-                           "'CreditsVideo' not found in any Resources folder.");
+            Debug.LogError("CreditsVideoPlayer: video not found at " + path);
             Close();
             return;
         }
 
-        _vp.source = VideoSource.VideoClip;
-        _vp.clip   = _clip;
+        _vp.source = VideoSource.Url;
+        _vp.url    = "file://" + path;
+
         _vp.prepareCompleted += _ => _vp.Play();
         _vp.loopPointReached += _ => Close();
-        _vp.errorReceived    += (_, msg) => Debug.LogError("CreditsVideoPlayer video error: " + msg);
+        _vp.errorReceived    += (_, msg) => Debug.LogError("CreditsVideoPlayer: " + msg);
         _vp.Prepare();
     }
 

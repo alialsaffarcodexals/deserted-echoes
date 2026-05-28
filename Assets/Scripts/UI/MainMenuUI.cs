@@ -9,7 +9,6 @@
 // ─────────────────────────────────────────────────────────────
 
 using UnityEngine;
-using UnityEngine.Video;
 
 public class MainMenuUI : MonoBehaviour
 {
@@ -24,9 +23,6 @@ public class MainMenuUI : MonoBehaviour
 
     [Header("Scene")]
     [SerializeField] private string firstLevelScene = "Open-World";
-
-    [Header("Credits Video")]
-    [SerializeField] private VideoClip creditsVideoClip;
 
     [Header("UI Sound Effects")]
     [SerializeField] private AudioSource uiAudio;
@@ -118,7 +114,7 @@ public class MainMenuUI : MonoBehaviour
     {
         PlaySound(panelOpenClip);
         HideButtonList();
-        CreditsVideoPlayer.Play(creditsVideoClip, ShowButtonList);
+        CreditsVideoPlayer.Play(ShowButtonList);
     }
 
     /// <summary>Settings button → shows settings panel.</summary>
