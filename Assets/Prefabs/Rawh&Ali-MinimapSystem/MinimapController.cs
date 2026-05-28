@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MinimapController : MonoBehaviour
@@ -35,6 +36,16 @@ public class MinimapController : MonoBehaviour
         if (Instance == null) Instance = this;
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+        if (fogPixels == null) return;
+        byte[] alphas = new byte[fogPixels.Length];
+        for (int i = 0; i < fogPixels.Length; i++)
+            alphas[i] = fogPixels[i].a;
+        FogStore.Set(SceneManager.GetActiveScene().name, alphas);
+    }
+
     private void Start()
     {
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
@@ -54,6 +65,15 @@ public class MinimapController : MonoBehaviour
 
         fogTexture.SetPixels32(fogPixels);
         fogTexture.Apply();
+
+        byte[] saved = FogStore.Get(SceneManager.GetActiveScene().name);
+        if (saved != null && saved.Length == fogPixels.Length)
+        {
+            for (int i = 0; i < fogPixels.Length; i++)
+                fogPixels[i].a = saved[i];
+            fogTexture.SetPixels32(fogPixels);
+            fogTexture.Apply();
+        }
     }
 
     private void CreateFogOverlay()
