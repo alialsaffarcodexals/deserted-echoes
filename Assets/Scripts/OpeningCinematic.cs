@@ -38,6 +38,15 @@ public class OpeningCinematic : MonoBehaviour
         public bool titleCard;
         public bool endText;
         public bool flash;
+        // audio
+        public string music;
+        public float wind;
+        public float fire;
+        public bool steps;
+        public bool rush;
+        public bool slam;
+        public int shout;            // 0 none, 1 lucian, 2 friend
+        public bool thud;
     }
 
     // ── Colours (from the original cinematic CSS) ────────────
@@ -68,7 +77,7 @@ public class OpeningCinematic : MonoBehaviour
     private CanvasGroup _endGroup;
 
     private Font _font;
-    private AudioSource _music;
+    private OpeningCinematicAudio _audio;
 
     private Coroutine _kbCo;
     private Coroutine _typeCo;
@@ -81,11 +90,13 @@ public class OpeningCinematic : MonoBehaviour
     {
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         BuildUI();
-        SetupAudio();
+        _audio = gameObject.AddComponent<OpeningCinematicAudio>();
+        _audio.Init();
     }
 
     private void Start()
     {
+        _audio.StartWind(0.18f);
         StartCoroutine(RunTimeline());
     }
 
@@ -131,6 +142,17 @@ public class OpeningCinematic : MonoBehaviour
 
         if (s.flash) StartCoroutine(FlashWhite());
 
+        // Audio
+        _audio.SetMusic(s.music);
+        if (s.wind > 0f) _audio.StartWind(s.wind); else _audio.StopWind();
+        _audio.SetFire(s.fire);
+        if (s.steps) _audio.StartFootsteps(); else _audio.StopFootsteps();
+        if (s.rush) _audio.PlayRush();
+        if (s.slam) { _audio.PlayWhoosh(0.6f); StartCoroutine(DelayThen(0.3f, () => _audio.PlayWhoosh(0.5f))); }
+        if (s.shout == 1) _audio.PlayShout(true);
+        else if (s.shout == 2) StartCoroutine(DelayThen(0.6f, () => _audio.PlayShout(false)));
+        if (s.thud) StartCoroutine(DelayThen(0.4f, () => _audio.PlayThud()));
+
         // Scheduled text
         if (!string.IsNullOrEmpty(s.dialogue))
             _textDelayCo = StartCoroutine(DelayThen(0.7f, () => ShowDialogue(s.speaker, s.dialogue)));
@@ -138,7 +160,12 @@ public class OpeningCinematic : MonoBehaviour
             _textDelayCo = StartCoroutine(DelayThen(0.8f, () => ShowNarration(s.narration)));
 
         if (s.titleCard)
-            StartCoroutine(DelayThen(1.5f, () => StartCoroutine(FadeIn(_titleGroup, 1.2f))));
+            StartCoroutine(DelayThen(1.5f, () =>
+            {
+                StartCoroutine(FadeIn(_titleGroup, 1.2f));
+                _audio.PlayFireBurst();
+                StartCoroutine(DelayThen(1.4f, () => _audio.PlayFireBurst()));
+            }));
     }
 
     private IEnumerator SwapAndAnimate(Scene s)
@@ -226,6 +253,7 @@ public class OpeningCinematic : MonoBehaviour
         for (int i = 0; i <= text.Length; i++)
         {
             _dialogText.text = text.Substring(0, i);
+            if (i < text.Length && text[i] != ' ' && i % 2 == 0) _audio.PlayBeep();
             yield return new WaitForSeconds(0.038f);
         }
     }
@@ -276,17 +304,6 @@ public class OpeningCinematic : MonoBehaviour
             yield return null;
         }
         g.alpha = to;
-    }
-
-    private void SetupAudio()
-    {
-        AudioClip clip = Resources.Load<AudioClip>(FrameResourceFolder + "opening-music");
-        if (clip == null) return;
-        _music = gameObject.AddComponent<AudioSource>();
-        _music.clip = clip;
-        _music.loop = true;
-        _music.volume = 0.6f;
-        _music.Play();
     }
 
     // ── UI construction ──────────────────────────────────────
@@ -468,51 +485,45 @@ public class OpeningCinematic : MonoBehaviour
     {
         return new[]
         {
-            S(1, 7f, KB.PanRight, narr: "A small group of travelers crosses an endless desert."),
-            S(2, 10f, KB.ZoomIn, spk: "LUCIAN (inner voice)",
-                dlg: "\"We had been walking for two days straight. No map. No compass. Just the sun ahead of us and the road we thought we knew.\""),
-            S(3, 6.5f, KB.ZoomOut, spk: "LUCIAN", dlg: "\"We make camp before nightfall.  We rest here.\""),
-            S(4, 5.5f, KB.ZoomIn),
-            S(5, 5.5f, KB.ZoomIn),
-            S(6, 7.5f, KB.ZoomIn, spk: "LUCIAN (inner voice)",
-                dlg: "\"I should have kept watch. I should have seen them coming.\""),
-            S(7, 5f, KB.ZoomOut),
-            S(8, 5f, KB.ZoomIn),
-            S(9, 5.5f, KB.PanLeft),
-            S(10, 4.5f, KB.ZoomIn),
-            S(11, 4.5f, KB.Shake),
-            S(12, 4.5f, KB.Shake),
-            S(13, 4f, KB.ZoomIn),
-            S(14, 4.5f, KB.ZoomIn, spk: "LUCIAN", dlg: "\"GET OFF — LET GO OF ME!\""),
-            S(15, 4.5f, KB.PanRight),
-            S(16, 4.5f, KB.ZoomIn, spk: "FRIEND", dlg: "\"LUCIAN — !\""),
-            S(17, 4.5f, KB.PanLeft),
-            S(18, 3f, KB.ZoomIn),
-            S(19, 2.2f, KB.ZoomIn, flash: true),
-            S(20, 4.5f, KB.ZoomOut),
-            S(21, 5f, KB.None, black: true),
-            S(22, 5f, KB.ZoomIn),
-            S(23, 5f, KB.ZoomIn),
-            S(24, 5f, KB.PanRight),
-            S(25, 6f, KB.ZoomIn),
-            S(26, 7.5f, KB.ZoomIn, spk: "LUCIAN (inner voice)",
-                dlg: "\"They took everything.  They took everyone.\""),
-            S(27, 7.5f, KB.ZoomIn, spk: "LUCIAN", dlg: "\"But they left me alive.  That was their mistake.\""),
-            S(28, 6.5f, KB.ZoomOut),
-            S(29, 8f, KB.ZoomIn, title: true),
-            S(30, 12f, KB.None, end: true),
-        };
-    }
-
-    private static Scene S(int img, float dur, KB kb, string narr = null,
-        string spk = null, string dlg = null, bool black = false,
-        bool title = false, bool end = false, bool flash = false)
-    {
-        return new Scene
-        {
-            img = img, dur = dur, kb = kb, narration = narr,
-            speaker = spk, dialogue = dlg, blackOverlay = black,
-            titleCard = title, endText = end, flash = flash,
+            new Scene { img = 1, dur = 7f, kb = KB.PanRight, music = "warm", wind = 0.18f, steps = true,
+                narration = "A small group of travelers crosses an endless desert." },
+            new Scene { img = 2, dur = 10f, kb = KB.ZoomIn, music = "warm", wind = 0.16f, steps = true,
+                speaker = "LUCIAN (inner voice)",
+                dialogue = "\"We had been walking for two days straight. No map. No compass. Just the sun ahead of us and the road we thought we knew.\"" },
+            new Scene { img = 3, dur = 6.5f, kb = KB.ZoomOut, music = "warm", wind = 0.14f, fire = 0.05f,
+                speaker = "LUCIAN", dialogue = "\"We make camp before nightfall.  We rest here.\"" },
+            new Scene { img = 4, dur = 5.5f, kb = KB.ZoomIn, music = "warm-soft", wind = 0.12f, fire = 0.32f },
+            new Scene { img = 5, dur = 5.5f, kb = KB.ZoomIn, music = "warm-soft", wind = 0.14f, fire = 0.32f },
+            new Scene { img = 6, dur = 7.5f, kb = KB.ZoomIn, music = "silent", wind = 0.16f, fire = 0.30f,
+                speaker = "LUCIAN (inner voice)", dialogue = "\"I should have kept watch. I should have seen them coming.\"" },
+            new Scene { img = 7, dur = 5f, kb = KB.ZoomOut, music = "silent", wind = 0.18f, fire = 0.18f },
+            new Scene { img = 8, dur = 5f, kb = KB.ZoomIn, music = "tense", wind = 0.20f, fire = 0.10f },
+            new Scene { img = 9, dur = 5.5f, kb = KB.PanLeft, music = "tense", wind = 0.22f, fire = 0.05f },
+            new Scene { img = 10, dur = 4.5f, kb = KB.ZoomIn, music = "tense", wind = 0.20f },
+            new Scene { img = 11, dur = 4.5f, kb = KB.Shake, music = "combat", wind = 0.10f, slam = true, rush = true },
+            new Scene { img = 12, dur = 4.5f, kb = KB.Shake, music = "combat", wind = 0.10f },
+            new Scene { img = 13, dur = 4f, kb = KB.ZoomIn, music = "combat", wind = 0.10f },
+            new Scene { img = 14, dur = 4.5f, kb = KB.ZoomIn, music = "combat", wind = 0.10f, shout = 1,
+                speaker = "LUCIAN", dialogue = "\"GET OFF — LET GO OF ME!\"" },
+            new Scene { img = 15, dur = 4.5f, kb = KB.PanRight, music = "combat", wind = 0.10f },
+            new Scene { img = 16, dur = 4.5f, kb = KB.ZoomIn, music = "combat", wind = 0.10f, shout = 2,
+                speaker = "FRIEND", dialogue = "\"LUCIAN — !\"" },
+            new Scene { img = 17, dur = 4.5f, kb = KB.PanLeft, music = "combat", wind = 0.12f },
+            new Scene { img = 18, dur = 3f, kb = KB.ZoomIn, music = "combat", wind = 0.12f },
+            new Scene { img = 19, dur = 2.2f, kb = KB.ZoomIn, music = "combat", wind = 0.12f, thud = true, flash = true },
+            new Scene { img = 20, dur = 4.5f, kb = KB.ZoomOut, music = "silent", wind = 0.18f },
+            new Scene { img = 21, dur = 5f, kb = KB.None, music = "silent", wind = 0.12f, blackOverlay = true },
+            new Scene { img = 22, dur = 5f, kb = KB.ZoomIn, music = "mournful", wind = 0.20f },
+            new Scene { img = 23, dur = 5f, kb = KB.ZoomIn, music = "mournful", wind = 0.20f },
+            new Scene { img = 24, dur = 5f, kb = KB.PanRight, music = "mournful", wind = 0.22f },
+            new Scene { img = 25, dur = 6f, kb = KB.ZoomIn, music = "mournful", wind = 0.18f },
+            new Scene { img = 26, dur = 7.5f, kb = KB.ZoomIn, music = "mournful", wind = 0.16f,
+                speaker = "LUCIAN (inner voice)", dialogue = "\"They took everything.  They took everyone.\"" },
+            new Scene { img = 27, dur = 7.5f, kb = KB.ZoomIn, music = "determined-low", wind = 0.16f,
+                speaker = "LUCIAN", dialogue = "\"But they left me alive.  That was their mistake.\"" },
+            new Scene { img = 28, dur = 6.5f, kb = KB.ZoomOut, music = "determined-mid", wind = 0.18f, steps = true },
+            new Scene { img = 29, dur = 8f, kb = KB.ZoomIn, music = "thrilling-reveal", fire = 0.22f, titleCard = true },
+            new Scene { img = 30, dur = 12f, kb = KB.None, music = "thrilling-resolve", wind = 0.08f, endText = true },
         };
     }
 }
