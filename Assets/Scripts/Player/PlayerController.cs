@@ -402,6 +402,18 @@ public class PlayerController : MonoBehaviour
     {
         survivalSystem = system;
         ReconcileHealthOnSceneLoad();
+
+        if (survivalSystem == null)
+            return;
+
+        if (hasLoadedSave)
+        {
+            survivalSystem.LoadProgressFromSave(SaveManager.Instance != null ? SaveManager.Instance.CurrentSaveData : null);
+            return;
+        }
+
+        if (survivalSystem.CurrentLevel > level)
+            SyncLevelFromSurvivalSystem(survivalSystem.CurrentLevel, survivalSystem.CurrentExp);
     }
 
     public void TakeDamage(int damage)
@@ -495,6 +507,8 @@ public class PlayerController : MonoBehaviour
         ApplyLevelProgression();
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         SyncSurvivalHealth();
+        if (survivalSystem != null)
+            survivalSystem.LoadProgressFromSave(saveData);
         
         // Restore position if different scene
         if (saveData.lastSceneName == UnityEngine.SceneManagement.SceneManager.GetActiveScene().name)
@@ -565,6 +579,21 @@ public class PlayerController : MonoBehaviour
     public int GetLevel()
     {
         return level;
+    }
+
+    public void SyncLevelFromSurvivalSystem(int survivalLevel, float survivalExperience)
+    {
+        int syncedLevel = Mathf.Max(1, survivalLevel);
+
+        if (syncedLevel < level)
+            return;
+
+        level = syncedLevel;
+        experience = Mathf.Max(0, Mathf.RoundToInt(survivalExperience));
+        ApplyLevelProgression();
+        SavePlayerData();
+
+        Debug.Log($"PlayerController synced from SurvivalSystem: Level {level}, Animation Player_Lvl{currentAnimationLevel}");
     }
 
     /// <summary>
