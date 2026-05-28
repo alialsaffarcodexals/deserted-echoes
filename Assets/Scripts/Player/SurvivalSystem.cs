@@ -31,8 +31,8 @@ public class SurvivalSystem : MonoBehaviour
     public float ExpNeededForNextLevel => expNeededForNextLevel;
 
     [Header("Depletion Rates (Per Second)")]
-    public float hungerDepletionRate = 1.5f;
-    public float thirstDepletionRate = 2.0f;
+    public float hungerDepletionRate = 2.5f;
+    public float thirstDepletionRate = 3.0f;
     public float staminaDepletionRate = 5f;
     public float staminaRunDepletionRate = 15f;
     public float staminaRegenRate = 4.0f;
@@ -191,11 +191,12 @@ public class SurvivalSystem : MonoBehaviour
         float thirstMod = TemperatureSystem.Instance?.GetThirstModifier() ?? 1f;
         float staminaMod = TemperatureSystem.Instance?.GetStaminaModifier() ?? 1f;
 
-        currentHunger -= hungerDepletionRate * hungerMod * Time.deltaTime;
-        currentThirst -= thirstDepletionRate * thirstMod * Time.deltaTime;
+        
 
         if (isSprinting && currentStamina > 0)
         {
+            currentHunger -= hungerDepletionRate * hungerMod * Time.deltaTime;
+            currentThirst -= thirstDepletionRate * thirstMod * Time.deltaTime;
             currentStamina -= staminaRunDepletionRate * staminaMod * Time.deltaTime;
 
             if (currentStamina <= 0)
