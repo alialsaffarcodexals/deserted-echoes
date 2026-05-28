@@ -86,6 +86,44 @@ public class InventoryController : MonoBehaviour
         targetSlot.currentItem = item;
     }
 
+    // changes here for adding item in the inventory
+
+    public bool AddItem(GameObject itemPrefab)
+    {
+        if (itemPrefab == null)
+        {
+            Debug.LogWarning("InventoryController: Tried to add a null item.");
+            return false;
+        }
+
+        if (staticHotbarSlots != null)
+        {
+            foreach (Slot slot in staticHotbarSlots)
+            {
+                if (slot != null && slot.currentItem == null)
+                {
+                    SpawnItemInSlot(itemPrefab, slot);
+                    return true;
+                }
+            }
+        }
+
+        foreach (Transform slotTransform in inventoryPanel.transform)
+        {
+            Slot slot = slotTransform.GetComponent<Slot>();
+
+            if (slot != null && slot.currentItem == null)
+            {
+                SpawnItemInSlot(itemPrefab, slot);
+                return true;
+            }
+        }
+
+        Debug.Log("InventoryController: Inventory is full.");
+        return false;
+    }
+
+    // ----
     void Update()
     {
         if (Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
