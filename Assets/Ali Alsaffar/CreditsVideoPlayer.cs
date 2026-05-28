@@ -7,6 +7,8 @@ using UnityEngine.Video;
 
 public class CreditsVideoPlayer : MonoBehaviour
 {
+    [SerializeField] private string returnScene = "main-menu";
+
     private VideoPlayer _vp;
     private RawImage    _screen;
     private TextMeshProUGUI _hud;
@@ -143,6 +145,9 @@ public class CreditsVideoPlayer : MonoBehaviour
     {
         if (_rt != null) { _rt.Release(); Destroy(_rt); }
         Destroy(gameObject);
-        _onClose?.Invoke();
+        if (_onClose != null)
+            _onClose.Invoke();
+        else if (!string.IsNullOrEmpty(returnScene))
+            SceneLoader.LoadScene(returnScene);
     }
 }
