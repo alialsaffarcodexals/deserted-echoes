@@ -31,12 +31,14 @@ public class SurvivalSystem : MonoBehaviour
     public float ExpNeededForNextLevel => expNeededForNextLevel;
 
     [Header("Depletion Rates (Per Second)")]
-    public float hungerDepletionRate = 1.5f;
-    public float thirstDepletionRate = 2.0f;
+    public float hungerDepletionRate = 4.5f;
+    public float thirstDepletionRate = 4.0f;
     public float staminaDepletionRate = 5f;
     public float staminaRunDepletionRate = 15f;
     public float staminaRegenRate = 4.0f;
-
+    // changes here
+    public float staminaRegenMultiplier = 1f;
+    // end here
     [Header("Health Settings")]
     public float starvationDamage = 1f;
     public bool canRegenerateHealth = true;
@@ -191,12 +193,13 @@ public class SurvivalSystem : MonoBehaviour
         float thirstMod = TemperatureSystem.Instance?.GetThirstModifier() ?? 1f;
         float staminaMod = TemperatureSystem.Instance?.GetStaminaModifier() ?? 1f;
 
-        currentHunger -= hungerDepletionRate * hungerMod * Time.deltaTime;
-        currentThirst -= thirstDepletionRate * thirstMod * Time.deltaTime;
+
 
         if (isSprinting && currentStamina > 0)
         {
             currentStamina -= staminaRunDepletionRate * staminaMod * Time.deltaTime;
+            currentHunger -= hungerDepletionRate * hungerMod * Time.deltaTime;
+            currentThirst -= thirstDepletionRate * thirstMod * Time.deltaTime;
 
             if (currentStamina <= 0)
             {
@@ -219,7 +222,13 @@ public class SurvivalSystem : MonoBehaviour
         }
         else if (!isSprinting && currentStamina < maxStamina)
         {
-            currentStamina += staminaRegenRate * Time.deltaTime;
+            //changes here 
+
+            
+            // currentStamina += staminaRegenRate * Time.deltaTime; old stamina system
+            currentStamina += staminaRegenRate * staminaRegenMultiplier * Time.deltaTime;
+            //end here
+
         }
 
         if (canRegenerateHealth && currentHunger > 20f && currentThirst > 20f && currentHealth < maxHealth)

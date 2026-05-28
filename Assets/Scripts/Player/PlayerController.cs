@@ -64,8 +64,15 @@ public class PlayerController : MonoBehaviour
 
     public event System.Action OnAttackPerformed;
     public event System.Action OnHitReceived;
+    // added event change here 
+    public event System.Action<int> OnArmorEquipped;
+    // end here
     private SurvivalSystem survivalSystem;
     private int baseAttackDamage;
+    // added changes here
+    private int weaponBonusDamage = 0;
+    private int armorDefense = 0;
+    // end here
     private int currentAnimationLevel = -1;
     private bool hasLoadedSave;
 
@@ -401,6 +408,10 @@ public class PlayerController : MonoBehaviour
     {
         if (isDead)
             return;
+        // added damage change here
+        damage = Mathf.Max(1, damage - armorDefense);
+        // end here
+
 
         // Re-acquire SurvivalSystem if lost (e.g. DontDestroyOnLoad player
         // whose Start() never re-fires after a scene reload via Retry).
@@ -575,7 +586,13 @@ public class PlayerController : MonoBehaviour
     private void ApplyLevelProgression()
     {
         level = Mathf.Max(1, level);
-        attackDamage = baseAttackDamage + ((level - 1) * attackDamagePerLevel);
+
+        // changes here
+
+        //attackDamage = baseAttackDamage + ((level - 1) * attackDamagePerLevel);
+        attackDamage = baseAttackDamage + ((level - 1) * attackDamagePerLevel) + weaponBonusDamage;
+        // end here
+
         ApplyAnimationForLevel();
     }
 
@@ -669,4 +686,24 @@ public class PlayerController : MonoBehaviour
     {
         Gizmos.DrawWireSphere(GetAttackCenterWorld(), attackRange);
     }
+    // changs here
+    public void EquipWeapon(int damageBonus)
+    {
+        weaponBonusDamage = damageBonus;
+
+        attackDamage = baseAttackDamage + ((level - 1) * attackDamagePerLevel) + weaponBonusDamage;
+
+        Debug.Log($"PlayerController: Weapon equipped. Total Damage = {attackDamage}");
+    }
+
+    public void EquipArmor(int defenseBonus)
+    {
+    armorDefense = defenseBonus;
+
+        OnArmorEquipped?.Invoke(defenseBonus);
+
+        Debug.Log($"PlayerController: Armor equipped. Defense = {armorDefense}");
+    }
+
+    // end here
 }
