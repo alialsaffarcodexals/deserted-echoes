@@ -146,7 +146,6 @@ public class OpeningCinematic : MonoBehaviour
         _audio.SetMusic(s.music);
         if (s.wind > 0f) _audio.StartWind(s.wind); else _audio.StopWind();
         _audio.SetFire(s.fire);
-        if (s.steps) _audio.StartFootsteps(); else _audio.StopFootsteps();
         if (s.rush) _audio.PlayRush();
         if (s.slam) { _audio.PlayWhoosh(0.6f); StartCoroutine(DelayThen(0.3f, () => _audio.PlayWhoosh(0.5f))); }
         if (s.shout == 1) _audio.PlayShout(true);
