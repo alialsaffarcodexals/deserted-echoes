@@ -28,7 +28,9 @@ public class SaveData
 
     // Fog of war discovery state — persists across scene reloads; cleared on New Game
     public List<SceneFogData> sceneFogData;
-
+    // change here
+    public List<ChestSaveData> chestSaveData;
+    // end here
     public SaveData()
     {
         // Default values
@@ -46,5 +48,15 @@ public class SaveData
         saveTimestamp = System.DateTime.Now.Ticks;
         seenDialogueKeys = new List<string>();
         sceneFogData = new List<SceneFogData>();
+        // change here
+        chestSaveData = new List<ChestSaveData>();
+        // end here
     }
+}
+
+[System.Serializable]
+public class ChestSaveData
+{
+    public string chestID;
+    public List<string> remainingItems = new List<string>();
 }
