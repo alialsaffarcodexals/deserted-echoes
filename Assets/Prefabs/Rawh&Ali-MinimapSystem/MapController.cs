@@ -24,6 +24,9 @@ public class MapController : MonoBehaviour
     [Header("Panning Settings")]
     [SerializeField] private float panningSpeed = 20f;
 
+    [Header("Player Marker")]
+    [SerializeField] private RectTransform playerMarker;
+
     private bool isMapOpen = false;
     private Transform playerTransform;
     private Vector2 panOffset = Vector2.zero;
@@ -95,6 +98,7 @@ public class MapController : MonoBehaviour
             HandleZoom();
             UpdateBigMapCamera();
             UpdateBigMapFogUV();
+            UpdatePlayerMarker();
         }
     }
 
@@ -148,6 +152,25 @@ public class MapController : MonoBehaviour
             heightOffset);
     }
 
+    private void UpdatePlayerMarker()
+    {
+        if (playerMarker == null || bigMapCamera == null || mapImageRect == null) return;
+
+        float camHalfHeight = bigMapCamera.orthographicSize;
+        float camHalfWidth = camHalfHeight * bigMapCamera.aspect;
+
+        float mapWidth = mapImageRect.rect.width;
+        float mapHeight = mapImageRect.rect.height;
+
+        // Camera sits at playerPos + panOffset. The player therefore appears
+        // -panOffset from the render-texture centre. Convert that to UI pixels
+        // so the marker stays locked to the player's world position while the
+        // view pans.
+        playerMarker.anchoredPosition = new Vector2(
+            -panOffset.x * mapWidth  / (2f * camHalfWidth),
+            -panOffset.y * mapHeight / (2f * camHalfHeight));
+    }
+
     private void UpdateBigMapFogUV()
     {
         if (bigMapFogOverlay == null || bigMapCamera == null || MinimapController.Instance == null) return;
@@ -189,6 +212,7 @@ public class MapController : MonoBehaviour
             Time.timeScale = 0f;
             panOffset = Vector2.zero;
             UpdateBigMapCamera();
+            UpdatePlayerMarker();
         }
         else
         {

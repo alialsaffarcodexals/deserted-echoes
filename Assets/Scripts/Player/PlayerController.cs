@@ -5,9 +5,21 @@ public class PlayerController : MonoBehaviour
 {
     private const int MaxPlayerAnimationLevel = 9;
 
+    private enum InitialFacingDirection
+    {
+        Down,
+        Left,
+        Right,
+        Up
+    }
+
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private float runSpeed = 10f;
+
+    [Header("Scene Control")]
+    [SerializeField] private bool inputLocked = false;
+    [SerializeField] private InitialFacingDirection startingFacing = InitialFacingDirection.Down;
 
     [Header("Combat")]
     [SerializeField] private Transform attackPoint;
@@ -102,8 +114,10 @@ public class PlayerController : MonoBehaviour
         if (animator == null)
             return;
 
-        animator.SetFloat("LastMoveX", 0);
-        animator.SetFloat("LastMoveY", -1);
+        lastMoveDirection = GetFacingVector(startingFacing);
+        animator.SetFloat("LastMoveX", lastMoveDirection.x);
+        animator.SetFloat("LastMoveY", lastMoveDirection.y);
+        UpdateAnimator();
     }
 
 #if UNITY_EDITOR
@@ -132,6 +146,18 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        if (inputLocked)
+        {
+            movement = Vector2.zero;
+            IsSprinting = false;
+            if (survivalSystem != null)
+                survivalSystem.SetSprinting(false);
+
+            UpdateAttackPoint();
+            UpdateAnimator();
+            return;
+        }
+
         ReadMovementInput();
 
         // Resolve sprinting here (Update) so FootstepSounds reads a current value
@@ -153,8 +179,9 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (isDead)
+        if (isDead || inputLocked)
         {
+            movement = Vector2.zero;
             rb.linearVelocity = Vector2.zero;
             return;
         }
@@ -282,6 +309,21 @@ public class PlayerController : MonoBehaviour
             if (direction.y > 0)
                 return Vector2.up;
             else
+                return Vector2.down;
+        }
+    }
+
+    private Vector2 GetFacingVector(InitialFacingDirection direction)
+    {
+        switch (direction)
+        {
+            case InitialFacingDirection.Left:
+                return Vector2.left;
+            case InitialFacingDirection.Right:
+                return Vector2.right;
+            case InitialFacingDirection.Up:
+                return Vector2.up;
+            default:
                 return Vector2.down;
         }
     }
