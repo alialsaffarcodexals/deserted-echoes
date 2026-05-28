@@ -11,7 +11,6 @@
 // ─────────────────────────────────────────────────────────────
 
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class OpeningCinematicAudio : MonoBehaviour
@@ -19,13 +18,16 @@ public class OpeningCinematicAudio : MonoBehaviour
     private const int SR = 44100;
 
     private AudioSource _musicA, _musicB, _wind, _fire, _sfx;
-    private bool _usingA = true;
     private string _mood = null;
 
-    private AudioClip _footstep, _thud, _whoosh, _shoutLow, _shoutHigh, _beep, _fireBurst, _kick, _heartKick;
-    private readonly Dictionary<string, AudioClip> _pads = new Dictionary<string, AudioClip>();
+    private AudioClip _footstep, _thud, _whoosh, _shoutLow, _shoutHigh, _beep, _fireBurst;
 
-    private Coroutine _footCo, _pulseCo, _windFadeCo, _fireFadeCo, _musicFadeA, _musicFadeB;
+    // Real CC0 score (OpenGameArt "Desert calmness and fighting", Dizzy Crow)
+    private AudioClip _desertLoop, _fightLoop;
+    private AudioSource _activeMusic;
+    private AudioClip _activeClip;
+
+    private Coroutine _footCo, _windFadeCo, _fireFadeCo, _musicFadeOut, _musicFadeIn;
 
     // ── Setup ────────────────────────────────────────────────
     public void Init()
@@ -46,8 +48,9 @@ public class OpeningCinematicAudio : MonoBehaviour
         _shoutHigh = BuildShout(680f);
         _beep      = BuildBeep();
         _fireBurst = BuildFireBurst();
-        _kick      = BuildKick(95f, 45f);
-        _heartKick = BuildKick(75f, 35f);
+
+        _desertLoop = Resources.Load<AudioClip>("OpeningAudio/NegevDesertLoop");
+        _fightLoop  = Resources.Load<AudioClip>("OpeningAudio/NegevFightLoop");
     }
 
     private AudioSource NewSource(float vol, bool loop)
@@ -136,49 +139,63 @@ public class OpeningCinematicAudio : MonoBehaviour
         }
     }
 
-    // ── Music moods (crossfading pads + pulse) ───────────────
+    // ── Music moods (real CC0 orchestral tracks) ────────────
+    // The "warm"/"mournful"/"determined" calm scenes share the Desert
+    // loop; the ambush and finale use the Fight loop. When two
+    // consecutive moods map to the same track we just adjust volume,
+    // so the music stays continuous instead of restarting.
     public void SetMusic(string mood)
     {
         if (_mood == mood) return;
         _mood = mood;
 
-        if (_pulseCo != null) { StopCoroutine(_pulseCo); _pulseCo = null; }
-
+        AudioClip target = MoodClip(mood);
         float vol = MoodVolume(mood);
-        AudioClip pad = (mood == "silent" || vol <= 0f) ? null : GetPad(mood);
 
-        AudioSource incoming = _usingA ? _musicB : _musicA;
-        AudioSource outgoing = _usingA ? _musicA : _musicB;
-        _usingA = !_usingA;
+        if (target == null) { FadeOutMusic(); return; }
 
-        if (_musicFadeA != null) StopCoroutine(_musicFadeA);
-        if (_musicFadeB != null) StopCoroutine(_musicFadeB);
-        _musicFadeA = StartCoroutine(Ramp(outgoing, 0f, 1.2f, true));
-
-        if (pad != null)
+        if (target == _activeClip && _activeMusic != null)
         {
-            incoming.clip = pad;
-            incoming.volume = 0f;
-            incoming.Play();
-            _musicFadeB = StartCoroutine(Ramp(incoming, vol, 1.6f, false));
+            // Same track — just ride the volume to the new mood level.
+            if (_musicFadeIn != null) StopCoroutine(_musicFadeIn);
+            _musicFadeIn = StartCoroutine(Ramp(_activeMusic, vol, 1.5f, false));
+            return;
         }
 
-        float pulse = PulseInterval(mood);
-        if (pulse > 0f)
-            _pulseCo = StartCoroutine(PulseLoop(mood, pulse));
+        AudioSource incoming = (_activeMusic == _musicA) ? _musicB : _musicA;
+        if (_musicFadeOut != null) StopCoroutine(_musicFadeOut);
+        if (_musicFadeIn != null) StopCoroutine(_musicFadeIn);
+        if (_activeMusic != null)
+            _musicFadeOut = StartCoroutine(Ramp(_activeMusic, 0f, 1.4f, true));
+
+        incoming.clip = target;
+        incoming.volume = 0f;
+        incoming.Play();
+        _musicFadeIn = StartCoroutine(Ramp(incoming, vol, 1.6f, false));
+        _activeMusic = incoming;
+        _activeClip = target;
     }
 
-    private IEnumerator PulseLoop(string mood, float interval)
+    private void FadeOutMusic()
     {
-        bool heart = mood == "ominous-cave" || mood == "dark-resolve";
-        float vol = heart ? 0.22f : (mood == "combat" ? 0.34f : mood.StartsWith("thrilling") ? 0.34f : 0.3f);
-        int beat = 0;
-        while (true)
+        if (_activeMusic == null) return;
+        if (_musicFadeOut != null) StopCoroutine(_musicFadeOut);
+        _musicFadeOut = StartCoroutine(Ramp(_activeMusic, 0f, 1.4f, true));
+        _activeMusic = null;
+        _activeClip = null;
+    }
+
+    private AudioClip MoodClip(string m)
+    {
+        switch (m)
         {
-            _sfx.PlayOneShot(heart ? _heartKick : _kick, vol);
-            beat++;
-            if (heart) yield return new WaitForSeconds(beat % 2 == 1 ? 0.38f : 1.4f);
-            else yield return new WaitForSeconds(interval);
+            case "silent": return null;
+            case "combat":
+            case "ominous-cave":
+            case "dark-resolve":
+            case "thrilling-reveal":
+            case "thrilling-resolve": return _fightLoop;
+            default: return _desertLoop;   // warm / mournful / determined / tense
         }
     }
 
@@ -186,72 +203,21 @@ public class OpeningCinematicAudio : MonoBehaviour
     {
         switch (m)
         {
-            case "warm": return 0.5f;
-            case "warm-soft": return 0.3f;
+            case "warm": return 0.55f;
+            case "warm-soft": return 0.42f;
             case "tense": return 0.5f;
-            case "combat": return 0.55f;
-            case "mournful": return 0.45f;
-            case "determined-low": return 0.35f;
-            case "determined-mid": return 0.55f;
-            case "determined-full": return 0.7f;
-            case "ominous-cave": return 0.5f;
-            case "dark-resolve": return 0.5f;
-            case "thrilling-reveal": return 0.6f;
-            case "thrilling-resolve": return 0.75f;
+            case "combat": return 0.7f;
+            case "mournful": return 0.5f;
+            case "determined-low": return 0.5f;
+            case "determined-mid": return 0.62f;
+            case "determined-full": return 0.72f;
+            case "thrilling-reveal": return 0.68f;
+            case "thrilling-resolve": return 0.8f;
             default: return 0f;
         }
     }
 
-    private static float PulseInterval(string m)
-    {
-        switch (m)
-        {
-            case "tense": return 1.1f;
-            case "combat": return 0.5f;
-            case "determined-mid":
-            case "determined-full": return 1.1f;
-            case "thrilling-reveal":
-            case "thrilling-resolve": return 0.3f;
-            case "ominous-cave":
-            case "dark-resolve": return 0.5f;   // handled as heartbeat
-            default: return 0f;
-        }
-    }
-
-    private AudioClip GetPad(string mood)
-    {
-        if (_pads.TryGetValue(mood, out AudioClip cached)) return cached;
-        float[] freqs = MoodFreqs(mood, out bool[] saw);
-        AudioClip clip = BuildPad(mood, freqs, saw, 9f);
-        _pads[mood] = clip;
-        return clip;
-    }
-
-    private static float[] MoodFreqs(string m, out bool[] saw)
-    {
-        float[] f;
-        switch (m)
-        {
-            case "warm":
-            case "warm-soft": f = new[] { 110f, 220f, 277.18f, 329.63f, 440f }; break;
-            case "tense": f = new[] { 55f, 110f, 220f }; break;
-            case "combat": f = new[] { 58f, 116f, 87f, 174f }; break;
-            case "mournful": f = new[] { 110f, 220f, 261.63f, 329.63f }; break;
-            case "determined-low":
-            case "determined-mid":
-            case "determined-full": f = new[] { 73.42f, 146.83f, 220f, 293.66f, 369.99f, 440f }; break;
-            case "ominous-cave":
-            case "dark-resolve": f = new[] { 41.2f, 73.42f, 77.78f, 146.83f }; break;
-            case "thrilling-reveal":
-            case "thrilling-resolve": f = new[] { 73.42f, 110f, 174.61f, 293.66f }; break;
-            default: f = new[] { 220f }; break;
-        }
-        saw = new bool[f.Length];
-        for (int i = 0; i < f.Length; i++) saw[i] = f[i] < 130f;   // low voices use saw
-        return f;
-    }
-
-    // ── Procedural clip builders ─────────────────────────────
+    // ── Procedural SFX builders ──────────────────────────────
     private static AudioClip MakeClip(string name, float[] data)
     {
         var clip = AudioClip.Create(name, data.Length, 1, SR, false);
@@ -285,47 +251,21 @@ public class OpeningCinematicAudio : MonoBehaviour
 
     private static float Saw(float phase) => 2f * (phase - Mathf.Floor(phase + 0.5f));
 
-    private AudioClip BuildPad(string name, float[] freqs, bool[] saw, float seconds)
-    {
-        int n = Mathf.RoundToInt(seconds * SR);
-        var d = new float[n];
-        for (int v = 0; v < freqs.Length; v++)
-        {
-            float f = freqs[v];
-            float lfoRate = 0.08f + v * 0.03f;
-            for (int i = 0; i < n; i++)
-            {
-                float t = (float)i / SR;
-                float detune = 1f + 0.0015f * Mathf.Sin(2f * Mathf.PI * lfoRate * t);
-                float ph = f * detune * t;
-                float s = saw[v] ? Saw(ph) * 0.6f : Mathf.Sin(2f * Mathf.PI * ph);
-                d[i] += s;
-            }
-        }
-        // slow amplitude swell
-        for (int i = 0; i < n; i++)
-        {
-            float t = (float)i / SR;
-            d[i] *= 0.85f + 0.15f * Mathf.Sin(2f * Mathf.PI * 0.06f * t);
-        }
-        Normalize(d, 0.3f);
-        d = LoopSmooth(d, SR / 4);
-        return MakeClip(name, d);
-    }
-
     private AudioClip BuildWind()
     {
         int n = 4 * SR;
         var d = new float[n];
         for (int i = 0; i < n; i++) d[i] = Random.value * 2f - 1f;
-        OnePoleLP(d, 500f);
-        OnePoleHP(d, 80f);
+        OnePoleLP(d, 700f);
+        OnePoleHP(d, 130f);
+        // Gentle, steady airflow — shallow LFO so it reads as desert wind
+        // rather than rolling ocean waves.
         for (int i = 0; i < n; i++)
         {
             float t = (float)i / SR;
-            d[i] *= 0.6f + 0.4f * Mathf.Sin(2f * Mathf.PI * 0.15f * t);
+            d[i] *= 0.88f + 0.12f * Mathf.Sin(2f * Mathf.PI * 0.23f * t);
         }
-        Normalize(d, 0.5f);
+        Normalize(d, 0.4f);
         d = LoopSmooth(d, SR / 4);
         return MakeClip("wind", d);
     }
@@ -458,20 +398,6 @@ public class OpeningCinematicAudio : MonoBehaviour
         }
         Normalize(d, 0.8f);
         return MakeClip("fireburst", d);
-    }
-
-    private AudioClip BuildKick(float fStart, float fEnd)
-    {
-        int n = Mathf.RoundToInt(0.4f * SR);
-        var d = new float[n];
-        for (int i = 0; i < n; i++)
-        {
-            float t = (float)i / SR;
-            float f = Mathf.Lerp(fStart, fEnd, Mathf.Clamp01(t / 0.25f));
-            d[i] = Mathf.Sin(2f * Mathf.PI * f * t) * Mathf.Exp(-t / 0.12f);
-        }
-        Normalize(d, 0.9f);
-        return MakeClip("kick", d);
     }
 
     // ── Simple one-pole filters (in place) ───────────────────
