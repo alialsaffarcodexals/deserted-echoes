@@ -13,9 +13,10 @@ GameObject:
   - component: {fileID: 6262571121852603591}
   - component: {fileID: 4483573940693650298}
   - component: {fileID: 7328271713721776862}
-  - component: {fileID: 8636326253386222551}
   - component: {fileID: 1837083868216936727}
   - component: {fileID: 7484036761269781888}
+  - component: {fileID: -5314159347814348247}
+  - component: {fileID: 6923201760187582904}
   m_Layer: 5
   m_Name: StaminaRegenPotion
   m_TagString: Untagged
@@ -104,20 +105,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 872fee3d05395a047b89601b088a7c02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemDragHandler
---- !u!114 &8636326253386222551
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1813670340793606714}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1363d6dd76f1f6c45a7204105f0886bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StaminaPotionCollectible
-  recoveryBoostMultiplier: 1.1
-  boostDuration: 10
 --- !u!212 &1837083868216936727
 SpriteRenderer:
   serializedVersion: 2
@@ -164,7 +151,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 561788279
-  m_SortingLayer: 4
+  m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 177572541, guid: 814c7e28625107746bc3de56be3e61dc, type: 3}
@@ -213,3 +200,30 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
+--- !u!114 &-5314159347814348247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813670340793606714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69a35b2fc25df3746ab1f7c484c4b270, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryItemPickup
+  inventoryItemPrefab: {fileID: 1813670340793606714}
+--- !u!114 &6923201760187582904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813670340793606714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ded3d809a0167b4b97423cf26c52270, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StaminaPotionCollectible
+  recoveryBoostMultiplier: 1.1
+  boostDuration: 10
