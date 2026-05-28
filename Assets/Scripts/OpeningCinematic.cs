@@ -157,12 +157,7 @@ public class OpeningCinematic : MonoBehaviour
             _textDelayCo = StartCoroutine(DelayThen(0.8f, () => ShowNarration(s.narration)));
 
         if (s.titleCard)
-            StartCoroutine(DelayThen(1.5f, () =>
-            {
-                StartCoroutine(FadeIn(_titleGroup, 1.2f));
-                _audio.PlayFireBurst();
-                StartCoroutine(DelayThen(1.4f, () => _audio.PlayFireBurst()));
-            }));
+            StartCoroutine(DelayThen(1.5f, () => StartCoroutine(FadeIn(_titleGroup, 1.2f))));
     }
 
     private IEnumerator SwapAndAnimate(Scene s)
@@ -519,7 +514,7 @@ public class OpeningCinematic : MonoBehaviour
             new Scene { img = 27, dur = 7.5f, kb = KB.ZoomIn, music = "determined-low", wind = 0.16f,
                 speaker = "LUCIAN", dialogue = "\"But they left me alive.  That was their mistake.\"" },
             new Scene { img = 28, dur = 6.5f, kb = KB.ZoomOut, music = "determined-mid", wind = 0.18f, steps = true },
-            new Scene { img = 29, dur = 8f, kb = KB.ZoomIn, music = "thrilling-reveal", fire = 0.22f, titleCard = true },
+            new Scene { img = 29, dur = 8f, kb = KB.ZoomIn, music = "thrilling-reveal", titleCard = true },
             new Scene { img = 30, dur = 12f, kb = KB.None, music = "thrilling-resolve", wind = 0.08f, endText = true },
         };
     }
