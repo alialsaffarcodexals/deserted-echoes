@@ -31,12 +31,14 @@ public class SurvivalSystem : MonoBehaviour
     public float ExpNeededForNextLevel => expNeededForNextLevel;
 
     [Header("Depletion Rates (Per Second)")]
-    public float hungerDepletionRate = 2.5f;
-    public float thirstDepletionRate = 3.0f;
+    public float hungerDepletionRate = 4.5f;
+    public float thirstDepletionRate = 4.0f;
     public float staminaDepletionRate = 5f;
     public float staminaRunDepletionRate = 15f;
     public float staminaRegenRate = 4.0f;
-
+    // changes here
+    public float staminaRegenMultiplier = 1f;
+    // end here
     [Header("Health Settings")]
     public float starvationDamage = 1f;
     public bool canRegenerateHealth = true;
@@ -122,6 +124,7 @@ public class SurvivalSystem : MonoBehaviour
         HandleRegeneration();
         HandleEnvironmentalDamage();
         ClampAllStats();
+        SyncPlayerControllerLevel();
         UpdateUI();
     }
 
@@ -191,13 +194,13 @@ public class SurvivalSystem : MonoBehaviour
         float thirstMod = TemperatureSystem.Instance?.GetThirstModifier() ?? 1f;
         float staminaMod = TemperatureSystem.Instance?.GetStaminaModifier() ?? 1f;
 
-        
+
 
         if (isSprinting && currentStamina > 0)
         {
+            currentStamina -= staminaRunDepletionRate * staminaMod * Time.deltaTime;
             currentHunger -= hungerDepletionRate * hungerMod * Time.deltaTime;
             currentThirst -= thirstDepletionRate * thirstMod * Time.deltaTime;
-            currentStamina -= staminaRunDepletionRate * staminaMod * Time.deltaTime;
 
             if (currentStamina <= 0)
             {
@@ -220,7 +223,13 @@ public class SurvivalSystem : MonoBehaviour
         }
         else if (!isSprinting && currentStamina < maxStamina)
         {
-            currentStamina += staminaRegenRate * Time.deltaTime;
+            //changes here 
+
+            
+            // currentStamina += staminaRegenRate * Time.deltaTime; old stamina system
+            currentStamina += staminaRegenRate * staminaRegenMultiplier * Time.deltaTime;
+            //end here
+
         }
 
         if (canRegenerateHealth && currentHunger > 20f && currentThirst > 20f && currentHealth < maxHealth)
@@ -252,6 +261,9 @@ public class SurvivalSystem : MonoBehaviour
         {
             LevelUp();
         }
+
+        SyncPlayerControllerProgress();
+        SaveManager.Instance?.SaveGame();
     }
 
     private void LevelUp()
@@ -277,7 +289,46 @@ public class SurvivalSystem : MonoBehaviour
         currentHealth = maxHealth;
         currentStamina = maxStamina;
 
+        SyncPlayerControllerProgress();
+
         Debug.Log($"Level Up! You are now Level {currentLevel}! Next level needs: {expNeededForNextLevel} EXP");
+    }
+
+    private void SyncPlayerControllerLevel()
+    {
+        if (playerController == null)
+            playerController = Object.FindAnyObjectByType<PlayerController>();
+
+        if (playerController != null && currentLevel > playerController.GetLevel())
+            playerController.SyncLevelFromSurvivalSystem(currentLevel, currentExp);
+    }
+
+    private void SyncPlayerControllerProgress()
+    {
+        if (playerController == null)
+            playerController = Object.FindAnyObjectByType<PlayerController>();
+
+        if (playerController != null)
+            playerController.SyncLevelFromSurvivalSystem(currentLevel, currentExp);
+    }
+
+    public void LoadProgressFromSave(SaveData saveData)
+    {
+        if (saveData == null)
+            return;
+
+        currentLevel = Mathf.Max(1, saveData.level);
+        currentExp = Mathf.Max(0f, saveData.experience);
+        CalculateNextLevelThreshold();
+
+        while (currentExp >= expNeededForNextLevel)
+        {
+            currentExp -= expNeededForNextLevel;
+            currentLevel++;
+            CalculateNextLevelThreshold();
+        }
+
+        UpdateUI();
     }
 
     private void CalculateNextLevelThreshold()
@@ -401,7 +452,7 @@ public class SurvivalSystem : MonoBehaviour
     }
 
     public void UseStamina(float amount) => currentStamina = Mathf.Clamp(currentStamina - amount, 0f, maxStamina);
-    public void Heal(float amount) => currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth);
-    public void Eat(float amount) => currentHunger += amount;
-    public void Drink(float amount) => currentThirst += amount;
+    public void Heal(float amount)  { currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth); UpdateUI(); }
+    public void Eat(float amount)   { currentHunger = Mathf.Clamp(currentHunger + amount, 0f, maxHunger); UpdateUI(); }
+    public void Drink(float amount) { currentThirst = Mathf.Clamp(currentThirst + amount, 0f, maxThirst); UpdateUI(); }
 }
