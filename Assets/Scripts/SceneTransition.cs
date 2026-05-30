@@ -109,22 +109,28 @@ public class SceneTransition : MonoBehaviour
     public void TransitionToScene(string sceneName)
     {
         if (isTransitioning) return;
-        StartCoroutine(DoTransition(sceneName));
+        StartCoroutine(DoTransition(sceneName, fadeOutDuration, fadeInDuration, true));
+    }
+
+    public void TransitionToScene(string sceneName, float customFadeOutDuration, float customFadeInDuration, bool playTeleportSound = true)
+    {
+        if (isTransitioning) return;
+        StartCoroutine(DoTransition(sceneName, customFadeOutDuration, customFadeInDuration, playTeleportSound));
     }
 
     // ── Coroutine ──────────────────────────────────────────────
 
-    private IEnumerator DoTransition(string sceneName)
+    private IEnumerator DoTransition(string sceneName, float fadeOutSeconds, float fadeInSeconds, bool playTeleportSound)
     {
         isTransitioning        = true;
         overlay.blocksRaycasts = true;
 
         // Play teleport whoosh
-        if (teleportSound != null)
+        if (playTeleportSound && teleportSound != null)
             audioSource.PlayOneShot(teleportSound, teleportVolume);
 
         // Fade screen to black
-        yield return StartCoroutine(Fade(0f, 1f, fadeOutDuration));
+        yield return StartCoroutine(Fade(0f, 1f, fadeOutSeconds));
 
         // Load scene asynchronously, hold until ready
         AsyncOperation op       = SceneManager.LoadSceneAsync(sceneName);
@@ -152,7 +158,7 @@ public class SceneTransition : MonoBehaviour
         AudioListener.volume = 1f;
 
         // Fade back in from black
-        yield return StartCoroutine(Fade(1f, 0f, fadeInDuration));
+        yield return StartCoroutine(Fade(1f, 0f, fadeInSeconds));
 
         overlay.blocksRaycasts = false;
         isTransitioning        = false;

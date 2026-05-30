@@ -35,6 +35,8 @@ public abstract class EnemyControllerBase : MonoBehaviour
     [Header("Boss Settings")]
     [Tooltip("Check this on boss prefabs so they use boss HP/damage values instead of mob values.")]
     [SerializeField] private bool isBoss = false;
+    [Tooltip("Check this on the final boss (Beholder) for higher HP on Easy and Normal.")]
+    [SerializeField] private bool isFinalBoss = false;
 
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 1.5f;
@@ -62,6 +64,15 @@ public abstract class EnemyControllerBase : MonoBehaviour
 
     [Tooltip("How much experience this structural base enemy awards on death.")]
     [SerializeField] private float expReward = 50f;
+
+    // changes here done for enemy item drops. 
+
+    [Header("Item Drops")]
+    [SerializeField] private GameObject[] itemDropPrefabs;
+    [SerializeField] private int numberOfDrops = 1;
+    [SerializeField] private float dropRadius = 0.5f;
+
+    // -------
 
     [Header("Animation")]
     [SerializeField] private AttackAnimationMode attackAnimationMode = AttackAnimationMode.Single;
@@ -441,8 +452,39 @@ public abstract class EnemyControllerBase : MonoBehaviour
         if (rb != null)
             rb.linearVelocity = Vector2.zero;
 
+        // added the method
+
+        DropItems();
+
+        //---
+
         Destroy(gameObject, deathDestroyDelay);
     }
+
+    // changes here also 
+
+    private void DropItems()
+    {
+        if (itemDropPrefabs == null || itemDropPrefabs.Length == 0)
+            return;
+
+        for (int i = 0; i < numberOfDrops; i++)
+        {
+            GameObject itemPrefab = itemDropPrefabs[UnityEngine.Random.Range(0, itemDropPrefabs.Length)];
+
+            if (itemPrefab == null)
+                continue;
+
+            Vector2 randomOffset = UnityEngine.Random.insideUnitCircle * dropRadius;
+            Vector3 dropPosition = transform.position + new Vector3(randomOffset.x, randomOffset.y, 0f);
+
+            Instantiate(itemPrefab, dropPosition, Quaternion.identity);
+        }
+    }
+
+
+    //-----
+
 
     private void InterruptCurrentAction()
     {
@@ -600,15 +642,15 @@ public abstract class EnemyControllerBase : MonoBehaviour
         switch (GameDifficultySettings.Current)
         {
             case GameDifficulty.Easy:
-                resolvedMaxHealth    = isBoss ? 75  : 50;
+                resolvedMaxHealth    = isFinalBoss ? 250 : (isBoss ? 75  : 50);
                 resolvedAttackDamage = isBoss ? 10  : 5;
                 break;
             case GameDifficulty.Hard:
-                resolvedMaxHealth    = isBoss ? 300 : 150;
+                resolvedMaxHealth    = isFinalBoss ? 600 : (isBoss ? 300 : 150);
                 resolvedAttackDamage = isBoss ? 50  : 20;
                 break;
             default: // Normal
-                resolvedMaxHealth    = isBoss ? 200 : 100;
+                resolvedMaxHealth    = isFinalBoss ? 500 : (isBoss ? 200 : 100);
                 resolvedAttackDamage = isBoss ? 20  : 10;
                 break;
         }

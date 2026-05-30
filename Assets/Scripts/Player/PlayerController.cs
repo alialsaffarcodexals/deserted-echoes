@@ -5,9 +5,21 @@ public class PlayerController : MonoBehaviour
 {
     private const int MaxPlayerAnimationLevel = 9;
 
+    private enum InitialFacingDirection
+    {
+        Down,
+        Left,
+        Right,
+        Up
+    }
+
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private float runSpeed = 10f;
+
+    [Header("Scene Control")]
+    [SerializeField] private bool inputLocked = false;
+    [SerializeField] private InitialFacingDirection startingFacing = InitialFacingDirection.Down;
 
     [Header("Combat")]
     [SerializeField] private Transform attackPoint;
@@ -52,8 +64,15 @@ public class PlayerController : MonoBehaviour
 
     public event System.Action OnAttackPerformed;
     public event System.Action OnHitReceived;
+    // added event change here 
+    public event System.Action<int> OnArmorEquipped;
+    // end here
     private SurvivalSystem survivalSystem;
     private int baseAttackDamage;
+    // added changes here
+    private int weaponBonusDamage = 0;
+    private int armorDefense = 0;
+    // end here
     private int currentAnimationLevel = -1;
     private bool hasLoadedSave;
 
@@ -102,8 +121,10 @@ public class PlayerController : MonoBehaviour
         if (animator == null)
             return;
 
-        animator.SetFloat("LastMoveX", 0);
-        animator.SetFloat("LastMoveY", -1);
+        lastMoveDirection = GetFacingVector(startingFacing);
+        animator.SetFloat("LastMoveX", lastMoveDirection.x);
+        animator.SetFloat("LastMoveY", lastMoveDirection.y);
+        UpdateAnimator();
     }
 
 #if UNITY_EDITOR
@@ -132,6 +153,18 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        if (inputLocked)
+        {
+            movement = Vector2.zero;
+            IsSprinting = false;
+            if (survivalSystem != null)
+                survivalSystem.SetSprinting(false);
+
+            UpdateAttackPoint();
+            UpdateAnimator();
+            return;
+        }
+
         ReadMovementInput();
 
         // Resolve sprinting here (Update) so FootstepSounds reads a current value
@@ -153,8 +186,9 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (isDead)
+        if (isDead || inputLocked)
         {
+            movement = Vector2.zero;
             rb.linearVelocity = Vector2.zero;
             return;
         }
@@ -286,6 +320,21 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private Vector2 GetFacingVector(InitialFacingDirection direction)
+    {
+        switch (direction)
+        {
+            case InitialFacingDirection.Left:
+                return Vector2.left;
+            case InitialFacingDirection.Right:
+                return Vector2.right;
+            case InitialFacingDirection.Up:
+                return Vector2.up;
+            default:
+                return Vector2.down;
+        }
+    }
+
     private void Attack()
     {
         if (isDead || isAttacking)
@@ -353,12 +402,28 @@ public class PlayerController : MonoBehaviour
     {
         survivalSystem = system;
         ReconcileHealthOnSceneLoad();
+
+        if (survivalSystem == null)
+            return;
+
+        if (hasLoadedSave)
+        {
+            survivalSystem.LoadProgressFromSave(SaveManager.Instance != null ? SaveManager.Instance.CurrentSaveData : null);
+            return;
+        }
+
+        if (survivalSystem.CurrentLevel > level)
+            SyncLevelFromSurvivalSystem(survivalSystem.CurrentLevel, survivalSystem.CurrentExp);
     }
 
     public void TakeDamage(int damage)
     {
         if (isDead)
             return;
+        // added damage change here
+        damage = Mathf.Max(1, damage - armorDefense);
+        // end here
+
 
         // Re-acquire SurvivalSystem if lost (e.g. DontDestroyOnLoad player
         // whose Start() never re-fires after a scene reload via Retry).
@@ -442,6 +507,8 @@ public class PlayerController : MonoBehaviour
         ApplyLevelProgression();
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         SyncSurvivalHealth();
+        if (survivalSystem != null)
+            survivalSystem.LoadProgressFromSave(saveData);
         
         // Restore position if different scene
         if (saveData.lastSceneName == UnityEngine.SceneManagement.SceneManager.GetActiveScene().name)
@@ -514,6 +581,21 @@ public class PlayerController : MonoBehaviour
         return level;
     }
 
+    public void SyncLevelFromSurvivalSystem(int survivalLevel, float survivalExperience)
+    {
+        int syncedLevel = Mathf.Max(1, survivalLevel);
+
+        if (syncedLevel < level)
+            return;
+
+        level = syncedLevel;
+        experience = Mathf.Max(0, Mathf.RoundToInt(survivalExperience));
+        ApplyLevelProgression();
+        SavePlayerData();
+
+        Debug.Log($"PlayerController synced from SurvivalSystem: Level {level}, Animation Player_Lvl{currentAnimationLevel}");
+    }
+
     /// <summary>
     /// Gets player current health.
     /// </summary>
@@ -533,7 +615,13 @@ public class PlayerController : MonoBehaviour
     private void ApplyLevelProgression()
     {
         level = Mathf.Max(1, level);
-        attackDamage = baseAttackDamage + ((level - 1) * attackDamagePerLevel);
+
+        // changes here
+
+        //attackDamage = baseAttackDamage + ((level - 1) * attackDamagePerLevel);
+        attackDamage = baseAttackDamage + ((level - 1) * attackDamagePerLevel) + weaponBonusDamage;
+        // end here
+
         ApplyAnimationForLevel();
     }
 
@@ -627,4 +715,24 @@ public class PlayerController : MonoBehaviour
     {
         Gizmos.DrawWireSphere(GetAttackCenterWorld(), attackRange);
     }
+    // changs here
+    public void EquipWeapon(int damageBonus)
+    {
+        weaponBonusDamage = damageBonus;
+
+        attackDamage = baseAttackDamage + ((level - 1) * attackDamagePerLevel) + weaponBonusDamage;
+
+        Debug.Log($"PlayerController: Weapon equipped. Total Damage = {attackDamage}");
+    }
+
+    public void EquipArmor(int defenseBonus)
+    {
+    armorDefense = defenseBonus;
+
+        OnArmorEquipped?.Invoke(defenseBonus);
+
+        Debug.Log($"PlayerController: Armor equipped. Defense = {armorDefense}");
+    }
+
+    // end here
 }

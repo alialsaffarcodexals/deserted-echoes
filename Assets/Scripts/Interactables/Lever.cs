@@ -22,12 +22,19 @@ public class Lever : MonoBehaviour
     [Header("Interaction")]
     [SerializeField] private float interactRadius = 1.5f;
 
+    [Header("Sound")]
+    [SerializeField] private AudioClip leverSound;
+    [SerializeField] private AudioSource audioSource;
+
     private bool isActivated = false;
     private Transform playerTransform;
     private Vector3Int leverCellPosition;
 
     private void Start()
     {
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
+
         PlayerController player = FindAnyObjectByType<PlayerController>();
         if (player != null)
             playerTransform = player.transform;
@@ -53,6 +60,9 @@ public class Lever : MonoBehaviour
     private void Activate()
     {
         isActivated = true;
+
+        if (leverSound != null && audioSource != null)
+            audioSource.PlayOneShot(leverSound);
 
         // Swap the tile on the tilemap from OFF → ON
         if (leverTilemap != null && leverOnTile != null)

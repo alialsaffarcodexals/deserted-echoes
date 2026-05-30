@@ -2,8 +2,15 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
+
+
 public class HotBarController : MonoBehaviour
 {
+    // changes here
+    private PlayerController playerController;
+    //-----
+
+
     [Header("Hotbar Configuration")]
     [Tooltip("Set how many static slots are generated inside the hotbar from the Inspector.")]
     public int hotbarSlotCount = 7;
@@ -24,6 +31,7 @@ public class HotBarController : MonoBehaviour
 
     void Start()
     {
+
         if (hotbarPanel == null || slotPrefab == null)
         {
             Debug.LogError("HotbarController: Missing references in Inspector!");
@@ -56,12 +64,26 @@ public class HotBarController : MonoBehaviour
         }
 
         UpdateSelectionUI();
+        
+        // changes here 
+
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+
+        if (playerObject != null)
+        {
+            playerController = playerObject.GetComponent<PlayerController>();
+        }
+
+        // -- end here ---
     }
 
     void Update()
     {
         HandleKeyboardInput();
         HandleScrollInput();
+        // changes here 
+        HandleItemUse();
+        // --end here --
     }
 
     private void HandleKeyboardInput()
@@ -143,4 +165,53 @@ public class HotBarController : MonoBehaviour
     {
         return hotbarSlots;
     }
+    // changes here 
+    private void HandleItemUse()
+    {
+        if (Keyboard.current == null || !Keyboard.current.eKey.wasPressedThisFrame)
+            return;
+
+        Slot selectedSlot = hotbarSlots[currentSelectedIndex];
+
+        if (selectedSlot == null || selectedSlot.currentItem == null)
+        {
+            Debug.Log("HotbarController: No item selected.");
+            return;
+        }
+
+        IUsableItem usableItem = selectedSlot.currentItem.GetComponent<IUsableItem>();
+
+        if (usableItem == null)
+        {
+            Debug.Log("HotbarController: Selected item is not usable.");
+            return;
+        }
+
+        // Re-find player if lost (e.g. scene reload).
+        if (playerController == null)
+        {
+            GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+            if (playerObject != null)
+                playerController = playerObject.GetComponent<PlayerController>();
+        }
+
+        if (playerController == null)
+        {
+            Debug.LogWarning("HotbarController: PlayerController not found, cannot use item.");
+            return;
+        }
+
+        usableItem.Use(playerController.gameObject);
+
+        Destroy(selectedSlot.currentItem);
+        selectedSlot.currentItem = null;
+        selectedSlot.UpdateSlotVisual();
+
+        // Persist the updated inventory so it survives scene transitions.
+        InventoryController.Current?.SaveToStore();
+
+        Debug.Log("HotbarController: Item used.");
+    }
+    // end here
+
 }
