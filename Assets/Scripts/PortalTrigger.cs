@@ -18,8 +18,35 @@ public class PortalTrigger : MonoBehaviour
     [Tooltip("Exact name of the scene to load (must match Build Settings)")]
     [SerializeField] private string targetSceneName;
 
+    [Header("Boss Lock")]
+    [SerializeField] private bool requireBossDefeated;
+    [SerializeField] private string requiredBossName = "Beholder1";
+
     private bool playerInRange = false;
     private bool hasTriggered   = false;
+    private bool bossDefeated;
+    private EnemyControllerBase requiredBoss;
+
+    private void Start()
+    {
+        if (!requireBossDefeated)
+            return;
+
+        requiredBoss = FindRequiredBoss();
+        if (requiredBoss != null)
+        {
+            requiredBoss.OnDefeated += HandleRequiredBossDefeated;
+            return;
+        }
+
+        Debug.LogWarning($"PortalTrigger: Boss '{requiredBossName}' was not found. Portal '{name}' will stay locked.");
+    }
+
+    private void OnDestroy()
+    {
+        if (requiredBoss != null)
+            requiredBoss.OnDefeated -= HandleRequiredBossDefeated;
+    }
 
     private void Update()
     {
@@ -43,6 +70,12 @@ public class PortalTrigger : MonoBehaviour
 
     private void EnterPortal()
     {
+        if (requireBossDefeated && !bossDefeated)
+        {
+            Debug.Log($"PortalTrigger: Defeat '{requiredBossName}' before using {gameObject.name}.");
+            return;
+        }
+
         if (string.IsNullOrEmpty(targetSceneName))
         {
             Debug.LogWarning("PortalTrigger: No target scene name set on " + gameObject.name);
@@ -82,5 +115,31 @@ public class PortalTrigger : MonoBehaviour
         hasTriggered   = true;
         Time.timeScale = 1f;
         SceneLoader.LoadScene(targetSceneName);
+    }
+
+    private EnemyControllerBase FindRequiredBoss()
+    {
+        EnemyControllerBase[] enemies = FindObjectsByType<EnemyControllerBase>(FindObjectsSortMode.None);
+        foreach (EnemyControllerBase enemy in enemies)
+        {
+            if (enemy != null && enemy.name == requiredBossName)
+                return enemy;
+        }
+
+        foreach (EnemyControllerBase enemy in enemies)
+        {
+            if (enemy != null && enemy.name.Contains(requiredBossName))
+                return enemy;
+        }
+
+        return null;
+    }
+
+    private void HandleRequiredBossDefeated(EnemyControllerBase defeated)
+    {
+        bossDefeated = true;
+
+        if (requiredBoss != null)
+            requiredBoss.OnDefeated -= HandleRequiredBossDefeated;
     }
 }

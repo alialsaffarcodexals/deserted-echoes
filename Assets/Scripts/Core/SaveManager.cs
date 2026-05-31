@@ -5,6 +5,10 @@ using System.Collections.Generic;
 public class SaveManager : MonoBehaviour
 {
     public static SaveManager Instance { get; private set; }
+
+    private const string FriendsSceneName = "Friends";
+    private const string CreditsSceneName = "Credits";
+    private const string OpenWorldSceneName = "Open-World";
     
     private string savePath;
     private const string SAVE_FILE_NAME = "gamesave.json";
@@ -123,7 +127,40 @@ public class SaveManager : MonoBehaviour
     /// </summary>
     public void UpdateSceneName(string sceneName)
     {
-        CurrentSaveData.lastSceneName = sceneName;
+        NormalizeSaveData();
+
+        CurrentSaveData.lastSceneName = ShouldRedirectCompletedEndingScene(sceneName)
+            ? OpenWorldSceneName
+            : sceneName;
+    }
+
+    public void MarkFriendsSceneSeen()
+    {
+        NormalizeSaveData();
+        CurrentSaveData.hasSeenFriendsScene = true;
+
+        if (CurrentSaveData.lastSceneName == FriendsSceneName)
+            CurrentSaveData.lastSceneName = OpenWorldSceneName;
+    }
+
+    public string GetSafeSceneToLoad(string fallbackSceneName)
+    {
+        NormalizeSaveData();
+
+        string sceneName = CurrentSaveData.lastSceneName;
+        if (string.IsNullOrWhiteSpace(sceneName))
+            sceneName = fallbackSceneName;
+
+        if (ShouldRedirectCompletedEndingScene(sceneName))
+            return OpenWorldSceneName;
+
+        return sceneName;
+    }
+
+    private bool ShouldRedirectCompletedEndingScene(string sceneName)
+    {
+        return CurrentSaveData.hasSeenFriendsScene
+            && (sceneName == FriendsSceneName || sceneName == CreditsSceneName);
     }
 
     public bool HasSeenDialogue(string key)

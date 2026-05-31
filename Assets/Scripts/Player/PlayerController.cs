@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Level Progression")]
     [SerializeField] private RuntimeAnimatorController[] levelAnimatorControllers = new RuntimeAnimatorController[MaxPlayerAnimationLevel];
-    [SerializeField] private int attackDamagePerLevel = 5;
+    [SerializeField] private int attackDamagePerLevel = 2;
     [SerializeField] private int maxHealthPerLevel = 10;
 
     [Header("Components")]
@@ -500,8 +500,6 @@ public class PlayerController : MonoBehaviour
         maxHealth = saveData.maxHealth;
         level = saveData.level;
         experience = saveData.experience;
-        if (saveData.attackDamage > 0)
-            attackDamage = saveData.attackDamage;
 
         hasLoadedSave = true;
         ApplyLevelProgression();

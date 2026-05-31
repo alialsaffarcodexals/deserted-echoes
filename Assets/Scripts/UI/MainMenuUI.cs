@@ -97,8 +97,7 @@ public class MainMenuUI : MonoBehaviour
         }
 
         saveManager.LoadGame();
-        string savedScene = saveManager.CurrentSaveData.lastSceneName;
-        SceneLoader.LoadScene(string.IsNullOrWhiteSpace(savedScene) ? firstLevelScene : savedScene);
+        SceneLoader.LoadScene(saveManager.GetSafeSceneToLoad(firstLevelScene));
     }
 
     /// <summary>Instructions button → shows instructions panel.</summary>
