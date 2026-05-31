@@ -31,13 +31,13 @@ public class SurvivalSystem : MonoBehaviour
     public float ExpNeededForNextLevel => expNeededForNextLevel;
 
     [Header("Depletion Rates (Per Second)")]
-    public float hungerDepletionRate = 4.5f;
-    public float thirstDepletionRate = 4.0f;
-    public float staminaDepletionRate = 5f;
-    public float staminaRunDepletionRate = 15f;
-    public float staminaRegenRate = 4.0f;
+    public float hungerDepletionRate = 2.0f;
+    public float thirstDepletionRate = 2.5f;
+    public float staminaDepletionRate = 2.5f;
+    public float staminaRunDepletionRate = 7.5f;
+    public float staminaRegenRate = 5f;
     // changes here
-    public float staminaRegenMultiplier = 1f;
+    public float staminaRegenMultiplier = 1.5f;
     // end here
     [Header("Health Settings")]
     public float starvationDamage = 1f;
