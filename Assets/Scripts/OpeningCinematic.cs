@@ -21,7 +21,7 @@ using UnityEngine.UI;
 
 public class OpeningCinematic : MonoBehaviour
 {
-    private const string NextScene = "main-menu";
+    public static string TargetScene = "Open-World";
     private const string FrameResourceFolder = "OpeningCinematic/";
 
     private enum KB { None, ZoomIn, ZoomOut, PanRight, PanLeft, Shake }
@@ -85,6 +85,8 @@ public class OpeningCinematic : MonoBehaviour
 
     private bool _endActive;
     private bool _leaving;
+    private bool _paused;
+    private Text _hintText;
 
     private void Awake()
     {
@@ -94,28 +96,76 @@ public class OpeningCinematic : MonoBehaviour
         _audio.Init();
     }
 
-    private const string SeenKey = "OpeningCinematicSeen";
-
     private void Start()
     {
-        if (PlayerPrefs.GetInt(SeenKey, 0) == 1)
-        {
-            SceneLoader.LoadScene(NextScene);
-            return;
-        }
-
         StartCoroutine(RunTimeline());
     }
 
     private void Update()
     {
-        if (_endActive && !_leaving && Input.anyKeyDown)
+        if (_endActive && !_leaving && Input.anyKeyDown && !Input.GetKeyDown(KeyCode.R))
         {
             _leaving = true;
-            PlayerPrefs.SetInt(SeenKey, 1);
-            PlayerPrefs.Save();
-            SceneLoader.LoadScene(NextScene);
+            SceneLoader.LoadScene(TargetScene);
         }
+
+        if (!_leaving)
+        {
+            if (Input.GetKeyDown(KeyCode.Space) && !_endActive)
+                TogglePause();
+            if (Input.GetKeyDown(KeyCode.R))
+                RestartCinematic();
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                SkipCinematic();
+        }
+    }
+
+    private void SkipCinematic()
+    {
+        if (_paused)
+        {
+            Time.timeScale = 1f;
+            AudioListener.pause = false;
+        }
+        _leaving = true;
+        StopAllCoroutines();
+        SceneLoader.LoadScene(TargetScene);
+    }
+
+    private void TogglePause()
+    {
+        _paused = !_paused;
+        Time.timeScale = _paused ? 0f : 1f;
+        AudioListener.pause = _paused;
+        _hintText.text = _paused
+            ? "Space — Resume    R — Replay    Enter — Skip"
+            : "Space — Pause    R — Replay    Enter — Skip";
+    }
+
+    private void RestartCinematic()
+    {
+        if (_paused)
+        {
+            _paused = false;
+            Time.timeScale = 1f;
+            AudioListener.pause = false;
+        }
+        _endActive = false;
+        _leaving = false;
+        StopAllCoroutines();
+        _kbCo = null;
+        _typeCo = null;
+        _textDelayCo = null;
+        _dialogBox.SetActive(false);
+        _narrationGroup.alpha = 0f;
+        _titleGroup.alpha = 0f;
+        _endGroup.alpha = 0f;
+        _blackOverlay.gameObject.SetActive(false);
+        _frameGroup.alpha = 0f;
+        _audio.SetMusic(null);
+        _audio.SetFire(0f);
+        _hintText.text = "Space — Pause    R — Replay    Enter — Skip";
+        StartCoroutine(RunTimeline());
     }
 
     // ── Timeline ─────────────────────────────────────────────
@@ -433,10 +483,30 @@ public class OpeningCinematic : MonoBehaviour
         _blackOverlay.raycastTarget = false;
         _blackOverlay.gameObject.SetActive(false);
 
+        // Top-left hint label (Space / R)
+        var hintGo = new GameObject("HintLabel", typeof(Text));
+        hintGo.transform.SetParent(root, false);
+        _hintText = hintGo.GetComponent<Text>();
+        _hintText.font = _font;
+        _hintText.fontSize = 18;
+        _hintText.alignment = TextAnchor.UpperLeft;
+        _hintText.color = new Color(1f, 1f, 1f, 0.5f);
+        _hintText.text = "Space — Pause    R — Replay    Enter — Skip";
+        _hintText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        _hintText.verticalOverflow = VerticalWrapMode.Overflow;
+        _hintText.raycastTarget = false;
+        var hintRt = _hintText.rectTransform;
+        hintRt.anchorMin = new Vector2(0f, 1f);
+        hintRt.anchorMax = new Vector2(0f, 1f);
+        hintRt.pivot = new Vector2(0f, 1f);
+        hintRt.anchoredPosition = new Vector2(16f, -12f);
+        hintRt.sizeDelta = new Vector2(400f, 30f);
+
         // Make sure FX sit above frame but below text where appropriate
         _frame.transform.SetSiblingIndex(1);
         barTop.transform.SetAsLastSibling();
         barBottom.transform.SetAsLastSibling();
+        hintGo.transform.SetAsLastSibling();
         _flashOverlay.transform.SetAsLastSibling();
 
         _dialogBox.SetActive(false);

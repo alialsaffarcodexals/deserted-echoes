@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 public class InventoryController : MonoBehaviour
 {
+    public static InventoryController Current { get; private set; }
+
     [Header("Panels & Prefabs")]
     public GameObject inventoryPanel;
     public GameObject slotPrefab;
@@ -11,6 +13,17 @@ public class InventoryController : MonoBehaviour
     public GameObject[] itemPrefabs;
 
     private Slot[] staticHotbarSlots;
+    private Slot[] inventorySlots;
+
+    private void Awake()
+    {
+        Current = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (Current == this) Current = null;
+    }
 
     void Start()
     {
@@ -20,73 +33,109 @@ public class InventoryController : MonoBehaviour
             return;
         }
 
-        inventoryPanel.SetActive(false); // Hide inventory panel at start
+        inventoryPanel.SetActive(false);
 
-        // 1. Fetch the slots dynamically created by the HotBarController
+        // Register all known prefabs so InventoryStore can restore them by name.
+        if (itemPrefabs != null)
+        {
+            foreach (GameObject p in itemPrefabs)
+                InventoryStore.Register(p);
+        }
+
+        // 1. Fetch hotbar slots from HotBarController
         HotBarController hotbar = FindFirstObjectByType<HotBarController>();
         int hotbarCount = 0;
         if (hotbar != null)
         {
             staticHotbarSlots = hotbar.GetGeneratedHotbarSlots();
-            hotbarCount = staticHotbarSlots.Length;
+            hotbarCount = staticHotbarSlots != null ? staticHotbarSlots.Length : 0;
         }
 
-        // Keep track of our current position in the itemPrefabs array globally
+        // 2. Generate inventory panel slots
+        inventorySlots = new Slot[inventorySlotCount];
+        for (int i = 0; i < inventorySlotCount; i++)
+        {
+            GameObject newSlotObj = Instantiate(slotPrefab, inventoryPanel.transform, false);
+            Slot slot = newSlotObj.GetComponent<Slot>();
+            if (slot != null)
+                slot.InitializeSlotNumber(i + 1);
+            inventorySlots[i] = slot;
+        }
+
+        // 3. Populate slots — restore from store if we have saved data, else use defaults.
+        if (InventoryStore.IsInitialized)
+        {
+            RestoreFromStore();
+        }
+        else
+        {
+            PopulateDefaults(hotbarCount);
+        }
+
+        SaveToStore();
+    }
+
+    // ── Populate from inspector defaults (first run) ─────────────────────────
+
+    private void PopulateDefaults(int hotbarCount)
+    {
         int globalItemIndex = 0;
 
-        // 2. PHASE 1: Populate existing Hotbar Slots with starting items
         if (staticHotbarSlots != null)
         {
             for (int i = 0; i < hotbarCount; i++)
             {
                 if (globalItemIndex < itemPrefabs.Length && itemPrefabs[globalItemIndex] != null)
-                {
                     SpawnItemInSlot(itemPrefabs[globalItemIndex], staticHotbarSlots[i]);
-                }
                 globalItemIndex++;
             }
         }
 
-        // 3. PHASE 2: Generate Inventory Panel Slots and populate remaining items
         for (int i = 0; i < inventorySlotCount; i++)
         {
-            GameObject newSlotObj = Instantiate(slotPrefab, inventoryPanel.transform, false);
-            Slot slot = newSlotObj.GetComponent<Slot>();
-
-            if (slot != null)
-            {
-                // Numbers inventory slots locally from 1 to inventorySlotCount
-                slot.InitializeSlotNumber(i + 1);
-
-                // If there are still items left in your array, spawn them here
-                if (globalItemIndex < itemPrefabs.Length && itemPrefabs[globalItemIndex] != null)
-                {
-                    SpawnItemInSlot(itemPrefabs[globalItemIndex], slot);
-                }
-            }
+            if (inventorySlots[i] != null && globalItemIndex < itemPrefabs.Length && itemPrefabs[globalItemIndex] != null)
+                SpawnItemInSlot(itemPrefabs[globalItemIndex], inventorySlots[i]);
             globalItemIndex++;
         }
     }
 
-    // Helper method to handle UI scaling transformations safely
-    private void SpawnItemInSlot(GameObject itemPrefab, Slot targetSlot)
-    {
-        GameObject item = Instantiate(itemPrefab, targetSlot.transform, false);
+    // ── Restore from InventoryStore ──────────────────────────────────────────
 
-        RectTransform itemRect = item.GetComponent<RectTransform>();
-        if (itemRect != null)
+    private void RestoreFromStore()
+    {
+        string[] hotbarData    = InventoryStore.GetHotbarData();
+        string[] inventoryData = InventoryStore.GetInventoryData();
+
+        if (staticHotbarSlots != null && hotbarData != null)
         {
-            itemRect.anchorMin = Vector2.zero;
-            itemRect.anchorMax = Vector2.one;
-            itemRect.sizeDelta = Vector2.zero;
-            itemRect.anchoredPosition = Vector2.zero;
-            itemRect.localScale = Vector3.one;
+            for (int i = 0; i < staticHotbarSlots.Length; i++)
+            {
+                if (staticHotbarSlots[i] == null) continue;
+                string name = i < hotbarData.Length ? hotbarData[i] : null;
+                if (!string.IsNullOrEmpty(name))
+                {
+                    GameObject prefab = InventoryStore.FindPrefab(name);
+                    if (prefab != null) SpawnItemInSlot(prefab, staticHotbarSlots[i]);
+                }
+            }
         }
 
-        targetSlot.currentItem = item;
+        if (inventorySlots != null && inventoryData != null)
+        {
+            for (int i = 0; i < inventorySlots.Length; i++)
+            {
+                if (inventorySlots[i] == null) continue;
+                string name = i < inventoryData.Length ? inventoryData[i] : null;
+                if (!string.IsNullOrEmpty(name))
+                {
+                    GameObject prefab = InventoryStore.FindPrefab(name);
+                    if (prefab != null) SpawnItemInSlot(prefab, inventorySlots[i]);
+                }
+            }
+        }
     }
 
-    // changes here for adding item in the inventory
+    // ── Public API ───────────────────────────────────────────────────────────
 
     public bool AddItem(GameObject itemPrefab)
     {
@@ -96,6 +145,8 @@ public class InventoryController : MonoBehaviour
             return false;
         }
 
+        InventoryStore.Register(itemPrefab);
+
         if (staticHotbarSlots != null)
         {
             foreach (Slot slot in staticHotbarSlots)
@@ -103,19 +154,22 @@ public class InventoryController : MonoBehaviour
                 if (slot != null && slot.currentItem == null)
                 {
                     SpawnItemInSlot(itemPrefab, slot);
+                    SaveToStore();
                     return true;
                 }
             }
         }
 
-        foreach (Transform slotTransform in inventoryPanel.transform)
+        if (inventorySlots != null)
         {
-            Slot slot = slotTransform.GetComponent<Slot>();
-
-            if (slot != null && slot.currentItem == null)
+            foreach (Slot slot in inventorySlots)
             {
-                SpawnItemInSlot(itemPrefab, slot);
-                return true;
+                if (slot != null && slot.currentItem == null)
+                {
+                    SpawnItemInSlot(itemPrefab, slot);
+                    SaveToStore();
+                    return true;
+                }
             }
         }
 
@@ -123,12 +177,34 @@ public class InventoryController : MonoBehaviour
         return false;
     }
 
-    // ----
+    // Snapshot current slot state into InventoryStore.
+    public void SaveToStore()
+    {
+        InventoryStore.Save(staticHotbarSlots, inventorySlots);
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private void SpawnItemInSlot(GameObject itemPrefab, Slot targetSlot)
+    {
+        GameObject item = Instantiate(itemPrefab, targetSlot.transform, false);
+
+        RectTransform itemRect = item.GetComponent<RectTransform>();
+        if (itemRect != null)
+        {
+            itemRect.anchorMin        = Vector2.zero;
+            itemRect.anchorMax        = Vector2.one;
+            itemRect.sizeDelta        = Vector2.zero;
+            itemRect.anchoredPosition = Vector2.zero;
+            itemRect.localScale       = Vector3.one;
+        }
+
+        targetSlot.currentItem = item;
+    }
+
     void Update()
     {
         if (Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
-        {
             inventoryPanel.SetActive(!inventoryPanel.activeSelf);
-        }
     }
 }
