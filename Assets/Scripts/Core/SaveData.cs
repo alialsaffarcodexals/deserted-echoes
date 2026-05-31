@@ -22,6 +22,7 @@ public class SaveData
     // Scene Info
     public string lastSceneName;
     public long saveTimestamp;
+    public bool hasSeenFriendsScene;
 
     // Dialogue
     public List<string> seenDialogueKeys;
@@ -46,6 +47,7 @@ public class SaveData
         killedEnemies = 0;
         lastSceneName = "Open-World";
         saveTimestamp = System.DateTime.Now.Ticks;
+        hasSeenFriendsScene = false;
         seenDialogueKeys = new List<string>();
         sceneFogData = new List<SceneFogData>();
         // change here

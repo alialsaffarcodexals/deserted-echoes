@@ -178,9 +178,7 @@ public class GameManager : MonoBehaviour
 
         SaveManager.Instance.LoadGame();
 
-        string sceneToLoad = SaveManager.Instance.CurrentSaveData.lastSceneName;
-        if (string.IsNullOrWhiteSpace(sceneToLoad))
-            sceneToLoad = fallbackSceneName;
+        string sceneToLoad = SaveManager.Instance.GetSafeSceneToLoad(fallbackSceneName);
 
         Time.timeScale = 1f;
         isGamePaused = false;
