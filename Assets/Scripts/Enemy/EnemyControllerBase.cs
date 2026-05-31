@@ -1,9 +1,18 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public abstract class EnemyControllerBase : MonoBehaviour
 {
+    private const int MinScaledSceneLevel = 1;
+    private const int MaxScaledSceneLevel = 12;
+    private const float SceneHealthPercentPerLevel = 25f;
+    private const float SceneDamagePercentPerLevel = 25f;
+    private const float SceneMoveSpeedPercentPerLevel = 3f;
+    private const float SceneCooldownReductionPercentPerLevel = 3f;
+    private const float SceneMaxCooldownReduction = 45f;
+
     protected enum Difficulty
     {
         Easy,
@@ -654,6 +663,39 @@ public abstract class EnemyControllerBase : MonoBehaviour
                 resolvedAttackDamage = isBoss ? 20  : 10;
                 break;
         }
+
+        ApplyLevelSceneScaling();
+    }
+
+    private void ApplyLevelSceneScaling()
+    {
+        int levelSteps = Mathf.Max(0, GetCurrentSceneLevel() - MinScaledSceneLevel);
+        float healthMultiplier = 1f + (SceneHealthPercentPerLevel * levelSteps / 100f);
+        float damageMultiplier = 1f + (SceneDamagePercentPerLevel * levelSteps / 100f);
+        float moveSpeedMultiplier = 1f + (SceneMoveSpeedPercentPerLevel * levelSteps / 100f);
+        float cooldownReduction = Mathf.Min(
+            SceneMaxCooldownReduction,
+            SceneCooldownReductionPercentPerLevel * levelSteps);
+        float attackCooldownMultiplier = 1f - (cooldownReduction / 100f);
+
+        resolvedMaxHealth = Mathf.Max(1, Mathf.RoundToInt(resolvedMaxHealth * healthMultiplier));
+        resolvedAttackDamage = Mathf.Max(1, Mathf.RoundToInt(resolvedAttackDamage * damageMultiplier));
+        resolvedWalkSpeed = Mathf.Max(0.1f, resolvedWalkSpeed * moveSpeedMultiplier);
+        resolvedRunSpeed = Mathf.Max(0.1f, resolvedRunSpeed * moveSpeedMultiplier);
+        resolvedAttackCooldown = Mathf.Max(0.1f, resolvedAttackCooldown * attackCooldownMultiplier);
+    }
+
+    private int GetCurrentSceneLevel()
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
+        if (string.IsNullOrWhiteSpace(sceneName) || !sceneName.StartsWith("level-"))
+            return MinScaledSceneLevel;
+
+        string numberText = sceneName.Substring("level-".Length);
+        if (!int.TryParse(numberText, out int sceneLevel))
+            return MinScaledSceneLevel;
+
+        return Mathf.Clamp(sceneLevel, MinScaledSceneLevel, MaxScaledSceneLevel);
     }
 
     private DifficultyProfile SanitizeProfile(DifficultyProfile profile, float defaultSpeed, float defaultDamage, float defaultHealth, float defaultCooldown)
