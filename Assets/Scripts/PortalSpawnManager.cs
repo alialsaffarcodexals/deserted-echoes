@@ -74,6 +74,16 @@ public class PortalSpawnManager : MonoBehaviour
         pendingOpenWorldUseCentral = useCentral;
     }
 
+    /// <summary>
+    /// Clears all stored return positions. Call when starting a new journey
+    /// so previous session positions don't carry over.
+    /// </summary>
+    public void ClearReturnPositions()
+    {
+        returnPositions.Clear();
+        pendingOpenWorldUseCentral = null;
+    }
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         bool hasReturn = returnPositions.TryGetValue(scene.name, out Vector2 pos);

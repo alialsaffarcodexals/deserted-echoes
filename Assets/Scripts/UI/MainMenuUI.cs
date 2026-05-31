@@ -71,6 +71,9 @@ public class MainMenuUI : MonoBehaviour
         SaveManager saveManager = EnsureSaveManagerExists();
         saveManager.CreateNewGame(firstLevelScene);
 
+        if (PortalSpawnManager.Instance != null)
+            PortalSpawnManager.Instance.ClearReturnPositions();
+
         OpeningCinematic.TargetScene = firstLevelScene;
         SceneLoader.LoadScene("Opening");
     }
