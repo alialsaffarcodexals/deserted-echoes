@@ -127,7 +127,7 @@ public class SettingsPanelUI : MonoBehaviour
             PlayerPrefs.Save();
         }
 
-        gameObject.SetActive(false);
+        NotifyParentAndClose();
     }
 
     /// <summary>Reverts the AudioMixer to last saved state and hides the panel.</summary>
@@ -136,7 +136,16 @@ public class SettingsPanelUI : MonoBehaviour
         if (SettingsManager.Instance != null)
             SettingsManager.Instance.ApplyAllSettings();
 
-        gameObject.SetActive(false);
+        NotifyParentAndClose();
+    }
+
+    private void NotifyParentAndClose()
+    {
+        MainMenuUI mainMenu = GetComponentInParent<MainMenuUI>();
+        if (mainMenu != null)
+            mainMenu.OnClosePanel();
+        else
+            gameObject.SetActive(false);
     }
 
     /// <summary>Returns to the main menu, resetting timescale first.</summary>

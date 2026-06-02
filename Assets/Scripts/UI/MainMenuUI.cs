@@ -68,15 +68,14 @@ public class MainMenuUI : MonoBehaviour
         PlaySound(buttonClickClip);
         GameDifficultySettings.Set(difficulty);
 
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.StartNewGame(firstLevelScene);
-            return;
-        }
-
         SaveManager saveManager = EnsureSaveManagerExists();
         saveManager.CreateNewGame(firstLevelScene);
-        SceneLoader.LoadScene(firstLevelScene);
+
+        if (PortalSpawnManager.Instance != null)
+            PortalSpawnManager.Instance.ClearReturnPositions();
+
+        OpeningCinematic.TargetScene = firstLevelScene;
+        SceneLoader.LoadScene("Opening");
     }
 
     /// <summary>Load Game button → loads the last saved scene and player data.</summary>
@@ -98,8 +97,7 @@ public class MainMenuUI : MonoBehaviour
         }
 
         saveManager.LoadGame();
-        string savedScene = saveManager.CurrentSaveData.lastSceneName;
-        SceneLoader.LoadScene(string.IsNullOrWhiteSpace(savedScene) ? firstLevelScene : savedScene);
+        SceneLoader.LoadScene(saveManager.GetSafeSceneToLoad(firstLevelScene));
     }
 
     /// <summary>Instructions button → shows instructions panel.</summary>

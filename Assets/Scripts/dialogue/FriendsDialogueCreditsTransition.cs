@@ -74,6 +74,12 @@ public class FriendsDialogueCreditsTransition : MonoBehaviour
 
         hasTriggered = true;
 
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.MarkFriendsSceneSeen();
+            SaveManager.Instance.SaveGame();
+        }
+
         if (SceneTransition.Instance != null)
         {
             SceneTransition.Instance.TransitionToScene(
