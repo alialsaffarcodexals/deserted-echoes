@@ -30,8 +30,18 @@ public class PauseMenuUI : MonoBehaviour
 
     private void Start()
     {
+        // The instructionsPanel field may point at the prefab asset instead of the
+        // in-hierarchy instance if the user dragged from the Project window.
+        // Always resolve by name so we get the real scene object.
+        if (pausePanel != null)
+        {
+            Transform found = FindDeepChild(pausePanel.transform, "InstructionsPanel");
+            if (found != null)
+                instructionsPanel = found.gameObject;
+        }
+
         // The InstructionsPanel prefab's ExitButton is wired to MainMenuUI in the asset,
-        // which doesn't exist in level scenes. Re-wire it here so it calls OnCloseInstructions.
+        // which doesn't exist in level scenes. Re-wire it here.
         if (instructionsPanel != null)
         {
             foreach (Button btn in instructionsPanel.GetComponentsInChildren<Button>(true))
@@ -44,6 +54,17 @@ public class PauseMenuUI : MonoBehaviour
                 }
             }
         }
+    }
+
+    private Transform FindDeepChild(Transform parent, string childName)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == childName) return child;
+            Transform found = FindDeepChild(child, childName);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     private void Update()
