@@ -20,6 +20,7 @@ public class PauseMenuUI : MonoBehaviour
 
     [Header("Sub Panels")]
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private GameObject instructionsPanel;
 
     [Header("UI Sound Effects")]
     [SerializeField] private AudioSource uiAudio;
@@ -84,6 +85,48 @@ public class PauseMenuUI : MonoBehaviour
         if (settingsPanel != null) settingsPanel.SetActive(false);
     }
 
+    /// <summary>Instructions button → shows instructions sub-panel.</summary>
+    public void OnInstructions()
+    {
+        PlaySound(buttonClickClip);
+        if (instructionsPanel != null) instructionsPanel.SetActive(true);
+    }
+
+    /// <summary>Close instructions sub-panel and return to pause panel.</summary>
+    public void OnCloseInstructions()
+    {
+        PlaySound(buttonClickClip);
+        if (instructionsPanel != null) instructionsPanel.SetActive(false);
+    }
+
+    /// <summary>Open-World button → saves position, resumes time, and loads Open-World at last visited position.</summary>
+    public void OnOpenWorld()
+    {
+        PlaySound(buttonClickClip);
+
+        // Save the player's current scene position so re-entering this level later spawns them here.
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player != null && PortalSpawnManager.Instance != null)
+            PortalSpawnManager.Instance.SetReturnPosition(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,
+                player.transform.position
+            );
+
+        // Use the normal (last-position) spawn in Open-World.
+        if (PortalSpawnManager.Instance != null)
+            PortalSpawnManager.Instance.SetOpenWorldSpawnChoice(false);
+
+        Time.timeScale = 1f;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResumeGame();
+            GameManager.Instance.SaveGameState();
+        }
+
+        SceneLoader.LoadScene("Open-World");
+    }
+
     /// <summary>Main Menu button → resumes time then loads main menu.</summary>
     public void OnMainMenu()
     {
@@ -120,7 +163,8 @@ public class PauseMenuUI : MonoBehaviour
 
     private void CloseAllPanels()
     {
-        if (pausePanel != null)    pausePanel.SetActive(false);
-        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (pausePanel != null)        pausePanel.SetActive(false);
+        if (settingsPanel != null)     settingsPanel.SetActive(false);
+        if (instructionsPanel != null) instructionsPanel.SetActive(false);
     }
 }
