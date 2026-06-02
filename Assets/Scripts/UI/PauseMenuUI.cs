@@ -28,6 +28,24 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private AudioClip menuOpenClip;
     [SerializeField] private AudioClip menuCloseClip;
 
+    private void Start()
+    {
+        // The InstructionsPanel prefab's ExitButton is wired to MainMenuUI in the asset,
+        // which doesn't exist in level scenes. Re-wire it here so it calls OnCloseInstructions.
+        if (instructionsPanel != null)
+        {
+            foreach (Button btn in instructionsPanel.GetComponentsInChildren<Button>(true))
+            {
+                if (btn.gameObject.name == "ExitButton")
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(OnCloseInstructions);
+                    break;
+                }
+            }
+        }
+    }
+
     private void Update()
     {
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
@@ -103,6 +121,7 @@ public class PauseMenuUI : MonoBehaviour
     public void OnOpenWorld()
     {
         PlaySound(buttonClickClip);
+        CloseAllPanels();
 
         // Save the player's current scene position so re-entering this level later spawns them here.
         GameObject player = GameObject.FindWithTag("Player");
