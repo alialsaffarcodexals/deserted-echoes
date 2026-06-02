@@ -452,7 +452,7 @@ public class SurvivalSystem : MonoBehaviour
     }
 
     public void UseStamina(float amount) => currentStamina = Mathf.Clamp(currentStamina - amount, 0f, maxStamina);
-    public void Heal(float amount) => currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth);
-    public void Eat(float amount) => currentHunger += amount;
-    public void Drink(float amount) => currentThirst += amount;
+    public void Heal(float amount)  { currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth); UpdateUI(); }
+    public void Eat(float amount)   { currentHunger = Mathf.Clamp(currentHunger + amount, 0f, maxHunger); UpdateUI(); }
+    public void Drink(float amount) { currentThirst = Mathf.Clamp(currentThirst + amount, 0f, maxThirst); UpdateUI(); }
 }

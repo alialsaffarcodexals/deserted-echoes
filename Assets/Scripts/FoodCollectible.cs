@@ -24,7 +24,7 @@ public class FoodCollectible : MonoBehaviour, IUsableItem
 
     public void Use(GameObject user)
     {
-        SurvivalSystem survival = user.GetComponent<SurvivalSystem>();
+        SurvivalSystem survival = SurvivalSystem.Instance;
 
         if (survival == null)
         {
