@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Level Progression")]
     [SerializeField] private RuntimeAnimatorController[] levelAnimatorControllers = new RuntimeAnimatorController[MaxPlayerAnimationLevel];
-    [SerializeField] private int attackDamagePerLevel = 2;
+    [SerializeField] private int attackDamagePerLevel = 5;
     [SerializeField] private int maxHealthPerLevel = 10;
 
     [Header("Components")]
