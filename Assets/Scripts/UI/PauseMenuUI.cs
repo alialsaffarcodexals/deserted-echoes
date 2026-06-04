@@ -20,12 +20,52 @@ public class PauseMenuUI : MonoBehaviour
 
     [Header("Sub Panels")]
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private GameObject instructionsPanel;
 
     [Header("UI Sound Effects")]
     [SerializeField] private AudioSource uiAudio;
     [SerializeField] private AudioClip buttonClickClip;
     [SerializeField] private AudioClip menuOpenClip;
     [SerializeField] private AudioClip menuCloseClip;
+
+    private void Start()
+    {
+        // The instructionsPanel field may point at the prefab asset instead of the
+        // in-hierarchy instance if the user dragged from the Project window.
+        // Always resolve by name so we get the real scene object.
+        if (pausePanel != null)
+        {
+            Transform found = FindDeepChild(pausePanel.transform, "InstructionsPanel");
+            if (found != null)
+                instructionsPanel = found.gameObject;
+        }
+
+        // The InstructionsPanel prefab's ExitButton is wired to MainMenuUI in the asset,
+        // which doesn't exist in level scenes. Re-wire it here.
+        if (instructionsPanel != null)
+        {
+            foreach (Button btn in instructionsPanel.GetComponentsInChildren<Button>(true))
+            {
+                if (btn.gameObject.name == "ExitButton")
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(OnCloseInstructions);
+                    break;
+                }
+            }
+        }
+    }
+
+    private Transform FindDeepChild(Transform parent, string childName)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == childName) return child;
+            Transform found = FindDeepChild(child, childName);
+            if (found != null) return found;
+        }
+        return null;
+    }
 
     private void Update()
     {
@@ -84,6 +124,82 @@ public class PauseMenuUI : MonoBehaviour
         if (settingsPanel != null) settingsPanel.SetActive(false);
     }
 
+    /// <summary>Instructions button → shows instructions sub-panel.</summary>
+    public void OnInstructions()
+    {
+        PlaySound(buttonClickClip);
+        if (instructionsPanel != null) instructionsPanel.SetActive(true);
+    }
+
+    /// <summary>Close instructions sub-panel and return to pause panel.</summary>
+    public void OnCloseInstructions()
+    {
+        PlaySound(buttonClickClip);
+        if (instructionsPanel != null) instructionsPanel.SetActive(false);
+    }
+
+    /// <summary>Open-World button → saves position, resumes time, and loads Open-World at last visited position.</summary>
+    public void OnOpenWorld()
+    {
+        PlaySound(buttonClickClip);
+        CloseAllPanels();
+
+        // Save the player's current scene position so re-entering this level later spawns them here.
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player != null && PortalSpawnManager.Instance != null)
+            PortalSpawnManager.Instance.SetReturnPosition(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,
+                player.transform.position
+            );
+
+        // Use the normal (last-position) spawn in Open-World.
+        if (PortalSpawnManager.Instance != null)
+            PortalSpawnManager.Instance.SetOpenWorldSpawnChoice(false);
+
+        Time.timeScale = 1f;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResumeGame();
+            GameManager.Instance.SaveGameState();
+        }
+
+        SceneLoader.LoadScene("Open-World");
+    }
+
+    /// <summary>Central Teleport button (Open-World only) — warps player to Central_Teleport without reloading the scene.</summary>
+    public void OnCentralTeleport()
+    {
+        PlaySound(buttonClickClip);
+        CloseAllPanels();
+        Time.timeScale = 1f;
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.ResumeGame();
+
+        if (SceneTransition.Instance != null)
+            SceneTransition.Instance.TransitionInPlace(TeleportToCenter);
+        else
+            TeleportToCenter();
+    }
+
+    private void TeleportToCenter()
+    {
+        GameObject centralObj = GameObject.Find("Central_Teleport");
+        Vector2 dest = centralObj != null
+            ? (Vector2)centralObj.transform.position
+            : new Vector2(-14.98f, 35.38f);
+
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player == null) return;
+
+        player.transform.position = dest;
+
+        CameraFollow2D cam = Object.FindAnyObjectByType<CameraFollow2D>();
+        if (cam != null)
+            cam.Warp(dest);
+    }
+
     /// <summary>Main Menu button → resumes time then loads main menu.</summary>
     public void OnMainMenu()
     {
@@ -120,7 +236,8 @@ public class PauseMenuUI : MonoBehaviour
 
     private void CloseAllPanels()
     {
-        if (pausePanel != null)    pausePanel.SetActive(false);
-        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (pausePanel != null)        pausePanel.SetActive(false);
+        if (settingsPanel != null)     settingsPanel.SetActive(false);
+        if (instructionsPanel != null) instructionsPanel.SetActive(false);
     }
 }
