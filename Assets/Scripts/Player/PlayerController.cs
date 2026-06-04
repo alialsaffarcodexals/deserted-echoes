@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     private const int MaxPlayerAnimationLevel = 9;
+    private const float MovementEpsilon = 0.0001f;
 
     private enum InitialFacingDirection
     {
@@ -193,7 +194,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (movement == Vector2.zero)
+        if (!HasMovement())
         {
             rb.linearVelocity = Vector2.zero;
             return;
@@ -231,7 +232,7 @@ public class PlayerController : MonoBehaviour
         Vector2 inputMovement = new Vector2(moveX, moveY);
         movement = inputMovement.sqrMagnitude > 0f ? inputMovement.normalized : Vector2.zero;
 
-        if (movement != Vector2.zero)
+        if (HasMovement())
         {
             lastMoveDirection = GetMainDirection(movement);
         }
@@ -269,24 +270,29 @@ public class PlayerController : MonoBehaviour
 
         float speedValue = 0f;
 
-        if (movement != Vector2.zero)
+        if (HasMovement())
         {
             speedValue = IsRunPressed() ? runSpeed : walkSpeed;
 
             animator.SetFloat("MoveX", movement.x);
             animator.SetFloat("MoveY", movement.y);
-            animator.SetFloat("LastMoveX", lastMoveDirection.x);
-            animator.SetFloat("LastMoveY", lastMoveDirection.y);
         }
         else
         {
-            animator.SetFloat("MoveX", 0);
-            animator.SetFloat("MoveY", 0);
+            animator.SetFloat("MoveX", lastMoveDirection.x);
+            animator.SetFloat("MoveY", lastMoveDirection.y);
         }
 
+        animator.SetFloat("LastMoveX", lastMoveDirection.x);
+        animator.SetFloat("LastMoveY", lastMoveDirection.y);
         animator.SetFloat("Speed", speedValue);
         animator.SetBool("IsAttacking", isAttacking);
         animator.SetBool("IsDead", isDead);
+    }
+
+    private bool HasMovement()
+    {
+        return movement.sqrMagnitude > MovementEpsilon;
     }
 
     private void UpdateAttackPoint()
