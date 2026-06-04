@@ -24712,6 +24712,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MinimapSystem
       objectReference: {fileID: 0}
+    - target: {fileID: 6300646626892684312, guid: e7e86f5fc3bc53b4eb801cd4334d5343, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6932765808906959919, guid: e7e86f5fc3bc53b4eb801cd4334d5343, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.69748
@@ -614401,6 +614405,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PortalTrigger
   targetSceneName: Open-World
+  requireBossDefeated: 0
+  requiredBossName: Beholder1
 --- !u!61 &1498208012
 BoxCollider2D:
   m_ObjectHideFlags: 0
