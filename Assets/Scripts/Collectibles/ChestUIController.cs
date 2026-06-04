@@ -39,6 +39,21 @@ public class ChestUIController : MonoBehaviour
             Slot slot = slotObj.GetComponent<Slot>();
 
             GameObject item = Instantiate(chestItems[i], slotObj.transform, false);
+
+            //changes here
+
+
+            ItemDragHandler dragHandler = item.GetComponent<ItemDragHandler>();
+
+            if (dragHandler != null)
+            {
+                Destroy(dragHandler);
+            }
+
+
+            //end here
+
+
             // for item positions in the chest
             RectTransform itemRect = item.GetComponent<RectTransform>();
 
@@ -62,7 +77,14 @@ public class ChestUIController : MonoBehaviour
                 slot.UpdateSlotVisual();
             }
 
-            ChestItemButton button = item.AddComponent<ChestItemButton>();
+            // change here
+            //ChestItemButton button = item.AddComponent<ChestItemButton>();
+
+            ChestItemButton button = slotObj.AddComponent<ChestItemButton>();
+
+            // end here
+
+
             button.Setup(i, this);
         }
     }
