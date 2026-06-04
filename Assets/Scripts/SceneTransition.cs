@@ -118,6 +118,35 @@ public class SceneTransition : MonoBehaviour
         StartCoroutine(DoTransition(sceneName, customFadeOutDuration, customFadeInDuration, playTeleportSound));
     }
 
+    /// <summary>
+    /// Plays the teleport sound and fades to black, invokes <paramref name="onBlackout"/>
+    /// while the screen is fully black (move the player there), then fades back in.
+    /// No scene is loaded. Ignored if a transition is already running.
+    /// </summary>
+    public void TransitionInPlace(System.Action onBlackout)
+    {
+        if (isTransitioning) return;
+        StartCoroutine(DoInPlaceTransition(onBlackout));
+    }
+
+    private IEnumerator DoInPlaceTransition(System.Action onBlackout)
+    {
+        isTransitioning        = true;
+        overlay.blocksRaycasts = true;
+
+        if (teleportSound != null)
+            audioSource.PlayOneShot(teleportSound, teleportVolume);
+
+        yield return StartCoroutine(Fade(0f, 1f, fadeOutDuration));
+
+        onBlackout?.Invoke();
+
+        yield return StartCoroutine(Fade(1f, 0f, fadeInDuration));
+
+        overlay.blocksRaycasts = false;
+        isTransitioning        = false;
+    }
+
     // ── Coroutine ──────────────────────────────────────────────
 
     private IEnumerator DoTransition(string sceneName, float fadeOutSeconds, float fadeInSeconds, bool playTeleportSound)

@@ -167,6 +167,39 @@ public class PauseMenuUI : MonoBehaviour
         SceneLoader.LoadScene("Open-World");
     }
 
+    /// <summary>Central Teleport button (Open-World only) — warps player to Central_Teleport without reloading the scene.</summary>
+    public void OnCentralTeleport()
+    {
+        PlaySound(buttonClickClip);
+        CloseAllPanels();
+        Time.timeScale = 1f;
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.ResumeGame();
+
+        if (SceneTransition.Instance != null)
+            SceneTransition.Instance.TransitionInPlace(TeleportToCenter);
+        else
+            TeleportToCenter();
+    }
+
+    private void TeleportToCenter()
+    {
+        GameObject centralObj = GameObject.Find("Central_Teleport");
+        Vector2 dest = centralObj != null
+            ? (Vector2)centralObj.transform.position
+            : new Vector2(-14.98f, 35.38f);
+
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player == null) return;
+
+        player.transform.position = dest;
+
+        CameraFollow2D cam = Object.FindAnyObjectByType<CameraFollow2D>();
+        if (cam != null)
+            cam.Warp(dest);
+    }
+
     /// <summary>Main Menu button → resumes time then loads main menu.</summary>
     public void OnMainMenu()
     {
