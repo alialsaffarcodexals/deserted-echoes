@@ -66,7 +66,13 @@ public class SurvivalSystem : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            // Destroy the WHOLE duplicate Canvas root from this scene, not just
+            // this component's own GameObject. Destroying only "this" left the
+            // duplicate's InventoryController/HotBarController/EventSystem alive
+            // and orphaned alongside the persistent Canvas, causing duplicate
+            // EventSystems and a race over which Inventory/Hotbar instance wins
+            // (visually and as InventoryController.Current) on each scene load.
+            Destroy(transform.root.gameObject);
             return;
         }
 

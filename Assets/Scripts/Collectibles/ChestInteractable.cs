@@ -124,6 +124,12 @@ public class ChestInteractable : MonoBehaviour
         }
 
     }
+
+    public void NotifyClosedExternally()
+    {
+        isChestOpen = false;
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
@@ -194,6 +200,9 @@ public class ChestInteractable : MonoBehaviour
             return;
 
         chestItems[index] = null;
+
+        SaveChestData();
+        SaveManager.Instance?.SaveGame();
     }
 
     private void LoadChestData()
