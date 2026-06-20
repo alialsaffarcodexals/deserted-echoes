@@ -177,6 +177,19 @@ public class InventoryController : MonoBehaviour
         return false;
     }
 
+    // Places an item directly into a specific (empty) slot, e.g. when a drag-and-drop
+    // lands on an exact target rather than the next free slot.
+    public bool PlaceItemInSlot(GameObject itemPrefab, Slot targetSlot)
+    {
+        if (itemPrefab == null || targetSlot == null || targetSlot.currentItem != null)
+            return false;
+
+        InventoryStore.Register(itemPrefab);
+        SpawnItemInSlot(itemPrefab, targetSlot);
+        SaveToStore();
+        return true;
+    }
+
     // Snapshot current slot state into InventoryStore.
     public void SaveToStore()
     {
@@ -204,7 +217,7 @@ public class InventoryController : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
+        if (Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame && !ChestUIController.AnyChestOpen)
             inventoryPanel.SetActive(!inventoryPanel.activeSelf);
     }
 }
