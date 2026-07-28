@@ -12,6 +12,7 @@ public class ChestUIController : MonoBehaviour
     private ChestInteractable currentChest;
     private RectTransform inventoryPanelRect;
     private Vector2 inventoryPanelDefaultPosition;
+    private Slot[] uiSlots;
 
     // Lets InventoryController know not to also toggle the inventory panel
     // when Tab is used to close the chest in the same frame.
@@ -60,35 +61,42 @@ public class ChestUIController : MonoBehaviour
                 inventoryPanelRect.anchoredPosition = new Vector2(inventoryOffsetXWhileChestOpen, inventoryPanelDefaultPosition.y);
         }
 
+        RebuildSlots();
+    }
+
+    // Builds one UI slot per chest array index, INCLUDING empty ones, so the
+    // slot frames stay visible after items are taken and can receive drops.
+    private void RebuildSlots()
+    {
         foreach (Transform child in chestPanel.transform)
         {
             Destroy(child.gameObject);
         }
 
         GameObject[] chestItems = currentChest.GetChestItems();
+        uiSlots = new Slot[chestItems.Length];
 
         for (int i = 0; i < chestItems.Length; i++)
         {
-            if (chestItems[i] == null) continue;
-
             GameObject slotObj = Instantiate(slotPrefab, chestPanel.transform, false);
             Slot slot = slotObj.GetComponent<Slot>();
+            uiSlots[i] = slot;
+
+            // Added to every slot (even empty ones): handles click-to-take and
+            // marks this as a chest slot so inventory drags can drop into it.
+            ChestItemButton button = slotObj.AddComponent<ChestItemButton>();
+            button.Setup(i, this);
+
+            if (chestItems[i] == null) continue;
 
             GameObject item = Instantiate(chestItems[i], slotObj.transform, false);
 
-            //changes here
-
-
+            // Chest items use ChestItemDragHandler instead of the inventory one.
             ItemDragHandler dragHandler = item.GetComponent<ItemDragHandler>();
-
             if (dragHandler != null)
             {
                 Destroy(dragHandler);
             }
-
-
-            //end here
-
 
             // for item positions in the chest
             RectTransform itemRect = item.GetComponent<RectTransform>();
@@ -112,16 +120,6 @@ public class ChestUIController : MonoBehaviour
                 slot.currentItem = item;
                 slot.UpdateSlotVisual();
             }
-
-            // change here
-            //ChestItemButton button = item.AddComponent<ChestItemButton>();
-
-            ChestItemButton button = slotObj.AddComponent<ChestItemButton>();
-
-            // end here
-
-
-            button.Setup(i, this);
 
             ChestItemDragHandler dragger = item.AddComponent<ChestItemDragHandler>();
             dragger.Setup(i, this, slot);
@@ -148,10 +146,65 @@ public class ChestUIController : MonoBehaviour
         if (added)
         {
             currentChest.RemoveItemAt(itemIndex);
+            ClearUISlot(itemIndex);
             Debug.Log("ChestUIController: Item moved to inventory.");
         }
 
         return added;
+    }
+
+    // Puts an item (dragged from inventory/hotbar) back into an empty chest slot.
+    // Returns false if the slot is occupied or the item can't be identified.
+    public bool StoreItem(int slotIndex, GameObject draggedItem)
+    {
+        if (currentChest == null || draggedItem == null) return false;
+        if (currentChest.GetItemAt(slotIndex) != null) return false;
+
+        // Dragged UI items are clones, e.g. "BreadPrefab Variant(Clone)" —
+        // strip the suffix to get back to the prefab name.
+        string prefabName = draggedItem.name.Replace("(Clone)", "").Trim();
+        GameObject prefab = currentChest.ResolvePrefab(prefabName);
+
+        if (prefab == null)
+        {
+            Debug.LogWarning($"ChestUIController: couldn't resolve '{prefabName}' to store in chest.");
+            return false;
+        }
+
+        currentChest.SetItemAt(slotIndex, prefab);
+        RebuildSlots();
+
+        Debug.Log("ChestUIController: Item stored in chest.");
+        return true;
+    }
+
+    // Rearranges items inside the chest itself. Works for both moving into an
+    // empty slot and swapping with an occupied one.
+    public bool MoveWithinChest(int fromIndex, int toIndex)
+    {
+        if (currentChest == null) return false;
+        if (fromIndex == toIndex) return false;
+        if (currentChest.GetItemAt(fromIndex) == null) return false;
+
+        currentChest.SwapItemsAt(fromIndex, toIndex);
+        RebuildSlots();
+
+        return true;
+    }
+
+    // Empties one chest UI slot but keeps the slot frame visible.
+    private void ClearUISlot(int index)
+    {
+        if (uiSlots == null || index < 0 || index >= uiSlots.Length) return;
+
+        Slot slot = uiSlots[index];
+        if (slot == null) return;
+
+        if (slot.currentItem != null)
+            Destroy(slot.currentItem);
+
+        slot.currentItem = null;
+        slot.UpdateSlotVisual();
     }
 
     public void CloseChest()

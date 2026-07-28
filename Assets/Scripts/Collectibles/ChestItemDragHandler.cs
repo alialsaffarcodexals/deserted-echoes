@@ -49,26 +49,41 @@ public class ChestItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandl
         if (eventData.pointerEnter != null)
             dropSlot = eventData.pointerEnter.GetComponentInParent<Slot>();
 
-        bool droppedBackInChest = dropSlot != null && chestUI != null && chestUI.ChestPanelTransform != null
+        if (dropSlot == null || chestUI == null)
+        {
+            SnapBack();
+            return;
+        }
+
+        bool droppedBackInChest = chestUI.ChestPanelTransform != null
             && dropSlot.transform.IsChildOf(chestUI.ChestPanelTransform);
 
-        bool moved = false;
-        if (dropSlot != null && !droppedBackInChest && chestUI != null)
-            moved = chestUI.TakeItem(itemIndex, dropSlot);
+        if (droppedBackInChest)
+        {
+            // Rearranging inside the chest: move/swap into the target slot.
+            ChestItemButton targetSlot = dropSlot.GetComponent<ChestItemButton>();
 
-        if (moved)
-        {
-            if (ownerSlot != null)
+            if (targetSlot != null && chestUI.MoveWithinChest(itemIndex, targetSlot.ItemIndex))
             {
-                ownerSlot.currentItem = null;
-                ownerSlot.UpdateSlotVisual();
+                // RebuildSlots made fresh icons; this dragged one was reparented
+                // out of the panel during the drag, so remove it by hand.
+                Destroy(gameObject);
+                return;
             }
-            Destroy(gameObject);
+
+            SnapBack();
+            return;
         }
-        else
-        {
-            transform.SetParent(originalParent);
-            rectTransform.anchoredPosition = originalAnchoredPosition;
-        }
+
+        // Dropped on an inventory/hotbar slot. TakeItem clears the chest slot
+        // and destroys this icon on success, so only failure needs handling.
+        if (!chestUI.TakeItem(itemIndex, dropSlot))
+            SnapBack();
+    }
+
+    private void SnapBack()
+    {
+        transform.SetParent(originalParent);
+        rectTransform.anchoredPosition = originalAnchoredPosition;
     }
 }

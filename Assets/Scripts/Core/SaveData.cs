@@ -60,5 +60,15 @@ public class SaveData
 public class ChestSaveData
 {
     public string chestID;
+
+    // Legacy name-only list, kept so saves made before slot-based storage still load.
     public List<string> remainingItems = new List<string>();
+
+    // Per-slot item names; empty string = slot is empty/taken. Slot-indexed so two
+    // items with the same name (possible with loot table rolls) don't get confused.
+    public List<string> slotItems = new List<string>();
+
+    // True once this chest's contents have been rolled/recorded, so loot chests
+    // never re-roll on a later visit.
+    public bool initialized = false;
 }
