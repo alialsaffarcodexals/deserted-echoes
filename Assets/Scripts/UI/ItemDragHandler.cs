@@ -39,6 +39,38 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         Slot originalSlot = originalParent.GetComponent<Slot>();
 
+        // Dropped onto a chest slot? Route through the chest so its data and
+        // save get updated (just reparenting the icon wouldn't persist).
+        ChestItemButton chestSlot = dropSlot != null ? dropSlot.GetComponent<ChestItemButton>() : null;
+        if (chestSlot != null && chestSlot.ChestUI != null)
+        {
+            bool stored = chestSlot.ChestUI.StoreItem(chestSlot.ItemIndex, gameObject);
+
+            if (stored)
+            {
+                if (originalSlot != null)
+                {
+                    originalSlot.currentItem = null;
+                    originalSlot.UpdateSlotVisual();
+                }
+
+                InventoryController.Current?.SaveToStore();
+
+                HotBarController hb = FindFirstObjectByType<HotBarController>();
+                if (hb != null) hb.RefreshActiveSlotItem();
+
+                Destroy(gameObject);
+            }
+            else
+            {
+                transform.SetParent(originalParent);
+                GetComponent<RectTransform>().localScale = Vector3.one;
+                rectTransform.anchoredPosition = Vector2.zero;
+            }
+
+            return;
+        }
+
         if (dropSlot != null)
         {
             if (dropSlot.currentItem != null && dropSlot.currentItem != gameObject)

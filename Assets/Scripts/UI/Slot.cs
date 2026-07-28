@@ -1,8 +1,9 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class Slot : MonoBehaviour
+public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public GameObject currentItem;
 
@@ -52,6 +53,21 @@ public class Slot : MonoBehaviour
             // No item? Hide the icon display completely
             itemIconImage.sprite = null;
             itemIconImage.enabled = false;
+
+            // If the cursor was hovering this slot when the item left it,
+            // don't leave a stale tooltip on screen.
+            ItemTooltip.HideFor(this);
         }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (currentItem != null)
+            ItemTooltip.Show(ItemInfo.GetDisplayName(currentItem), this);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        ItemTooltip.HideFor(this);
     }
 }
